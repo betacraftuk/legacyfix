@@ -3,7 +3,6 @@ package legacyfix.agent;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
-import javassist.LoaderClassPath;
 import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.ClassFile;
@@ -38,15 +36,15 @@ public class LegacyFixAgent {
 	public static boolean preclassicJ5 = false;
 	public static boolean fixAMD = false;
 	public static boolean deAWT = false;
-	
+
 	public static String frameName = "Minecraft";
 	public static String iconPath = null;
 
 	public static String levelFile = null;
-	
+
 	static ByteBuffer pixels16 = null;
 	static ByteBuffer pixels32 = null;
-	
+
 	static boolean mousedxymatched = false;
 	static String canvasClassName = null;
 	static String mcappletname = null;
@@ -60,7 +58,7 @@ public class LegacyFixAgent {
 			Graphics g = bufImg.getGraphics();
 			g.drawImage(read, 0, 0, null);
 			g.dispose();
-			
+
 			final int[] rgb = bufImg.getRGB(0, 0, resolution, resolution, null, 0, resolution);
 			final ByteBuffer allocate = ByteBuffer.allocate(4 * rgb.length);
 			for (final int n : rgb) {
@@ -88,7 +86,7 @@ public class LegacyFixAgent {
 			levelFile		= System.getProperty("legacyfix.classicLevelPath");
 
 			System.out.println("patchmacmouse - " + patchMouse + "\nfix15a - " + fix15aMP + "\ndeAWT - " + deAWT);
-			
+
 			if (iconPath != null) {
 				File iconFile = new File(iconPath);
 				if (iconFile.exists() && iconFile.isFile()) {
@@ -117,59 +115,16 @@ public class LegacyFixAgent {
 			CtClass string = pool.get("java.lang.String");
 			CtClass intclas = pool.get("int");
 			CtMethod meth;
-			
+
 			/*
 			 * Strips Minecraft off any references to AWT/swing.
 			 * Improves performance. Is required for MacOS M1 fix.
 			 */
 			if (deAWT) {
-				// TODO check if this affects forge or not
-				// do what's necessary
-				boolean isForge = (System.getProperty("minecraft.applet.WrapperClass") != null);
-				
-				// TODO forge support for deAWT is BROKEN!
-				// either fix or let it die, as it should.
-				// Or, redistribute patched forge versions.
-				if (isForge) {
-					inst.addTransformer(new ClassFileTransformer() {
-						public byte[] transform(
-								final ClassLoader loader,
-								String className,
-								Class<?> classRedefined,
-								ProtectionDomain domain,
-								byte[] classfileBuffer)
-						{
-							String cname = className.replace("/", ".");
-							if (!cname.startsWith("net.minecraft.client")) return classfileBuffer;
-							
-							try {
-								ClassPool cp = new ClassPool();
-								cp.appendClassPath(new LoaderClassPath(loader));
-								CtClass clas = cp.makeClass(new ByteArrayInputStream(classfileBuffer));
-								if (clas == null) return null;
-								
-								if ("cpw.mods.fml.relauncher.RelaunchClassLoader".equals(loader.getClass().getName()) &&
-										"net.minecraft.client.MinecraftApplet".equals(cname)) {
-									System.out.println("Editing MinecraftApplet class of Forge's classloader");
-									clas.defrost();
 
-									return deAWTApplet(cp);
-								} else if ("cpw.mods.fml.relauncher.RelaunchClassLoader".equals(loader.getClass().getName()) &&
-										"net.minecraft.client.Minecraft".equals(cname)) {
-									System.out.println("Editing Minecraft class of Forge's classloader");
-									clas.defrost();
-									
-									deAWTPatch(cp, domain);
-									return deAWTMain(cp);
-								}
-							} catch (Throwable t) {
-								t.printStackTrace();
-							}
-							return classfileBuffer;
-						}
-					});
-				}
-				
+				// Note: Forge support for deAWT is BROKEN!
+				// Let it die, or redistribute patched versions of Forge.
+
 				byte[] appletbytes = deAWTApplet(pool);
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mcappletname), appletbytes)});
 
@@ -179,13 +134,13 @@ public class LegacyFixAgent {
 					deAWTPatch(pool, pool.getClassLoader().getClass().getProtectionDomain());
 					inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mcclas.getName()), deAWTMain(pool))});
 					inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(canvasClassName), deAWTCanvas(pool))});
-					
+
 					// Hooks for LWJGL to set title, icons, resizable status
 					// and a part of M1 Macs color patch
 					name = "org.lwjgl.opengl.Display";
 					clas = pool.get(name);
-					meth = clas.getDeclaredMethod("setTitle", new CtClass[] {string}); // isCloseRequested
-					
+					meth = clas.getDeclaredMethod("setTitle", new CtClass[] {string});
+
 					// on init
 					meth.insertBefore(
 							"$1 = \"" + frameName + "\";" +
@@ -200,10 +155,10 @@ public class LegacyFixAgent {
 							"java.nio.ByteBuffer pix32 = f32.get(null);" +
 							"org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});"
 					);
-					
+
 					// on tick - couldn't really hook anywhere else, this looks like a safe spot
 					meth = clas.getDeclaredMethod("isCloseRequested");
-					
+
 					meth.insertBefore(
 							"if (org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER).contains(\"Apple M\")) {" + 
 							"	org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB);" +
@@ -213,7 +168,7 @@ public class LegacyFixAgent {
 					inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 				}
 			}
-			
+
 			// TODO 
 			// -redirect references to .minecraft/assets to mapped hashpaths
 			//  (affects 1.6 to 1.7.2 and their snapshots)
@@ -303,66 +258,66 @@ public class LegacyFixAgent {
 
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("java.net.URI"), clas.toBytecode())});
 			}
-			
+
 			/*
 			 * Makes it possible to run preclassic on Java 5
 			 */
 			if (preclassicJ5) {
-				
+
 				// order matters
 				String[] preclassicClasses = {
-					"RubyDung",
-					"Textures",
-					"Timer",
-					"HitResult",
-					"Entity",
-					"Player",
-					"character.Cube",
-					"character.Polygon",
-					"character.Vec3",
-					"character.Vertex",
-					"character.Zombie",
-					"character.ZombieModel",
-					"level.Chunk",
-					"level.DirtyChunkSorter",
-					"level.Frustum",
-					"level.Level",
-					"level.LevelListener",
-					"level.LevelRenderer",
-					"level.PerlinNoiseFilter",
-					"level.Tesselator",
-					"particle.Particle",
-					"particle.ParticleEngine",
-					"phys.AABB",
-					"level.Tile",
-					"level.tile.Tile",
-					"level.tile.Bush",
-					"level.tile.DirtTile",
-					"level.tile.GrassTile"
+						"RubyDung",
+						"Textures",
+						"Timer",
+						"HitResult",
+						"Entity",
+						"Player",
+						"character.Cube",
+						"character.Polygon",
+						"character.Vec3",
+						"character.Vertex",
+						"character.Zombie",
+						"character.ZombieModel",
+						"level.Chunk",
+						"level.DirtyChunkSorter",
+						"level.Frustum",
+						"level.Level",
+						"level.LevelListener",
+						"level.LevelRenderer",
+						"level.PerlinNoiseFilter",
+						"level.Tesselator",
+						"particle.Particle",
+						"particle.ParticleEngine",
+						"phys.AABB",
+						"level.Tile",
+						"level.tile.Tile",
+						"level.tile.Bush",
+						"level.tile.DirtTile",
+						"level.tile.GrassTile"
 				};
-				
+
 				String[] packages = {
-					"com.mojang.minecraft",
-					"com.mojang.rubydung"
+						"com.mojang.minecraft",
+						"com.mojang.rubydung"
 				};
-				
+
 				ArrayList<ClassDefinition> defList = new ArrayList<ClassDefinition>();
-				
+
 				// essentially declare all classes java 5 compliant
 				for (int i = 0; i < packages.length; i++) {
 					for (String classname : preclassicClasses) {
 						CtClass pc = pool.getOrNull(packages[i] + "." + classname);
 						if (pc == null) continue;
-						
+
 						ClassFile cf = pc.getClassFile();
 						cf.setMajorVersion(49);
 						cf.setVersionToJava5();
-						
+
 						defList.add(new ClassDefinition(pc.toClass(), pc.toBytecode()));
 					}
 				}
-				
-				inst.redefineClasses(defList.toArray(new ClassDefinition[] {}));
+
+				inst.redefineClasses(defList.toArray(new ClassDefinition[defList.size()]));
 			}
 
 			/*
@@ -454,12 +409,12 @@ public class LegacyFixAgent {
 
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
-			
+
 			/*
 			 * Fixes mouse on new macOS (mojave+?)
 			 */
 			if (patchMouse) {
-				
+
 				CtField[] fields = mcclas.getDeclaredFields();
 				for (CtField field : fields) {
 					CtConstructor[] constrs = field.getType().getConstructors();
@@ -471,9 +426,9 @@ public class LegacyFixAgent {
 						}
 					}
 				}
-				
+
 				if (mouseHelper != null) {
-					
+
 					CtMethod[] methods = mouseHelper.getDeclaredMethods();
 					methods[0].setBody(
 							"{" +
@@ -482,26 +437,26 @@ public class LegacyFixAgent {
 							"    $0.b = 0;" +
 							"}"
 					);
-					
+
 					String body2 = (
 							"{" +
 							"    $0.a = org.lwjgl.input.Mouse.getDX();" +
 							"    $0.b = org.lwjgl.input.Mouse.getDY();" +
 							"}"
 					);
-					
+
 					String body2invert = (
 							"{" +
 							"    $0.a = org.lwjgl.input.Mouse.getDX();" +
 							"    $0.b = -(org.lwjgl.input.Mouse.getDY());" +
 							"}"
 					);
-					
+
 					// mouse handling changed somewhen during alpha
 					boolean invert = "invert".equals(System.getProperty("legacyfix.patchMouse"));
-					
+
 					System.out.println("MOUSE Y INVERT: " + Boolean.toString(invert));
-					
+
 					if (methods.length == 2) {
 						methods[1].setBody((invert ? body2invert : body2));
 					} else {
@@ -511,10 +466,10 @@ public class LegacyFixAgent {
 								"    org.lwjgl.input.Mouse.setGrabbed(false);" +
 								"}"
 						);
-						
+
 						methods[2].setBody((invert ? body2invert : body2));
 					}
-					
+
 					inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mouseHelper.getName()), mouseHelper.toBytecode())});
 				}
 
@@ -526,23 +481,23 @@ public class LegacyFixAgent {
 							byte[] classfileBuffer) {
 						CtClass clas = pool.getOrNull(className.replace("/", "."));
 						if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelper.getName())) return null;
-						
+
 						try {
 							clas.instrument(new ExprEditor() {
 								public void edit(MethodCall m) throws CannotCompileException {
-									
+
 									if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
 											"getDX".equals(m.getMethodName()) &&
 											"()I".equalsIgnoreCase(m.getSignature())) {
-										
+
 										mousedxymatched = true;
 										m.replace("$_ = 0;");
 										System.out.println("Mouse.getDX() match!");
-										
+
 									} else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
 											"getDY".equals(m.getMethodName()) &&
 											"()I".equalsIgnoreCase(m.getSignature())) {
-										
+
 										mousedxymatched = true;
 										m.replace("$_ = 0;");
 										System.out.println("Mouse.getDY() match!");
@@ -560,13 +515,13 @@ public class LegacyFixAgent {
 						return null;
 					}
 				});
-				
+
 				// Some versions refer to setNativeCursor within methods of the Minecraft class,
 				// we need to account for that too
 				CtClass mouse = pool.get("org.lwjgl.input.Mouse");
 				CtClass cursorclas = pool.get("org.lwjgl.input.Cursor");
 				CtMethod setcursor = mouse.getDeclaredMethod("setNativeCursor", new CtClass[] {cursorclas});
-				
+
 				setcursor.setBody(
 						"{" +
 						"    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
@@ -576,7 +531,7 @@ public class LegacyFixAgent {
 						"    return null;" + // we don't need this
 						"}"
 				);
-				
+
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouse.toBytecode())});
 			}
 
@@ -593,7 +548,7 @@ public class LegacyFixAgent {
 
 				String server = System.getProperty("server", null);
 				String port = System.getProperty("port", "25565");
-				
+
 				if (server == null) {
 					// if we aren't joining any server, it should start in singleplayer mode
 					setServer.setBody("{}");
@@ -610,7 +565,7 @@ public class LegacyFixAgent {
 							"}"
 					);
 				}
-				
+
 				// make the server join method run after the game is fully initialized
 				// will fire an empty method if no server arguments were given for legacyfix (watch above)
 				CtMethod runmeth = clas.getDeclaredMethod("run");
@@ -620,7 +575,7 @@ public class LegacyFixAgent {
 
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
-			
+
 			/*
 			 * Change calls to String.getBytes(Charset) and String.<init>(byte[],Charset)
 			 * for Java 5 support (notch failed) - affects c0.0.15a to c0.0.16a_02
@@ -635,7 +590,7 @@ public class LegacyFixAgent {
 							m.replace("$_ = $0.getBytes(\"UTF-8\");");
 						}
 					}
-					
+
 					public void edit(NewExpr m) throws CannotCompileException {
 						try {
 							m.getConstructor();
@@ -644,14 +599,14 @@ public class LegacyFixAgent {
 						}
 					}
 				});
-				
+
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 	}
-	
+
 	public static void deAWTPatch(ClassPool pool, ProtectionDomain pdomain) {
 		try {
 			// Now find ways to hook into dynamic width/height changing
@@ -659,46 +614,45 @@ public class LegacyFixAgent {
 			CtClass guiScreen = null;
 			CtMethod gsInitMethod = null;
 			CtField guiscreenfield = null;
-			
+
 			CtField[] fields = mcclas.getDeclaredFields();
 			for (CtField field : fields) {
 				CtMethod[] methods = field.getType().getDeclaredMethods();
-				
+
 				for (CtMethod method : methods) {
 					CtClass[] params = method.getParameterTypes();
 					if (params.length == 3 && params[0].getName().equals(mcclas.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-						
+
 						guiScreen = field.getType();
 						gsInitMethod = method;
 						guiscreenfield = field;
-						
+
 						System.out.println("found match for guiscreen: " + guiScreen.getName());
 						break;
 					}
 				}
 			}
-			
+
 			// Find InGameHud
 			CtClass hud = null;
 			CtField hudField = null;
 
 			for (CtField field : fields) {
 				CtConstructor[] constrs = field.getType().getDeclaredConstructors();
-				
+
 				for (CtConstructor constr : constrs) {
 					CtClass[] params = constr.getParameterTypes();
 					if (params.length == 3 && params[0].getName().equals(mcclas.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-						
+
 						hud = field.getType();
 						hudField = field;
-						
+
 						System.out.println("found match for ingamehud: " + field.getName() + " / " + hud.getName());
 						break;
 					}
 				}
 			}
-			
-			
+
 			// find resolution fields for hud
 			CtField[] hudResFields = new CtField[] {null, null};
 			if (hud != null) {
@@ -710,7 +664,7 @@ public class LegacyFixAgent {
 					if (cname.equals("int") && intoccurences < 2) {
 						System.out.println("found hud resolution field: " + test.getName());
 						hudResFields[intoccurences] = test;
-						
+
 						intoccurences++;
 						if (intoccurences > 1) {
 							break;
@@ -718,9 +672,10 @@ public class LegacyFixAgent {
 					}
 				}
 			}
-			
+
 			// find the resolution fields of minecraft
 			CtField[] resolutionFields = new CtField[] {null, null};
+
 			// we take for granted that first two int fields are: width & height
 			int intoccurences = 0;
 			for (CtField test : mcclas.getDeclaredFields()) {
@@ -736,16 +691,15 @@ public class LegacyFixAgent {
 					}
 				}
 			}
-			
-			
+
 			// Make ad-hoc thread to monitor changes of resolution
 			// If res is changed, update it within the Minecraft class
 			CtClass threadclas = pool.get("java.lang.Thread");
 			CtClass clas = pool.makeClass("legacyfix.ResizeThread", threadclas);
-			
+
 			CtField threadmcfield = CtField.make("public final " + mcclas.getName() + " mc;", clas);
 			clas.addField(threadmcfield);
-			
+
 			CtConstructor constr = new CtConstructor(new CtClass[] {mcclas}, clas);
 			constr.setBody(
 					"{" +
@@ -753,13 +707,13 @@ public class LegacyFixAgent {
 					"}"
 			);
 			clas.addConstructor(constr);
-			
+
 			String widthFieldName = resolutionFields[0].getName();
 			String heightFieldName = resolutionFields[1].getName();
-			
+
 			String hudWidthFieldName = hudResFields[0] != null ? hudResFields[0].getName() : null;
 			String hudHeightFieldName = hudResFields[1] != null ? hudResFields[1].getName() : null;
-			
+
 			CtMethod runmeth = CtMethod.make("public void run() {}", clas);
 			runmeth.setBody(
 					"{" +
@@ -825,29 +779,28 @@ public class LegacyFixAgent {
 					"}"
 			);
 			clas.addMethod(runmeth);
-			
-			//byte[] bytes = clas.toBytecode();
+
 			clas.toClass(pool.getClassLoader(), pdomain);
 			Class.forName("legacyfix.ResizeThread", true, pool.getClassLoader());
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 	}
-	
+
 	public static byte[] deAWTApplet(ClassPool pool) {
 		try {
-			boolean isForge = (System.getProperty("minecraft.applet.WrapperClass") != null);
 			mcappletname = "net.minecraft.client.MinecraftApplet";
+
 			CtClass clas = pool.getOrNull(mcappletname);
 			if (clas == null) {
 				mcappletname = "com.mojang.minecraft.MinecraftApplet";
 				clas = pool.get(mcappletname); 
 			}
-			
-			CtMethod meth = clas.getDeclaredMethod(isForge ? "fmlInitReentry" : "init");
-			
+
+			CtMethod meth = clas.getDeclaredMethod("init");
+
 			CtField mcfield = null;
-			
+
 			// find the minecraft class
 			for (CtField test : clas.getDeclaredFields()) {
 				String cname = test.getType().getName();
@@ -860,7 +813,7 @@ public class LegacyFixAgent {
 					break;
 				}
 			}
-			
+
 			CtField appletmodeField = null;
 			for (CtField test : mcclas.getDeclaredFields()) {
 				String cname = test.getType().getName();
@@ -870,8 +823,7 @@ public class LegacyFixAgent {
 					break;
 				}
 			}
-			
-			
+
 			// silence all AWT/swing components
 			meth.insertAfter(
 					"java.awt.Component parent = $0;" +
@@ -884,21 +836,10 @@ public class LegacyFixAgent {
 					"}" +
 					"$0." + mcfield.getName() + "." + appletmodeField.getName() + " = false;" // appletMode=false for proper handling
 			);
-			
-			// block giving the canvas to the main Minecraft class
-			// plus take the canvas class name to later edit out its removeNotify() method
+
+			// take the canvas class name to later edit out its removeNotify() method
 			meth.instrument(new ExprEditor() {
-				
-//				public void edit(FieldAccess m) throws CannotCompileException {
-//					System.out.println("FieldAccess: " + m.getClassName() + " " + m.getFieldName() + " " + m.getSignature());
-//					if ("Ljava/awt/Canvas;".equals(m.getSignature())) {
-//						canvasCount++;
-//						if (canvasCount == 2) {
-//							m.replace("$_ = null;");
-//						}
-//					}
-//				}
-				
+
 				public void edit(NewExpr m) throws CannotCompileException {
 					try {
 						//System.out.println("Expr: " + m.getClassName() + " " + m.getConstructor().getLongName() + " " + m.getSignature());
@@ -912,6 +853,7 @@ public class LegacyFixAgent {
 					}
 				}
 			});
+
 			return clas.toBytecode();
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -921,17 +863,17 @@ public class LegacyFixAgent {
 
 	public static byte[] deAWTMain(ClassPool pool) {
 		try {
-			if (mcclas.isFrozen()) mcclas.defrost();
+			if (mcclas.isFrozen())
+				mcclas.defrost();
+
 			// hook the resolution thread into the Minecraft.run() method
 			CtMethod meth = mcclas.getMethod("run", "()V");
 			meth.insertBefore(
-//					"Thread thread = (Thread) ClassLoader.getSystemClassLoader().loadClass(\"legacyfix.ResizeThread\").getConstructor(new Class[] {$0.getClass()}).newInstance(new Object[] {$0});" +
-//					"thread.start();"
 					"new legacyfix.ResizeThread($0).start();"
 			);
-			
+
 			CtConstructor mcconstr = mcclas.getConstructors()[0];
-			
+
 			// The typical formula of a Minecraft constructor goes like:
 			//  component, canvas, minecraftapplet, int, int, boolean
 			CtClass[] paramTypes = mcconstr.getParameterTypes();
@@ -940,7 +882,7 @@ public class LegacyFixAgent {
 				String classname = paramTypes[i].getName();
 				// if we're at int already, don't replace it
 				if (classname.equals("int")) break;
-				
+
 				// nullify canvas
 				// only nullify applet instance if it's not a classic version
 				if (classname.equals("java.awt.Canvas")) {
@@ -949,10 +891,10 @@ public class LegacyFixAgent {
 					tonull += "$" + Integer.toString(i+1) + " = null;\n";
 				}
 			}
-			System.out.println(tonull);
-			
+
 			mcconstr.insertBefore(tonull);
 			byte[] bytes = mcclas.toBytecode();
+
 			mcclas.defrost();
 			return bytes;
 		} catch (Throwable t) {
@@ -960,7 +902,7 @@ public class LegacyFixAgent {
 		}
 		return null;
 	}
-	
+
 	public static byte[] deAWTCanvas(ClassPool pool) {
 		try {
 			// Stop all calls from the canvas when it gets removed

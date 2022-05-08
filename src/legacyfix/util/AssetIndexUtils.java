@@ -17,22 +17,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class AssetIndexUtils {
-	
+
 	public static final String assetDir = System.getProperty("legacyfix.assetDir");
 	public static final String assetIndex = System.getProperty("legacyfix.assetIndex");
 	public static String gameDir = System.getProperty("legacyfix.gameDir");
 	public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-	
+
 	public static File getAssetIndex() {
 		if (assetIndex == null) return null;
-		
+
 		File file = new File(assetIndex);
 		if (!file.exists() || !file.isFile()) return null;
-		
+
 		return file;
 	}
-	
-	
+
+
 	public static boolean loadAssetObjectData() {
 		try {
 			FileInputStream fis = new FileInputStream(getAssetIndex());
@@ -146,7 +146,7 @@ public class AssetIndexUtils {
 		ArrayList<File> list = new ArrayList<File>();
 		try {
 			for (URI uri : asURIs()) {
-				 list.add(new File(uri));
+				list.add(new File(uri));
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -165,7 +165,7 @@ public class AssetIndexUtils {
 //		}
 //		return ret;
 //	}
-	
+
 	public static void unpackMissingAssets(File assetFile, String entry) {
 		try {
 			InputStream is = AssetIndexUtils.class.getResourceAsStream("/patchasset/" + entry);
@@ -188,7 +188,7 @@ public class AssetIndexUtils {
 
 	public static ArrayList<URI> asURIs() {
 		ArrayList<URI> uris = new ArrayList<URI>();
-		
+
 		if (AssetIndexUtils.assetindex == null && !AssetIndexUtils.loadAssetObjectData()) {
 			return uris;
 		}
@@ -213,11 +213,11 @@ public class AssetIndexUtils {
 			String hash = value.get("hash").getAsString();
 
 			File assetFile = new File(assetDir, "objects/" + hash.substring(0, 2) + "/" + hash);
-			
+
 			// THIS PART OF CODE IS MEANT FOR ASSETS THAT CAN'T BE APPLIED VIA THE NORMAL WAY.
 			// They need to be downloaded as a jar library, and then extracted by this code.
 			// Thanks mojang!!!!!!!!!!!!!!!!!!!
-			
+
 			// asset doesn't exist, is empty, or its hash is different (how?)
 			if (!assetFile.exists() || assetFile.length() == 0 || !hash.equalsIgnoreCase(getSHA1(assetFile))) {
 				assetFile.getParentFile().mkdirs();
@@ -241,7 +241,7 @@ public class AssetIndexUtils {
 
 	public static boolean isInURIs(URI uri) {
 		if (AssetIndexUtils.uris == null) return false;
-		
+
 		for (URI uri1 : uris) {
 			if (uri1.getPath().equals(uri.getPath())) {
 				return true;
@@ -277,7 +277,7 @@ public class AssetIndexUtils {
 			return null;
 		}
 	}
-	
+
 	public static byte[] fileToBytes(File file) {
 		try {
 			FileInputStream fis = new FileInputStream(file);

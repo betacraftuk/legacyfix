@@ -22,7 +22,7 @@ public class Handler extends URLStreamHandler {
 
 		if (RedirectProfile && stringurl.contains("/session/minecraft/profile/") && !stringurl.contains("?unsigned=") && !stringurl.endsWith("?unsigned=false"))
 			stringurl += "?unsigned=false";
-		
+
 		return new URL((URL)null, stringurl, new sun.net.www.protocol.https.Handler()).openConnection();
 	}
 }
