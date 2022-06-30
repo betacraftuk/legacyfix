@@ -327,15 +327,24 @@ public class LegacyFixAgent {
 			name = "java.lang.Class";
 			clas = pool.get(name);
 			meth = clas.getDeclaredMethod("getDeclaredField", new CtClass[] {string});
-			meth.insertBefore(
-					"if ($1.equals(\"modifiers\")) {" +
+			meth.setBody(
+					"{" + // Override the whole method, some mods need it like this
 					"	java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
 					"	for (int i = 0; i < fieldz.length; i++) {" +
 					"		java.lang.reflect.Field one = fieldz[i];" +
-					"		if (\"modifiers\".equals(one.getName())) {" +
+					"		if ($1.equals(one.getName())) {" +
 					"			return one;" +
 					"		}" +
 					"	}" +
+					"	return null;" +
+					"}"
+			);
+
+			// Just to be *completely* sure
+			meth = clas.getDeclaredMethod("getDeclaredFields");
+			meth.setBody(
+					"{" +
+					"	return copyFields($0.getDeclaredFields0(false));" +
 					"}"
 			);
 
