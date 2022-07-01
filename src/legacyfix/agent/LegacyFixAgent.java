@@ -349,6 +349,24 @@ public class LegacyFixAgent {
 			);
 
 			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			
+			/*
+			 * Fix b1.7.3-b1.8.1 Forge (devs were apparently very tired of coding)
+			 */
+			name = "forge.ForgeHooksClient";
+			clas = pool.getOrNull(name);
+
+			if (clas != null) {
+				clas.instrument(new ExprEditor() {
+					public void edit(MethodCall m) throws CannotCompileException {
+						if (m.getMethodName().equals("toArray") && m.getSignature().equals("()[Ljava/lang/Object;")) {
+							m.replace("$_ = $0.toArray(new Integer[0]);");
+						}
+					}
+				});
+
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			}
 
 			name = "java.lang.ClassLoader";
 			clas = pool.get(name);
