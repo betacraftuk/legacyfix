@@ -349,7 +349,18 @@ public class LegacyFixAgent {
 			);
 
 			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
-			
+
+			name = "java.lang.ClassLoader";
+			clas = pool.get(name);
+			meth = clas.getDeclaredMethod("loadClass", new CtClass[] {string});
+			meth.insertBefore(
+					"if ($1.startsWith(\"\\.mod_\")) {" +
+					"	$1 = $1.substring(1);" +
+					"}"
+			);
+
+			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+
 			/*
 			 * Fix b1.7.3-b1.8.1 Forge (devs were apparently very tired of coding)
 			 */
@@ -367,17 +378,6 @@ public class LegacyFixAgent {
 
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
-
-			name = "java.lang.ClassLoader";
-			clas = pool.get(name);
-			meth = clas.getDeclaredMethod("loadClass", new CtClass[] {string});
-			meth.insertBefore(
-					"if ($1.startsWith(\"\\.mod_\")) {" +
-					"	$1 = $1.substring(1);" +
-					"}"
-			);
-
-			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 
 			/*
 			 * A hook for the wrapper. It triggers after the applet is fully initialized, but before the game starts.

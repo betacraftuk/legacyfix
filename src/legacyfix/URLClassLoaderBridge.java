@@ -6,8 +6,14 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 
-// To mimic Java 8's system classloader on Java 9+
-// (for ModLoader and other, heavy mods)
+/**
+ * To mimic Java 8's system classloader on Java 9+
+ * (for ModLoader and other, heavy mods)
+ * 
+ * Usage: -Djava.system.class.loader=legacyfix.URLClassLoaderBridge
+ * Make sure to include LegacyFix (or that single class) in your path!!!
+ *
+ */
 public class URLClassLoaderBridge extends URLClassLoader {
 	private static ArrayList<URL> urls = new ArrayList<URL>();
 
