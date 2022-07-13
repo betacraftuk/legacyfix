@@ -10,10 +10,12 @@ As of now:
 
 - [x] skins on versions that support them
 - [x] crash on start with Indev and Infdev versions
+- [x] crash due to broken controllers support with c0.0.14a to 1.2.5
+- [x] gray screen on a1.1.1
 - [x] online mode support
 - [x] running Classic/Indev/Infdev versions on MacOS 10.7+
 - [x] running versions before 13w16a with no dependency on Java AWT/Swing
-- [x] flipped color channels on versions before 13w16a on M1 Macs
+- [x] flipped color channels on versions before 13w16a on Silicon Macs
 - [x] unnatural clouds on AMD graphics
 - [x] ModLoader support for Java 9 and later
 - [x] running Preclassic versions and c0.0.15a-c0.0.16a_02 on Java 5

@@ -1,0 +1,39 @@
+plugins {
+	id 'java'
+	id 'eclipse'
+}
+
+targetCompatibility = 5;
+sourceCompatibility = 5;
+
+repositories {
+	mavenCentral()
+	flatDir {
+		dirs 'lib'
+	}
+}
+
+jar {
+	from {
+		configurations.extraLibs.collect {
+			it.isDirectory() ? it : zipTree(it)
+		}
+	}
+	manifest {
+		attributes(
+			'Main-Class': 'legacyfix.LegacyFix',
+			'Premain-Class': 'legacyfix.agent.LegacyFixAgent',
+			'Can-Redefine-Classes': 'true',
+			'Can-Retransform-Classes': 'true'
+		)
+	}
+}
+
+configurations {
+	extraLibs
+}
+
+dependencies {
+	compile fileTree(dir: 'lib', include: ['*.jar'])
+	extraLibs files('lib/javassist-java5.jar')
+}
