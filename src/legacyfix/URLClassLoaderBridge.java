@@ -20,7 +20,7 @@ public class URLClassLoaderBridge extends URLClassLoader {
 	static {
 		String cp = System.getProperty("java.class.path");
 		String[] cpSplit = cp.split(File.pathSeparator);
-		
+
 		for (String singlePath : cpSplit) {
 			try {
 				urls.add(new File(singlePath).toURI().toURL());
@@ -37,6 +37,6 @@ public class URLClassLoaderBridge extends URLClassLoader {
 
 	// Allows for javaagent to be hooked
 	void appendToClassPathForInstrumentation(String path) throws MalformedURLException {
-        super.addURL(new File(path).toURI().toURL());
-    }
+		super.addURL(new File(path).toURI().toURL());
+	}
 }

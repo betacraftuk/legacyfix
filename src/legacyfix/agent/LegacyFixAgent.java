@@ -31,6 +31,8 @@ import javassist.expr.NewExpr;
 public class LegacyFixAgent {
 
 	public static boolean patchMouse = false;
+	public static boolean disableControllers = false;
+	public static boolean disableGamma = false;
 	public static boolean fix15aMP = false;
 	public static boolean fixJ6Refs = false;
 	public static boolean preclassicJ5 = false;
@@ -74,16 +76,18 @@ public class LegacyFixAgent {
 
 	public static void premain(String args, final Instrumentation inst) {
 		try {
-			patchMouse		= System.getProperty("legacyfix.patchMouse") != null;
-			fix15aMP		= System.getProperty("legacyfix.fix15aMP") != null;
-			fixJ6Refs		= System.getProperty("legacyfix.fixJava6References") != null;
-			preclassicJ5	= System.getProperty("legacyfix.preclassicJava5") != null;
-			fixAMD			= "true".equalsIgnoreCase(System.getProperty("legacyfix.fixAMD"));
-			deAWT			= System.getProperty("legacyfix.deAWT") != null;
-			iconPath		= System.getProperty("legacyfix.icon");
-			frameName		= System.getProperty("legacyfix.frameName");
+			patchMouse		= System.getProperty("lf.patchMouse") != null;
+			disableControllers	= System.getProperty("lf.disableControllers") != null;
+			disableGamma		= System.getProperty("lf.disableGamma") != null;
+			fix15aMP		= System.getProperty("lf.fix15aMP") != null;
+			fixJ6Refs		= System.getProperty("lf.fixJava6References") != null;
+			preclassicJ5		= System.getProperty("lf.preclassicJava5") != null;
+			fixAMD			= "true".equalsIgnoreCase(System.getProperty("lf.fixAMD"));
+			deAWT			= System.getProperty("lf.deAWT") != null;
+			iconPath		= System.getProperty("lf.icon");
+			frameName		= System.getProperty("lf.frameName");
 
-			levelFile		= System.getProperty("legacyfix.classicLevelPath");
+			levelFile		= System.getProperty("lf.classicLevelPath");
 
 			System.out.println("patchmacmouse - " + patchMouse + "\nfix15a - " + fix15aMP + "\ndeAWT - " + deAWT);
 
@@ -110,11 +114,13 @@ public class LegacyFixAgent {
 			// ------------------------------------------------
 
 			final ClassPool pool = ClassPool.getDefault();
-			String name = "java/io/File".replaceAll("/", "\\.");
-			CtClass clas = pool.get(name);
+			String name;
+			CtClass clas;
+			CtMethod meth;
+
 			CtClass string = pool.get("java.lang.String");
 			CtClass intclas = pool.get("int");
-			CtMethod meth;
+			CtClass floatclas = pool.get("float");
 
 			/*
 			 * Strips Minecraft off any references to AWT/swing.
@@ -175,10 +181,15 @@ public class LegacyFixAgent {
 			// -redirect references to .minecraft/resources to mapped hashpaths
 			// -redirect references to classic level save
 			if (false) {
+				name = "java.io.File";
+				clas = pool.get(name);
+				
 				CtConstructor[] constr = new CtConstructor[3];
 				constr[0] = clas.getDeclaredConstructor(new CtClass[] {string});
 				constr[1] = clas.getDeclaredConstructor(new CtClass[] {string, string});
 				constr[2] = clas.getDeclaredConstructor(new CtClass[] {clas, string});
+				
+				CtClass filefilter = pool.get("java.io.FileFilter");
 
 				meth = clas.getDeclaredMethod("isDirectory");
 				meth.insertBefore(
@@ -187,38 +198,44 @@ public class LegacyFixAgent {
 						"}"
 				);
 
-				meth = clas.getDeclaredMethod("listFiles");
-				meth.insertBefore(
-						"if ($0.path.endsWith(\"assets\") || $0.path.endsWith(\"assets/\")) {" +
-						"	java.util.ArrayList list = (java.util.ArrayList) java.lang.ClassLoader.getSystemClassLoader()" +
-						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"asFileArray\", null).invoke(null, null);" +
-						"	return list.toArray(new java.io.File[list.size()]);" +
-						"}"
-				);
+				CtMethod[] listFiles = new CtMethod[2];
+				listFiles[0] = clas.getDeclaredMethod("listFiles");
+				listFiles[1] = clas.getDeclaredMethod("listFiles", new CtClass[] {filefilter});
+				for (CtMethod lfMeth : listFiles) {
+					lfMeth.insertBefore(
+							"if ($0.path.endsWith(\"assets\") || $0.path.endsWith(\"assets/\")) {" +
+							"	System.out.println(\"DEBUG ASSETS REF DETECTED \\n \\n\\n\\n\");" +
+							"	Thread.sleep(1000L);" +
+							"	java.util.ArrayList list = (java.util.ArrayList) java.lang.ClassLoader.getSystemClassLoader()" +
+							"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"asFileArray\", null).invoke(null, null);" +
+							"	return list.toArray(new java.io.File[list.size()]);" +
+							"}"
+					);
+				}
 
 				for (CtConstructor c : constr) {
 					c.insertAfter(
 							"if (" + (levelFile != null) + " && $1.equals(\"level.dat\")) {" +
 							"	$0.path = java.io.DefaultFileSystem.getFileSystem().normalize(\"" + levelFile + "\");" +
 							"	return;" +
-							"}" +
-							"java.util.HashMap list = java.lang.ClassLoader.getSystemClassLoader()" +
-							"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
-							"java.util.Set set = list.keySet();" +
-							"java.util.Iterator it = set.iterator();" +
-							"while (it.hasNext()) {" +
-							"	String path = (String) it.next();" +
-							"	if ($0.path.endsWith(path)) {" +
-							"		$0.path = java.io.DefaultFileSystem.getFileSystem().normalize((String)list.get(path));" +
-							"		System.out.println($0.path);" +
-							"	}" +
-							"}"
+							"}" 
+//							"java.util.HashMap list = java.lang.ClassLoader.getSystemClassLoader()" +
+//							"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
+//							"java.util.Set set = list.keySet();" +
+//							"java.util.Iterator it = set.iterator();" +
+//							"while (it.hasNext()) {" +
+//							"	String path = (String) it.next();" +
+//							"	if ($0.path.endsWith(path)) {" +
+//							"		$0.path = java.io.DefaultFileSystem.getFileSystem().normalize((String)list.get(path));" +
+//							"		System.out.println($0.path);" +
+//							"	}" +
+//							"}"
 					);
 				}
 
-				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("java.io.File"), clas.toBytecode())});
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 
-				name = "java/net/URI".replaceAll("/", "\\.");
+				name = "java.net.URI";
 				clas = pool.get(name);
 				meth = clas.getDeclaredMethod("relativize", new CtClass[] {clas, clas});
 				meth.insertBefore(
@@ -229,34 +246,55 @@ public class LegacyFixAgent {
 						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {$2});" +
 						"boolean isIn = ((Boolean)obj).booleanValue();" +
 
-						"java.io.File assetsDir = (java.io.File) java.lang.ClassLoader.getSystemClassLoader()" +
-						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"assetsDir\").get(null);" +
-						"String resPath = assetsDir.toURI().getPath();" +
+						"java.io.File assetsDir = new java.io.File((String) java.lang.ClassLoader.getSystemClassLoader()" +
+						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"assetDir\").get(null));" +
+						"String resPath = assetsDir.toURI().path;" +
 
-						"System.out.println(\"DEBUG URI\");" +
-						"System.out.println($2.path);" +
-						"System.out.println(resPath);" +
-						//					"if (isIn && $2.path.startsWith(resPath)) {" +
-						//					"	$2.path = $2.path.substring(resPath.length());" +
-						//					"	System.out.println(\"Relative asset: \" + $2.path);" +
-						//					"	return $2;" +
-						//					"}"
-						"java.util.HashMap list = (java.util.HashMap) java.lang.ClassLoader.getSystemClassLoader()" +
-						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
-						"java.util.Set set = list.keySet();" +
-						"java.util.Iterator it = set.iterator();" +
-						"while (it.hasNext()) {" +
-						"	String key = (String) it.next();" +
-						"	if (list.get(key).equals($2.path)) {" +
-						"		$2.path = key;" +
-						"		$2.decodedPath = key;" +
-						"		System.out.println(\"Relative asset: \" + $2.getPath());" +
-						"		return $2;" +
+						"System.out.println(\"DEBUG URI, \" + isIn);" +
+						"System.out.println($2.path);" 
+						//"System.out.println(resPath);" +
+//											"if (isIn && $2.path.startsWith(resPath)) {" +
+//											"	$2.path = $2.path.substring(resPath.length());" +
+//											"	System.out.println(\"Relative asset: \" + $2.path);" +
+//											"	return $2;" +
+//											"}" +
+//						"java.util.HashMap list = (java.util.HashMap) java.lang.ClassLoader.getSystemClassLoader()" +
+//						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
+//						"java.util.Set set = list.keySet();" +
+//						"java.util.Iterator it = set.iterator();" +
+//						"while (it.hasNext()) {" +
+//						"	String key = (String) it.next();" +
+//						"	if (list.get(key).equals(new java.io.File($2).getAbsolutePath())) {" +
+//						"		$2.path = key;" +
+//						"		$2.decodedPath = key;" +
+//						"		System.out.println(\"Relative asset: \" + $2.getPath());" +
+//						"		return $2;" +
+//						"	}" +
+//						"}"
+				);
+
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+
+				name = "java.io.FileInputStream";
+				clas = pool.get(name);
+
+				CtConstructor constrc = clas.getDeclaredConstructor(new CtClass[] {string});
+				constrc.insertBefore(
+						"if ($1 != null) {" +
+						"	System.out.println(\"FIS \" + $1 + \"\\n\\n\\n\\n\\n\\n\");" +
+						"	Object obj = java.lang.ClassLoader.getSystemClassLoader()" +
+						"			.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {new java.io.File($1).toURI()});" +
+						"	boolean isIn = ((Boolean)obj).booleanValue();" +
+						"	if (isIn) {" +
+						"		java.util.HashMap list = (java.util.HashMap) java.lang.ClassLoader.getSystemClassLoader()" +
+						"				.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
+						"		System.out.println(\"FIS \" + $1 + \", \" + list.containsKey($1) + \"\\n\\n\\n\\n\\n\\n\");" +
+						"		$1 = (String)list.get($1);" +
 						"	}" +
 						"}"
 				);
-
-				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("java.net.URI"), clas.toBytecode())});
+				
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
 
 			/*
@@ -421,11 +459,43 @@ public class LegacyFixAgent {
 			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 
 			/*
+			 * Fixes crash by LWJGL caused by unsupported controllers
+			 */
+			if (disableControllers) {
+				name = "org.lwjgl.input.Controllers";
+				clas = pool.get(name);
+				meth = clas.getDeclaredMethod("create");
+				meth.setBody(
+						"{ return; }"
+				);
+
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			}
+
+			/*
+			 * Fixes gray screen for a1.1.1
+			 */
+			if (disableGamma) {
+				name = "org.lwjgl.opengl.Display";
+				clas = pool.get(name);
+				if (clas.isFrozen()) clas.defrost();
+
+				meth = clas.getDeclaredMethod("setDisplayConfiguration", new CtClass[] {floatclas, floatclas, floatclas});
+				meth.setBody(
+						"{ return; }"
+				);
+
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			}
+
+			/*
 			 * AMD cloud fix
 			 */
 			if (fixAMD) { // before b1.8-pre1-1
 				name = "org.lwjgl.opengl.Display";
 				clas = pool.get(name);
+				if (clas.isFrozen()) clas.defrost();
+
 				meth = clas.getDeclaredMethod("create");
 				meth.setBody(
 						"{" + 
@@ -480,7 +550,7 @@ public class LegacyFixAgent {
 					);
 
 					// mouse handling changed somewhen during alpha
-					boolean invert = "invert".equals(System.getProperty("legacyfix.patchMouse"));
+					boolean invert = "invert".equals(System.getProperty("lf.patchMouse"));
 
 					System.out.println("MOUSE Y INVERT: " + Boolean.toString(invert));
 

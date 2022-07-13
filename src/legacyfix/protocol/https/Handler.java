@@ -9,7 +9,7 @@ import java.net.URLStreamHandler;
 // This fixes skins in certain versions (like 1.7.7)
 // TODO: find out a way to import ssl certificates from newer versions of Java
 public class Handler extends URLStreamHandler {
-	public static final boolean RedirectProfile = "true".equalsIgnoreCase(System.getProperty("legacyfix.redirectProfile"));
+	public static final boolean RedirectProfile = "true".equalsIgnoreCase(System.getProperty("lf.redirectProfile"));
 
 	@Override
 	protected URLConnection openConnection(URL url, Proxy p) throws IOException {

@@ -19,13 +19,13 @@ public class SkinRequests {
 	public static long haltReq	= -1L;
 	public static Gson gson		= new Gson();
 
-	public static boolean OVERLAY_OUTER_HEAD_LAYER		= System.getProperties().containsKey("legacyfix.OVERLAY_OUTER_HEAD_LAYER");
-	public static boolean OVERLAY_OUTER_BODY_TO_BASE	= System.getProperties().containsKey("legacyfix.OVERLAY_OUTER_BODY_TO_BASE");
-	public static boolean COPY_LEFT_ARM_TO_RIGHT		= System.getProperties().containsKey("legacyfix.COPY_LEFT_ARM_TO_RIGHT");
-	public static boolean COPY_LEFT_LEG_TO_RIGHT		= System.getProperties().containsKey("legacyfix.COPY_LEFT_LEG_TO_RIGHT");
-	public static boolean ROTATE_BOTTOM_TEXTURES		= System.getProperties().containsKey("legacyfix.ROTATE_BOTTOM_TEXTURES");
-	public static boolean CONVERT_ALEX_TO_STEVE			= System.getProperties().containsKey("legacyfix.CONVERT_ALEX_TO_STEVE");
-	public static boolean SERVE_AS_64x32				= System.getProperties().containsKey("legacyfix.SERVE_AS_64x32");
+	public static boolean OVERLAY_OUTER_HEAD_LAYER		= System.getProperties().containsKey("lf.OVERLAY_OUTER_HEAD_LAYER");
+	public static boolean OVERLAY_OUTER_BODY_TO_BASE	= System.getProperties().containsKey("lf.OVERLAY_OUTER_BODY_TO_BASE");
+	public static boolean COPY_LEFT_ARM_TO_RIGHT		= System.getProperties().containsKey("lf.COPY_LEFT_ARM_TO_RIGHT");
+	public static boolean COPY_LEFT_LEG_TO_RIGHT		= System.getProperties().containsKey("lf.COPY_LEFT_LEG_TO_RIGHT");
+	public static boolean ROTATE_BOTTOM_TEXTURES		= System.getProperties().containsKey("lf.ROTATE_BOTTOM_TEXTURES");
+	public static boolean CONVERT_ALEX_TO_STEVE		= System.getProperties().containsKey("lf.CONVERT_ALEX_TO_STEVE");
+	public static boolean SERVE_AS_64x32			= System.getProperties().containsKey("lf.SERVE_AS_64x32");
 
 	public static String getUUIDfromName(String username) {
 		String cachedUUID = nameToUUID.get(username);

@@ -18,9 +18,9 @@ import com.google.gson.JsonObject;
 
 public class AssetIndexUtils {
 
-	public static final String assetDir = System.getProperty("legacyfix.assetDir");
-	public static final String assetIndex = System.getProperty("legacyfix.assetIndex");
-	public static String gameDir = System.getProperty("legacyfix.gameDir");
+	public static final String assetDir = System.getProperty("lf.assetDir");
+	public static final String assetIndex = System.getProperty("lf.assetIndex");
+	public static String gameDir = System.getProperty("lf.gameDir");
 	public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public static File getAssetIndex() {
@@ -153,6 +153,7 @@ public class AssetIndexUtils {
 		}
 		return list;
 	}
+
 //
 //	public static ArrayList<File> fileTree(File file) {
 //		ArrayList<File> ret = new ArrayList<File>();
@@ -213,6 +214,7 @@ public class AssetIndexUtils {
 			String hash = value.get("hash").getAsString();
 
 			File assetFile = new File(assetDir, "objects/" + hash.substring(0, 2) + "/" + hash);
+			File assetKeyFile = new File(assetDir, entry.getKey());
 
 			// THIS PART OF CODE IS MEANT FOR ASSETS THAT CAN'T BE APPLIED VIA THE NORMAL WAY.
 			// They need to be downloaded as a jar library, and then extracted by this code.
@@ -224,13 +226,15 @@ public class AssetIndexUtils {
 				// extract the asset file to its dedicated hashpath
 				unpackMissingAssets(assetFile, entry.getKey());
 			}
+			
+			System.out.println(entry.getKey() + ", " + hash);
 
 			// local sound files have priority over the default ones
-			File localfile = new File(gameDir + "/resources/", entry.getKey());
+			File localfile = new File(gameDir, "/resources/" + entry.getKey());
 			if (localfile.exists() && !localfile.isDirectory()) {
 				uris.add(localfile.toURI());
 			} else {
-				uris.add(assetFile.toURI());
+				uris.add(assetKeyFile.toURI());
 				// makes it easier to access hashpaths
 				namePathToHashPath.put(entry.getKey(), assetFile.getAbsolutePath());
 			}
