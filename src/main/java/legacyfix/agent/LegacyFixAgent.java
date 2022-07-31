@@ -440,23 +440,25 @@ public class LegacyFixAgent {
 			 * Fixes sound in early Indev
 			 */
 			name = "org.lwjgl.openal.AL10";
-			clas = pool.get(name);
-			CtClass bytebuffer = pool.get("java.nio.ByteBuffer");
-			meth = clas.getDeclaredMethod("alBufferData", new CtClass[] {intclas, intclas, bytebuffer, intclas});
-			meth.insertBefore(
-					"java.lang.reflect.Field f = java.lang.ClassLoader.getSystemClassLoader().loadClass(\"java.nio.ByteBuffer\").getDeclaredField(\"hb\");" +
-					"f.setAccessible(true);" +
-					"byte[] buffer = (byte[]) f.get($3);" +
-					"if (buffer != null) {" +
-					"	java.nio.ByteBuffer buf = org.lwjgl.BufferUtils.createByteBuffer(buffer.length);" +
-					"	buf.clear();" +
-					"	buf.put(buffer);" +
-					"	buf.flip();" +
-					"	$3 = buf;" +
-					"}"
-			);
+			clas = pool.getOrNull(name);
+			if (clas != null) {
+				CtClass bytebuffer = pool.get("java.nio.ByteBuffer");
+				meth = clas.getDeclaredMethod("alBufferData", new CtClass[] {intclas, intclas, bytebuffer, intclas});
+				meth.insertBefore(
+						"java.lang.reflect.Field f = java.lang.ClassLoader.getSystemClassLoader().loadClass(\"java.nio.ByteBuffer\").getDeclaredField(\"hb\");" +
+						"f.setAccessible(true);" +
+						"byte[] buffer = (byte[]) f.get($3);" +
+						"if (buffer != null) {" +
+						"	java.nio.ByteBuffer buf = org.lwjgl.BufferUtils.createByteBuffer(buffer.length);" +
+						"	buf.clear();" +
+						"	buf.put(buffer);" +
+						"	buf.flip();" +
+						"	$3 = buf;" +
+						"}"
+				);
 
-			inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			}
 
 			/*
 			 * Fixes crash by LWJGL caused by unsupported controllers
