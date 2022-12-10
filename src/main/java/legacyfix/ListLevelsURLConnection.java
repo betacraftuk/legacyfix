@@ -21,13 +21,16 @@ public class ListLevelsURLConnection extends URLConnection {
 	public void connect() throws IOException {}
 
 	public InputStream getInputStream() throws IOException {
+		String levels = "";
+		for(int i = 0; i < 5; i++) {
+			levels += EMPTY_LEVEL + ";";
+		}
+		if(classicLocalSaves == null) {
+			return new ByteArrayInputStream(levels.getBytes());
+		}
 		File levelsFolder = new File(classicLocalSaves);
 		File levelNames = new File(levelsFolder, "levels.txt");
 		if(!levelNames.exists()) {
-			String levels = "";
-			for(int i = 0; i < 5; i++) {
-				levels += EMPTY_LEVEL + ";";
-			}
 			return new ByteArrayInputStream(levels.getBytes());
 		}
 		return new FileInputStream(levelNames);
