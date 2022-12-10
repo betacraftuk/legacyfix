@@ -8,7 +8,10 @@ import java.net.URLStreamHandler;
 
 import legacyfix.BasicResponseURLConnection;
 import legacyfix.JoinServerURLConnection;
+import legacyfix.ListLevelsURLConnection;
+import legacyfix.LoadLevelURLConnection;
 import legacyfix.ResourceIndexURLConnection;
+import legacyfix.SaveLevelURLConnection;
 import legacyfix.SkinURLConnection;
 
 // thanks codie <3 - https://github.com/craftycodie/MineOnline
@@ -35,12 +38,12 @@ public class Handler extends URLStreamHandler {
 		else if (url.toString().contains("/haspaid.jsp"))
 			return new BasicResponseURLConnection(url, 200, "true");
 		// These move classic worlds to local files, as the level api is long gone.
-//		else if (url.toString().contains("level/save.html"))
-//			return new SaveLevelURLConnection(url);
-//		else if (url.toString().contains("level/load.html"))
-//			return new LoadLevelURLConnection(url);
-//		else if (url.toString().contains("listmaps.jsp"))
-//			return new ListLevelsURLConnection(url);
+		else if (url.toString().contains("level/save.html"))
+			return new SaveLevelURLConnection(url);
+		else if (url.toString().contains("level/load.html"))
+			return new LoadLevelURLConnection(url);
+		else if (url.toString().contains("listmaps.jsp"))
+			return new ListLevelsURLConnection(url);
 		// Sounds are downloaded by the launcher, so if this returns 404 the client is going to load them without checking
 		else if (url.toString().endsWith("/MinecraftResources/"))
 			return new ResourceIndexURLConnection(url, true);
