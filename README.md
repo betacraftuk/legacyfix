@@ -22,7 +22,7 @@ As of now:
 - [x] sound on early Indev versions
 - [x] joining servers with c0.0.15a
 - [ ] unnecessary duplicates of sound files and assets
-- [ ] offline saving in Classic versions
+- [x] offline saving in Classic versions
 
 <h2>How can I use it?</h2>
 The wiki is TBA
