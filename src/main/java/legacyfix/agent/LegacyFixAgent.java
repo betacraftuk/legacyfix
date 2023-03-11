@@ -180,15 +180,15 @@ public class LegacyFixAgent {
 			//  (affects 1.6 to 1.7.2 and their snapshots)
 			// -redirect references to .minecraft/resources to mapped hashpaths
 			// -redirect references to classic level save
-			if (false) {
+			if (true) {
 				name = "java.io.File";
 				clas = pool.get(name);
-				
+
 				CtConstructor[] constr = new CtConstructor[3];
 				constr[0] = clas.getDeclaredConstructor(new CtClass[] {string});
 				constr[1] = clas.getDeclaredConstructor(new CtClass[] {string, string});
 				constr[2] = clas.getDeclaredConstructor(new CtClass[] {clas, string});
-				
+
 				CtClass filefilter = pool.get("java.io.FileFilter");
 
 				meth = clas.getDeclaredMethod("isDirectory");
@@ -198,12 +198,19 @@ public class LegacyFixAgent {
 						"}"
 				);
 
+//				meth = clas.getDeclaredMethod("toURI");
+//				meth.insertBefore(
+//						"System.out.println($0.getAbsolutePath());"
+//				);
+
 				CtMethod[] listFiles = new CtMethod[2];
 				listFiles[0] = clas.getDeclaredMethod("listFiles");
 				listFiles[1] = clas.getDeclaredMethod("listFiles", new CtClass[] {filefilter});
+				// TODO: This has to serve leveled paths instead of delivering everything at once.
+				// That is true for every version pre-1.7.3.
 				for (CtMethod lfMeth : listFiles) {
 					lfMeth.insertBefore(
-							"if ($0.path.endsWith(\"assets\") || $0.path.endsWith(\"assets/\")) {" +
+							"if ($0.path.endsWith(\"assets\") || $0.path.endsWith(\"assets/\") || $0.path.endsWith(\"resources\") || $0.path.endsWith(\"resources/\")) {" +
 							"	System.out.println(\"DEBUG ASSETS REF DETECTED \\n \\n\\n\\n\");" +
 							"	Thread.sleep(1000L);" +
 							"	java.util.ArrayList list = (java.util.ArrayList) java.lang.ClassLoader.getSystemClassLoader()" +
@@ -218,18 +225,22 @@ public class LegacyFixAgent {
 							"if (" + (levelFile != null) + " && $1.equals(\"level.dat\")) {" +
 							"	$0.path = java.io.DefaultFileSystem.getFileSystem().normalize(\"" + levelFile + "\");" +
 							"	return;" +
-							"}" 
+							"}" +
+//							"System.out.println(\"File init: '\" + $1 + \"'\");" +
 //							"java.util.HashMap list = java.lang.ClassLoader.getSystemClassLoader()" +
 //							"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
+							"String hashpath = System.getProperty(\"mcpath-\" + $0.path);" +
+							"if (hashpath != null) {" +
 //							"java.util.Set set = list.keySet();" +
 //							"java.util.Iterator it = set.iterator();" +
 //							"while (it.hasNext()) {" +
 //							"	String path = (String) it.next();" +
 //							"	if ($0.path.endsWith(path)) {" +
-//							"		$0.path = java.io.DefaultFileSystem.getFileSystem().normalize((String)list.get(path));" +
+							"		$0.path = java.io.DefaultFileSystem.getFileSystem().normalize(hashpath);" +
+							"		$0.prefixLength = 1;" +
 //							"		System.out.println($0.path);" +
 //							"	}" +
-//							"}"
+							"}"
 					);
 				}
 
@@ -237,21 +248,24 @@ public class LegacyFixAgent {
 
 				name = "java.net.URI";
 				clas = pool.get(name);
+//				meth = clas.getDeclaredMethod("toURL");
+//				meth.insertBefore("System.out.println($0.toString());");
+
 				meth = clas.getDeclaredMethod("relativize", new CtClass[] {clas, clas});
-				meth.insertBefore(
+				meth.insertBefore(""
 						// if $2 present in asURIs() and starts with <resourcesDir>,
 						// set path of $2 relative to <resourcesDir> and return $2
 						// TODO: change it to refer to asURIs() method instead of uris field
-						"Object obj = java.lang.ClassLoader.getSystemClassLoader()" +
-						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {$2});" +
-						"boolean isIn = ((Boolean)obj).booleanValue();" +
-
-						"java.io.File assetsDir = new java.io.File((String) java.lang.ClassLoader.getSystemClassLoader()" +
-						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"assetDir\").get(null));" +
-						"String resPath = assetsDir.toURI().path;" +
-
-						"System.out.println(\"DEBUG URI, \" + isIn);" +
-						"System.out.println($2.path);" 
+//						"Object obj = java.lang.ClassLoader.getSystemClassLoader()" +
+//						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {$2});" +
+//						"boolean isIn = ((Boolean)obj).booleanValue();" +
+//
+//						"java.io.File assetsDir = new java.io.File((String) java.lang.ClassLoader.getSystemClassLoader()" +
+//						"		.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"assetDir\").get(null));" +
+//						"String resPath = assetsDir.toURI().path;" +
+//
+//						"System.out.println(\"DEBUG URI, \" + isIn);" +
+//						"System.out.println($2.path);" 
 						//"System.out.println(resPath);" +
 //											"if (isIn && $2.path.startsWith(resPath)) {" +
 //											"	$2.path = $2.path.substring(resPath.length());" +
@@ -279,21 +293,21 @@ public class LegacyFixAgent {
 				clas = pool.get(name);
 
 				CtConstructor constrc = clas.getDeclaredConstructor(new CtClass[] {string});
-				constrc.insertBefore(
-						"if ($1 != null) {" +
-						"	System.out.println(\"FIS \" + $1 + \"\\n\\n\\n\\n\\n\\n\");" +
-						"	Object obj = java.lang.ClassLoader.getSystemClassLoader()" +
-						"			.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {new java.io.File($1).toURI()});" +
-						"	boolean isIn = ((Boolean)obj).booleanValue();" +
-						"	if (isIn) {" +
-						"		java.util.HashMap list = (java.util.HashMap) java.lang.ClassLoader.getSystemClassLoader()" +
-						"				.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
-						"		System.out.println(\"FIS \" + $1 + \", \" + list.containsKey($1) + \"\\n\\n\\n\\n\\n\\n\");" +
-						"		$1 = (String)list.get($1);" +
-						"	}" +
-						"}"
+				constrc.insertBefore(""
+//						"if ($1 != null) {" +
+//						"	System.out.println(\"FIS \" + $1 + \"\\n\\n\\n\\n\\n\\n\");" +
+//						"	Object obj = java.lang.ClassLoader.getSystemClassLoader()" +
+//						"			.loadClass(\"legacyfix.util.AssetIndexUtils\").getMethod(\"isInURIs\", new Class[] {java.net.URI.class}).invoke(null, new Object[] {new java.io.File($1).toURI()});" +
+//						"	boolean isIn = ((Boolean)obj).booleanValue();" +
+//						"	if (isIn) {" +
+//						"		java.util.HashMap list = (java.util.HashMap) java.lang.ClassLoader.getSystemClassLoader()" +
+//						"				.loadClass(\"legacyfix.util.AssetIndexUtils\").getField(\"namePathToHashPath\").get(null);" +
+//						"		System.out.println(\"FIS \" + $1 + \", \" + list.containsKey($1) + \"\\n\\n\\n\\n\\n\\n\");" +
+//						"		$1 = (String)list.get($1);" +
+//						"	}" +
+//						"}"
 				);
-				
+
 				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
 			}
 
@@ -514,12 +528,20 @@ public class LegacyFixAgent {
 			 */
 			if (patchMouse) {
 
+				if (mcclas == null) {
+					try {
+						findMinecraftClass(getMinecraftAppletClass(pool));
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+				}
+
 				CtField[] fields = mcclas.getDeclaredFields();
 				for (CtField field : fields) {
 					CtConstructor[] constrs = field.getType().getConstructors();
 					for (CtConstructor constr : constrs) {
 						CtClass[] params = constr.getParameterTypes();
-						if (params.length == 1 && params[0].getName().equals("java.awt.Component")) {
+						if (params.length >= 1 && params[0].getName().equals("java.awt.Component")) {
 							mouseHelper = field.getType();
 							System.out.println("found match for mousehelper: " + mouseHelper.getName());
 						}
@@ -710,6 +732,7 @@ public class LegacyFixAgent {
 		try {
 			// Now find ways to hook into dynamic width/height changing
 			// sacred code don't touch (!!!)
+			// TODO: this was only confirmed to work on macOSX 10.4.11 under LWJGL 2.7.1. See what steps need to be taken to support resize on modern platforms
 			CtClass guiScreen = null;
 			CtMethod gsInitMethod = null;
 			CtField guiscreenfield = null;
@@ -886,32 +909,39 @@ public class LegacyFixAgent {
 		}
 	}
 
+	public static CtClass getMinecraftAppletClass(ClassPool pool) {
+		mcappletname = "net.minecraft.client.MinecraftApplet";
+
+		CtClass clas = pool.getOrNull(mcappletname);
+		if (clas == null) {
+			mcappletname = "com.mojang.minecraft.MinecraftApplet";
+			clas = pool.getOrNull(mcappletname); 
+		}
+		return clas;
+	}
+
+	public static CtField findMinecraftClass(CtClass mcappletclass) throws NotFoundException {
+		for (CtField test : mcappletclass.getDeclaredFields()) {
+			String cname = test.getType().getName();
+			if (!cname.equals("java.awt.Canvas") &&
+					!cname.equals("java.lang.Thread") &&
+					!cname.equals("long")) {
+				mcclas = test.getType();
+				System.out.println("found mcclas: " + mcclas.getName());
+				return test;
+			}
+		}
+		return null;
+	}
+
 	public static byte[] deAWTApplet(ClassPool pool) {
 		try {
-			mcappletname = "net.minecraft.client.MinecraftApplet";
-
-			CtClass clas = pool.getOrNull(mcappletname);
-			if (clas == null) {
-				mcappletname = "com.mojang.minecraft.MinecraftApplet";
-				clas = pool.get(mcappletname); 
-			}
+			CtClass clas = getMinecraftAppletClass(pool);
 
 			CtMethod meth = clas.getDeclaredMethod("init");
 
-			CtField mcfield = null;
-
 			// find the minecraft class
-			for (CtField test : clas.getDeclaredFields()) {
-				String cname = test.getType().getName();
-				if (!cname.equals("java.awt.Canvas") &&
-						!cname.equals("java.lang.Thread") &&
-						!cname.equals("long")) {
-					mcclas = test.getType();
-					mcfield = test;
-					System.out.println("found mcclas: " + mcclas.getName());
-					break;
-				}
-			}
+			CtField mcfield = findMinecraftClass(clas);
 
 			CtField appletmodeField = null;
 			for (CtField test : mcclas.getDeclaredFields()) {
@@ -986,7 +1016,8 @@ public class LegacyFixAgent {
 				// only nullify applet instance if it's not a classic version
 				if (classname.equals("java.awt.Canvas")) {
 					tonull += "$" + Integer.toString(i+1) + " = null;\n";
-				} else if (!mcappletname.startsWith("com.mojang") && classname.equals(mcappletname)) {
+				} else if ((!mcappletname.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null) 
+						&& classname.equals(mcappletname)) {
 					tonull += "$" + Integer.toString(i+1) + " = null;\n";
 				}
 			}

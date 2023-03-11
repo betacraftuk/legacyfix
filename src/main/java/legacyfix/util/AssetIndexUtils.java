@@ -20,7 +20,7 @@ public class AssetIndexUtils {
 
 	public static final String assetDir = System.getProperty("lf.assetDir");
 	public static final String assetIndex = System.getProperty("lf.assetIndex");
-	public static String gameDir = System.getProperty("lf.gameDir");
+	public static String workingDir = System.getProperty("user.home");
 	public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public static File getAssetIndex() {
@@ -47,7 +47,7 @@ public class AssetIndexUtils {
 	public static JsonObject assetindex;
 //	private static String xml = null;
 	public static ArrayList<URI> uris = null;
-	public static HashMap<String, String> namePathToHashPath = new HashMap<String, String>();
+//	public static HashMap<String, String> namePathToHashPath = new HashMap<String, String>();
 //	private static String text = null;
 //
 //	// Unnecessary
@@ -199,17 +199,15 @@ public class AssetIndexUtils {
 		}
 
 		// make sure gameDir is alright
-		if (gameDir.endsWith("/") || gameDir.endsWith("\\")) {
-			gameDir = gameDir.substring(0, gameDir.length()-1);
+		if (workingDir.endsWith("/") || workingDir.endsWith("\\")) {
+			workingDir = workingDir.substring(0, workingDir.length()-1);
 		}
 
 		// load the assetindex json
 		JsonObject obj = assetindex.get("objects").getAsJsonObject();
 
 		for (Entry<String, JsonElement> entry : obj.entrySet()) {
-			if (!entry.getKey().contains("/")) { // out of bounds -1
-				continue;
-			}
+
 			JsonObject value = entry.getValue().getAsJsonObject();
 			String hash = value.get("hash").getAsString();
 
@@ -226,17 +224,27 @@ public class AssetIndexUtils {
 				// extract the asset file to its dedicated hashpath
 				unpackMissingAssets(assetFile, entry.getKey());
 			}
-			
-			System.out.println(entry.getKey() + ", " + hash);
+
+			if (!entry.getKey().contains("/")) { // out of bounds -1 in early 1.6 snapshots
+				if ("index.xml".equals(entry.getKey())) {
+					System.setProperty("xmlLocation", assetFile.getAbsolutePath());
+				} else if ("index.txt".equals(entry.getKey())) {
+					System.setProperty("txtLocation", assetFile.getAbsolutePath());
+				}
+				continue;
+			}
+
+			//System.out.println(entry.getKey() + ", " + hash);
 
 			// local sound files have priority over the default ones
-			File localfile = new File(gameDir, "/resources/" + entry.getKey());
+			File localfile = new File(workingDir, "/" + getOS().getGameDirPath() + "resources/" + entry.getKey());
 			if (localfile.exists() && !localfile.isDirectory()) {
 				uris.add(localfile.toURI());
 			} else {
 				uris.add(assetKeyFile.toURI());
 				// makes it easier to access hashpaths
-				namePathToHashPath.put(entry.getKey(), assetFile.getAbsolutePath());
+				String prefix = workingDir + "/" + getOS().getGameDirPath() + "resources/";
+				System.setProperty("mcpath-" + prefix + entry.getKey(), assetFile.getAbsolutePath());
 			}
 		}
 		AssetIndexUtils.uris = uris;
@@ -279,6 +287,43 @@ public class AssetIndexUtils {
 		} catch (Throwable t) {
 			t.printStackTrace();
 			return null;
+		}
+	}
+
+	/** 
+	 * Represents how Minecraft handles game path per-OS
+	 * True for every version (AFAIK)
+	 */
+	public static enum OSEnum {
+		windows(".minecraft/"),
+		macos("Library/Application Support/minecraft/"),
+		solaris(".minecraft/"),
+		linux(".minecraft/"),
+		unknown("minecraft/");
+
+		private String loc;
+
+		private OSEnum(String loc) {
+			this.loc = loc;
+		}
+
+		public String getGameDirPath() {
+			return this.loc;
+		}
+	}
+
+	public static OSEnum getOS() {
+		String prop = System.getProperty("os.name").toLowerCase();
+		if (prop.contains("win")) {
+			return OSEnum.windows;
+		} else if (prop.contains("mac")) {
+			return OSEnum.macos;
+		} else if (prop.contains("solaris") || prop.contains("sunos")) {
+			return OSEnum.solaris;
+		} else if (prop.contains("linux") || prop.contains("unix")) {
+			return OSEnum.linux;
+		} else {
+			return OSEnum.unknown;
 		}
 	}
 

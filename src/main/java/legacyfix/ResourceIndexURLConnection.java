@@ -27,20 +27,21 @@ public class ResourceIndexURLConnection extends HttpURLConnection {
 	}
 
 	@Override
-	public void connect() throws IOException {
-		// TODO: change this to support custom sounds (AssetIndexUtils)
-		File indexFile;
-		if (xmlMode) {
-			indexFile = new File(AssetIndexUtils.namePathToHashPath.get("index.xml"));
-		} else {
-			indexFile = new File(AssetIndexUtils.namePathToHashPath.get("index.txt"));
-		}
-
-		stream = new ByteArrayInputStream(AssetIndexUtils.fileToBytes(indexFile));
-	}
+	public void connect() throws IOException {}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
+		AssetIndexUtils.asURIs();
+		// TODO: change this to support custom sounds (AssetIndexUtils)
+		File indexFile;
+		if (xmlMode) {
+			indexFile = new File(System.getProperty("xmlLocation"));
+		} else {
+			indexFile = new File(System.getProperty("txtLocation"));
+		}
+
+		stream = new ByteArrayInputStream(AssetIndexUtils.fileToBytes(indexFile));
+		
 		return this.stream;
 	}
 

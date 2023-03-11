@@ -24,17 +24,19 @@ public class Handler extends URLStreamHandler {
 
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
-		// TODO classic level handling
 		// TODO resources handling (pre-a1.1.2_01)
 
-		if (url.toString().contains("/game/joinserver.jsp"))
+		System.out.println("Got " + url.toString());
+		if (url.toString().endsWith("/game/joinserver.jsp"))
 			return new JoinServerURLConnection(url);
 		else if (url.toString().contains("/login/session.jsp")) // May be unused.
 			return new BasicResponseURLConnection(url, 200, "ok");
 		else if (url.toString().contains("login.minecraft.net/session?name="))
 			return new BasicResponseURLConnection(url, 200, "ok");
-		else if (url.toString().contains("/game/?n="))
+		else if (url.toString().contains("/game/"))
 			return new BasicResponseURLConnection(url, 200, "42069");
+		else if (url.toString().endsWith("1_6_has_been_released.flag"))
+			return new BasicResponseURLConnection(url, 403, "");
 		else if (url.toString().contains("/haspaid.jsp"))
 			return new BasicResponseURLConnection(url, 200, "true");
 		// These move classic worlds to local files, as the level api is long gone.

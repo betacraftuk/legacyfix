@@ -12,3 +12,6 @@ build
 # Outputs
 bin
 build
+
+# OS-specific
+.DS_Store
