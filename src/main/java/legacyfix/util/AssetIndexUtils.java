@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.google.gson.Gson;
@@ -191,6 +190,7 @@ public class AssetIndexUtils {
 		ArrayList<URI> uris = new ArrayList<URI>();
 
 		if (AssetIndexUtils.assetindex == null && !AssetIndexUtils.loadAssetObjectData()) {
+			System.out.println("[legacyfix] Asset index unable to load");
 			return uris;
 		}
 
@@ -228,8 +228,10 @@ public class AssetIndexUtils {
 			if (!entry.getKey().contains("/")) { // out of bounds -1 in early 1.6 snapshots
 				if ("index.xml".equals(entry.getKey())) {
 					System.setProperty("xmlLocation", assetFile.getAbsolutePath());
+					System.out.println("[legacyfix] Set XML resource index");
 				} else if ("index.txt".equals(entry.getKey())) {
 					System.setProperty("txtLocation", assetFile.getAbsolutePath());
+					System.out.println("[legacyfix] Set TXT resource index");
 				}
 				continue;
 			}
@@ -243,8 +245,14 @@ public class AssetIndexUtils {
 			} else {
 				uris.add(assetKeyFile.toURI());
 				// makes it easier to access hashpaths
-				String prefix = workingDir + "/" + getOS().getGameDirPath() + "resources/";
-				System.setProperty("mcpath-" + prefix + entry.getKey(), assetFile.getAbsolutePath());
+				String prefix = workingDir + "/" + getOS().getGameDirPath() + "resources/" + entry.getKey();
+				
+				// offloads the work from javaagent
+				if (getOS() == OSEnum.windows) {
+					prefix = prefix.replace("/", "\\");
+				}
+				
+				System.setProperty("mcpath-" + prefix, assetFile.getAbsolutePath());
 			}
 		}
 		AssetIndexUtils.uris = uris;

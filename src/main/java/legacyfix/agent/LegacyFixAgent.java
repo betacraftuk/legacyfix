@@ -27,6 +27,8 @@ import javassist.bytecode.ClassFile;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
+import legacyfix.util.AssetIndexUtils;
+import legacyfix.util.AssetIndexUtils.OSEnum;
 
 public class LegacyFixAgent {
 
@@ -237,7 +239,7 @@ public class LegacyFixAgent {
 //							"	String path = (String) it.next();" +
 //							"	if ($0.path.endsWith(path)) {" +
 							"		$0.path = java.io.DefaultFileSystem.getFileSystem().normalize(hashpath);" +
-							"		$0.prefixLength = 1;" +
+							(AssetIndexUtils.getOS() != OSEnum.windows ? "		$0.prefixLength = 1;" : "") +
 //							"		System.out.println($0.path);" +
 //							"	}" +
 							"}"
