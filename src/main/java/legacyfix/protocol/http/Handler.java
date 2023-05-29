@@ -27,7 +27,7 @@ public class Handler extends URLStreamHandler {
 		// TODO resources handling (pre-a1.1.2_01)
 
 		System.out.println("Got " + url.toString());
-		if (url.toString().endsWith("/game/joinserver.jsp"))
+		if (url.toString().contains("/game/joinserver.jsp"))
 			return new JoinServerURLConnection(url);
 		else if (url.toString().contains("/login/session.jsp")) // May be unused.
 			return new BasicResponseURLConnection(url, 200, "ok");
