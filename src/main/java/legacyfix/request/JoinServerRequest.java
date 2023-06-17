@@ -1,8 +1,5 @@
 package legacyfix.request;
 
-import legacyfix.request.RequestUtil.ReturnType;
-import legacyfix.request.Response.BlankResponse;
-
 public class JoinServerRequest extends Request {
 
 	public String accessToken;
@@ -19,12 +16,6 @@ public class JoinServerRequest extends Request {
 
 	@Override
 	public Response perform() {
-		int response = Integer.parseInt(new String(RequestUtil.performRawPOSTRequest(this, ReturnType.RESPONSE_CODE)));
-
-		if (response == 204) {
-			return new BlankResponse();
-		} else {
-			return null;
-		}
+		return RequestUtil.performPOSTRequest(this);
 	}
 }

@@ -7,26 +7,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class RequestUtil {
 	private static boolean debug = false;
 
-	public static String performPOSTRequest(Request req) {
-		byte[] data = performRawPOSTRequest(req, ReturnType.DATA);
-		if (data != null) {
-			try {
-				String response = new String(data, "UTF-8");
-				if (debug) System.out.println("INCOMING: " + response);
-				return response;
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	public static byte[] performRawPOSTRequest(Request req, ReturnType type) {
+	public static Response performPOSTRequest(Request req) {
 		HttpURLConnection con = null;
+		Response r = new Response();
 		try {
 			URL url = new URL(req.REQUEST_URL);
 			con = (HttpURLConnection) url.openConnection();
@@ -44,7 +32,7 @@ public class RequestUtil {
 			// Send POST
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
 			if (req.POST_DATA == null) {
-				Gson gson = new Gson();
+				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 				String s = gson.toJson(req);
 				if (debug) System.out.println("OUTGOING: " + s);
 				out.write(s.getBytes("UTF-8"));
@@ -54,35 +42,25 @@ public class RequestUtil {
 			}
 			out.flush();
 			out.close();
+			
+			r.code = con.getResponseCode();
+			r.response = readInputStream(con.getInputStream());
 
-			if (type == ReturnType.RESPONSE_CODE) {
-				return Integer.toString(con.getResponseCode()).getBytes();
-			} else {
-				// Read response and return
-				return readInputStream(con.getInputStream());
-			}
+			return r;
 		} catch (Throwable t) {
 			t.printStackTrace();
-			return null;
+
+			r.setErr();
+			if (con != null)
+				r.response = readInputStream(con.getErrorStream());
+
+			return r;
 		}
 	}
 
-	public static String performGETRequest(Request req) {
-		byte[] data = performRawGETRequest(req, ReturnType.DATA);
-		if (data != null) {
-			try {
-				String response = new String(data, "UTF-8");
-				if (debug) System.out.println("INCOMING: " + response);
-				return response;
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	public static byte[] performRawGETRequest(Request req, ReturnType type) {
+	public static Response performGETRequest(Request req) {
 		HttpURLConnection con = null;
+		Response r = new Response();
 		try {
 			if (debug) System.out.println("OUTCOME TO: " + req.REQUEST_URL);
 			URL url = new URL(req.REQUEST_URL);
@@ -98,15 +76,18 @@ public class RequestUtil {
 				con.addRequestProperty(key, req.PROPERTIES.get(key));
 			}
 
-			if (type == ReturnType.RESPONSE_CODE) {
-				return Integer.toString(con.getResponseCode()).getBytes();
-			} else {
-				// Read response and return
-				return readInputStream(con.getInputStream());
-			}
+			r.code = con.getResponseCode();
+			r.response = readInputStream(con.getInputStream());
+
+			return r;
 		} catch (Throwable t) {
 			t.printStackTrace();
-			return null;
+
+			r.setErr();
+			if (con != null)
+				r.response = readInputStream(con.getErrorStream());
+
+			return r;
 		}
 	}
 
@@ -124,10 +105,5 @@ public class RequestUtil {
 			t.printStackTrace();
 			return null;
 		}
-	}
-
-	public enum ReturnType {
-		DATA,
-		RESPONSE_CODE;
 	}
 }

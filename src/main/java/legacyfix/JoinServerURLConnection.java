@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import legacyfix.request.JoinServerRequest;
+import legacyfix.request.Response;
 
 public class JoinServerURLConnection extends HttpURLConnection {
 	public JoinServerURLConnection(URL url) {
@@ -39,13 +40,13 @@ public class JoinServerURLConnection extends HttpURLConnection {
 			sessionId = sessionId.split(":")[1];
 		}
 
-		boolean validJoin = new JoinServerRequest(
+		Response r = new JoinServerRequest(
 				sessionId,
 				System.getProperty("minecraft.user.uuid"),
 				serverId
-				).perform() != null;
+				).perform();
 
-		if (validJoin) {
+		if (!r.err) {
 			response = "ok";
 		}
 

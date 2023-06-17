@@ -2,8 +2,6 @@ package legacyfix.request;
 
 import java.util.Map;
 
-import legacyfix.request.RequestUtil.ReturnType;
-
 public class CustomRequest extends Request {
 	private RequestType type;
 
@@ -18,15 +16,15 @@ public class CustomRequest extends Request {
 		if (properties != null) this.PROPERTIES = properties;
 	}
 
-	public CustomResponse perform() {
-		byte[] response = null;
+	public Response perform() {
+		Response response = null;
 		if (this.type == RequestType.POST) {
-			response = RequestUtil.performRawPOSTRequest(this, ReturnType.DATA);
+			response = RequestUtil.performPOSTRequest(this);
 		} else {
-			response = RequestUtil.performRawGETRequest(this, ReturnType.DATA);
+			response = RequestUtil.performGETRequest(this);
 		}
 
-		return new CustomResponse(response);
+		return response;
 	}
 
 	public enum RequestType {
