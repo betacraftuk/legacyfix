@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import legacyfix.request.JoinServerRequest;
 import legacyfix.request.Response;
@@ -34,7 +35,7 @@ public class JoinServerURLConnection extends HttpURLConnection {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		String serverId = this.url.toString().substring(this.url.toString().indexOf("&serverId=") + 10);
-		String sessionId = this.url.toString().substring(this.url.toString().indexOf("&sessionId=") + 11, this.url.toString().indexOf("&serverId="));
+		String sessionId = URLDecoder.decode(this.url.toString().substring(this.url.toString().indexOf("&sessionId=") + 11, this.url.toString().indexOf("&serverId=")), "UTF-8");
 
 		if (sessionId.startsWith("token:")) {
 			sessionId = sessionId.split(":")[1];
