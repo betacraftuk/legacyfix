@@ -477,6 +477,30 @@ public class LegacyFixAgent {
 			}
 
 			/*
+			 * Fixes `Open texture pack folder` not working on a1.2.0 - 12w08a (linux/macos)
+			 */
+			name = "org.lwjgl.Sys";
+			clas = pool.getOrNull(name);
+			if (clas != null) {
+				meth = clas.getDeclaredMethod("openURL", new CtClass[] {string});
+				meth.insertBefore(
+						"if ($1 != null && $1.indexOf(\"file://\") == 0) {" +
+						"	String txpfolder = $1.substring(7);" +
+						"	try {" +
+						"		Class var3 = Class.forName(\"java.awt.Desktop\");" +
+						"		Object var4 = var3.getMethod(\"getDesktop\").invoke((Object)null);" +
+						"		var3.getMethod(\"browse\", java.net.URI.class).invoke(var4, (new java.io.File(txpfolder)).toURI());" +
+						"		return true;" + // stop if successful
+						"	} catch (Throwable var5) {" +
+						"		var5.printStackTrace();" + // if failed, have a shot at the Sys.openURL method (vanilla behavior since 1.2-pre)
+						"	}" +
+						"}"
+				);
+
+				inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(name), clas.toBytecode())});
+			}
+
+			/*
 			 * Fixes crash by LWJGL caused by unsupported controllers
 			 */
 			if (disableControllers) {
