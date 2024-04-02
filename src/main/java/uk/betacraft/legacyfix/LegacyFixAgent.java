@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public class LegacyFixAgent {
-    private static Map<String, Object> settings = new HashMap<String, Object>();
-    private static List<Fix> fixes = new ArrayList<Fix>();
+    private static final Map<String, Object> settings = new HashMap<String, Object>();
+    private static final List<Fix> fixes = new ArrayList<Fix>();
     private static int jvmVersion = -1;
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -45,10 +45,6 @@ public class LegacyFixAgent {
                 }
             }
         }
-    }
-
-    private static void log(String msg) {
-        System.out.println("LF: " + msg);
     }
 
     private static int getMajorJvmVersion() {

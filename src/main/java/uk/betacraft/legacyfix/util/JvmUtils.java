@@ -1,16 +1,15 @@
 package uk.betacraft.legacyfix.util;
 
 import java.lang.management.ManagementFactory;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class JvmUtils {
+public class    JvmUtils {
     public static String getJvmArguments() {
         String name = javaVmName();
         return (contains(name, "Server") ? "-server "
                 : contains(name, "Client") ? "-client " : "")
-                + joinWithSpace(vmArguments());
+                + join(" ", vmArguments());
     }
 
     static List<String> vmArguments() {
@@ -18,15 +17,11 @@ public class JvmUtils {
     }
 
     static boolean contains(String s, String b) {
-        return s != null && s.indexOf(b) >= 0;
+        return s != null && s.contains(b);
     }
 
     static String javaVmName() {
         return System.getProperty("java.vm.name");
-    }
-
-    static String joinWithSpace(Collection<String> c) {
-        return join(" ", c);
     }
 
     public static String join(String glue, Iterable<String> strings) {
