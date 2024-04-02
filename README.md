@@ -10,7 +10,7 @@ As of now:
 - [x] ModLoader support for Java 9 and later
 - [ ] Skins on versions that support them
 - [ ] Crash on start with Indev and Infdev versions
-- [ ] Crash due to broken controllers support with c0.0.14a to 1.2.5
+- [x] Crash due to broken controllers support with c0.0.14a to 1.2.5
 - [ ] Gray screen on a1.1.1
 - [ ] Online mode support
 - [ ] Running Classic/Indev/Infdev versions on MacOS 10.7+

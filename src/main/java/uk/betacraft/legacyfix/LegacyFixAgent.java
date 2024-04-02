@@ -33,6 +33,7 @@ public class LegacyFixAgent {
             }
         }
 
+        fixes.add(new DisableControllersFix());
         fixes.add(new ModloaderFix());
         fixes.add(new DeAwtFix());
 
