@@ -1,14 +1,14 @@
-package uk.betacraft.legacyfix.fix.impl;
+package uk.betacraft.legacyfix.patch.impl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.fix.Fix;
+import uk.betacraft.legacyfix.patch.Patch;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
-public class DisableControllersFix extends Fix {
-    public DisableControllersFix() {
+public class DisableControllersPatch extends Patch {
+    public DisableControllersPatch() {
         super("disableControllers", "Disable controllers");
     }
 

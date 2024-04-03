@@ -1,10 +1,10 @@
-package uk.betacraft.legacyfix.fix.impl;
+package uk.betacraft.legacyfix.patch.impl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
-import uk.betacraft.legacyfix.fix.Fix;
+import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.lang.instrument.ClassDefinition;
@@ -13,8 +13,8 @@ import java.lang.instrument.Instrumentation;
 /**
  * Fixes Risugami's ModLoader on Java 9 or higher.
  */
-public class ModloaderFix extends Fix {
-    public ModloaderFix() {
+public class ModloaderPatch extends Patch {
+    public ModloaderPatch() {
         super("modloader", "ModLoader");
     }
 
@@ -33,7 +33,7 @@ public class ModloaderFix extends Fix {
                 args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")
             )) {
                 LFLogger.error(
-                    "The ModLoader fix couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
+                    "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
                     "--add-opens=java.base/java.nio=ALL-UNNAMED " +
                     "--add-opens=java.base/java.net=ALL-UNNAMED " +
                     "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED " +
@@ -41,7 +41,7 @@ public class ModloaderFix extends Fix {
                     "--add-opens=java.base/java.util=ALL-UNNAMED " +
                     "--add-opens=java.desktop/java.awt=ALL-UNNAMED " +
                     "--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED " +
-                    "-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge"
+                    "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
                 );
 
                 return false;

@@ -1,11 +1,11 @@
-package uk.betacraft.legacyfix.fix.impl;
+package uk.betacraft.legacyfix.patch.impl;
 
-import uk.betacraft.legacyfix.fix.Fix;
+import uk.betacraft.legacyfix.patch.Patch;
 
 import java.lang.instrument.Instrumentation;
 
-public class DeAwtFix extends Fix {
-    public DeAwtFix() {
+public class DeAwtPatch extends Patch {
+    public DeAwtPatch() {
         super("deawt", "DeAWT");
     }
 

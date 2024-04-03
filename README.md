@@ -2,10 +2,10 @@
 ![](/.github/img/banner.webp)
 
 ## What is it?
-LegacyFix is a utility made to fix old and misbehaving versions of Minecraft.
+LegacyFix is a utility made to patch old and misbehaving versions of Minecraft.
 
-### What does it fix?
-It aims to fix all known issues with running legacy Minecraft.<br>
+### What does it patch?
+It aims to patch all known issues with running legacy Minecraft.<br>
 As of now:
 - [x] ModLoader support for Java 9 and later
 - [ ] Skins on versions that support them

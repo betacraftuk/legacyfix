@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.fix;
+package uk.betacraft.legacyfix.patch;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -7,10 +7,10 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 
 /**
- * Mimics Java 8's system classloader on Java 9+
- * (for ModLoader and other, heavy mods)
- *
- * Usage: -Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge
+ * Mimics Java 8's system classloader on Java 9+ <br>
+ * (for ModLoader and other, heavy mods) <br>
+ * <br>
+ * Usage: -Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge
  */
 @SuppressWarnings("unused")
 public class URLClassLoaderBridge extends URLClassLoader {
