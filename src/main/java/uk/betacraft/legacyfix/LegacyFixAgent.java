@@ -37,6 +37,7 @@ public class LegacyFixAgent {
         PATCHES.add(new DisableControllersPatch());
         PATCHES.add(new ModloaderPatch());
         PATCHES.add(new DeAwtPatch());
+        PATCHES.add(new TexturepackFolderPatch());
 
         for (Patch patch : PATCHES) {
             if (patch.shouldApply()) {
