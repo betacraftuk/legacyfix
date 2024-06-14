@@ -2,6 +2,7 @@
 <h1>LegacyFix</h1>
 <span>A utility made to patch old and misbehaving versions of Minecraft.</span>
 </div>
+<br>
 
 ![](/.github/img/banner.webp)
 
