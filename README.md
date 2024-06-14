@@ -1,8 +1,9 @@
-# LegacyFix
-![](/.github/img/banner.webp)
+<div align="center">
+<h1>LegacyFix</h1>
+<span>A utility made to patch old and misbehaving versions of Minecraft.</span>
+</div>
 
-## What is it?
-LegacyFix is a utility made to patch old and misbehaving versions of Minecraft.
+![](/.github/img/banner.webp)
 
 ### What does it patch?
 It aims to patch all known issues with running legacy Minecraft.<br>
@@ -22,9 +23,8 @@ As of now:
 - [ ] Joining servers with c0.0.15a
 - [ ] Unnecessary duplicates of sound files and assets
 - [ ] Offline saving in Classic versions
+- [x] Forge for b1.7.3 - b1.8.1
 
 ### How can I use it?
-TODO
-
-### What programs use it?
-- [BetaCraft Launcher V2](https://github.com/betacraftuk/betacraft-launcher/tree/v2)
+- Used by default in the [BetaCraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2)
+- Apply the javaagent in the launcher of your choice

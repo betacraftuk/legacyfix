@@ -19,7 +19,7 @@ public class ModloaderPatch extends Patch {
     }
 
     @Override
-    public boolean apply(Instrumentation inst) {
+    public boolean apply(Instrumentation inst) throws Exception {
         if (LegacyFixAgent.getJvmVersion() >= 11) {
             String args = JvmUtils.getJvmArguments();
             if (!(
@@ -48,49 +48,41 @@ public class ModloaderPatch extends Patch {
             }
         }
 
-        try {
-            CtClass clazz;
-            CtMethod method;
-            CtClass string = pool.get("java.lang.String");
+        CtClass clazz = pool.get("java.lang.Class");
+        CtClass string = pool.get("java.lang.String");
+        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {string});
 
-            clazz = pool.get("java.lang.Class");
-            method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {string});
-            method.setBody(
-                "{" +
-                "	java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
-                "	for (int i = 0; i < fieldz.length; i++) {" +
-                "		java.lang.reflect.Field one = fieldz[i];" +
-                "		if ($1.equals(one.getName())) {" +
-                "			return one;" +
-                "		}" +
-                "	}" +
-                "	return null;" +
-                "}"
-            );
+        method.setBody(
+            "{" +
+            "	java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
+            "	for (int i = 0; i < fieldz.length; i++) {" +
+            "		java.lang.reflect.Field one = fieldz[i];" +
+            "		if ($1.equals(one.getName())) {" +
+            "			return one;" +
+            "		}" +
+            "	}" +
+            "	return null;" +
+            "}"
+        );
 
-            method = clazz.getDeclaredMethod("getDeclaredFields");
-            method.setBody(
-                "{" +
-                "	return copyFields($0.getDeclaredFields0(false));" +
-                "}"
-            );
+        method = clazz.getDeclaredMethod("getDeclaredFields");
+        method.setBody(
+            "{" +
+            "	return copyFields($0.getDeclaredFields0(false));" +
+            "}"
+        );
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
 
-            clazz = pool.get("java.lang.ClassLoader");
-            method = clazz.getDeclaredMethod("loadClass", new CtClass[] {string});
-            method.insertBefore(
-            "if ($1.startsWith(\"\\.mod_\")) {" +
-                "	$1 = $1.substring(1);" +
-                "}"
-            );
+        clazz = pool.get("java.lang.ClassLoader");
+        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {string});
+        method.insertBefore(
+        "if ($1.startsWith(\"\\.mod_\")) {" +
+            "	$1 = $1.substring(1);" +
+            "}"
+        );
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
+        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
         return true;
     }
 

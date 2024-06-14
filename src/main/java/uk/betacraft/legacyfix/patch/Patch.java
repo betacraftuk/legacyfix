@@ -35,8 +35,9 @@ public class Patch {
     /**
      * Applies the patch. Should only ever be called in the agent's premain.
      * @return If the patch was correctly applied
+     * @throws Exception Exceptions related to class patching
      */
-    public boolean apply(final Instrumentation inst) {
+    public boolean apply(final Instrumentation inst) throws Exception {
         return true;
     }
 }

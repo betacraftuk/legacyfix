@@ -13,19 +13,14 @@ public class DisableControllersPatch extends Patch {
     }
 
     @Override
-    public boolean apply(Instrumentation inst) {
-        try {
-            CtClass clazz = pool.get("org.lwjgl.input.Controllers");
-            CtMethod method = clazz.getDeclaredMethod("create");
-            method.setBody(
-                    "{ return; }"
-            );
+    public boolean apply(Instrumentation inst) throws Exception {
+        CtClass clazz = pool.get("org.lwjgl.input.Controllers");
+        CtMethod method = clazz.getDeclaredMethod("create");
+        method.setBody(
+                "{ return; }"
+        );
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        return true;
     }
 }

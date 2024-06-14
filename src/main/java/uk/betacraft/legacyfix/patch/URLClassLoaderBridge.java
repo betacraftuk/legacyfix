@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("unused")
 public class URLClassLoaderBridge extends URLClassLoader {
-    private static ArrayList<URL> urls = new ArrayList<URL>();
+    private static final ArrayList<URL> urls = new ArrayList<URL>();
 
     static {
         String classpath = System.getProperty("java.class.path");
