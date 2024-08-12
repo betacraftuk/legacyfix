@@ -3,8 +3,8 @@ package uk.betacraft.legacyfix.patch.impl;
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.lang.instrument.ClassDefinition;
@@ -19,8 +19,8 @@ public class ModloaderPatch extends Patch {
     }
 
     @Override
-    public boolean apply(Instrumentation inst) throws Exception {
-        if (LegacyFixAgent.getJvmVersion() >= 11) {
+    public void apply(Instrumentation inst) throws Exception {
+        if (JvmUtils.getJvmVersion() >= 11) {
             String args = JvmUtils.getJvmArguments();
             if (!(
                 args.contains("--add-opens=java.base/java.nio=ALL-UNNAMED") &&
@@ -44,7 +44,7 @@ public class ModloaderPatch extends Patch {
                     "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
                 );
 
-                return false;
+                throw new PatchException();
             }
         }
 
@@ -83,11 +83,10 @@ public class ModloaderPatch extends Patch {
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
-        return true;
     }
 
     @Override
     public boolean shouldApply() {
-        return super.shouldApply() && LegacyFixAgent.getJvmVersion() >= 9;
+        return super.shouldApply() && JvmUtils.getJvmVersion() >= 9;
     }
 }

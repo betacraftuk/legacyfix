@@ -5,7 +5,6 @@ import java.lang.instrument.Instrumentation;
 
 import javassist.CtClass;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.patch.Patch;
 
 /**
@@ -17,14 +16,12 @@ public class TexturePackFolderPatch extends Patch {
 	}
 
 	@Override
-	public boolean apply(final Instrumentation inst) throws Exception {
+	public void apply(final Instrumentation inst) throws Exception {
         CtClass clazz;
         CtMethod method;
         CtClass string = pool.get("java.lang.String");
 
-        clazz = pool.getOrNull("org.lwjgl.Sys");
-        if (clazz == null) return false;
-
+        clazz = pool.get("org.lwjgl.Sys");
         method = clazz.getDeclaredMethod("openURL", new CtClass[] {string});
         method.insertBefore(
             "if ($1 != null && $1.indexOf(\"file://\") == 0) {" +
@@ -41,11 +38,10 @@ public class TexturePackFolderPatch extends Patch {
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
-        return true;
 	}
 
     @Override
     public boolean shouldApply() {
-    	return true;
+        return true;
     }
 }

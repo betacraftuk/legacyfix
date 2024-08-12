@@ -5,6 +5,7 @@ import javassist.CtClass;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.patch.PatchException;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
@@ -14,13 +15,13 @@ import java.lang.instrument.Instrumentation;
  */
 public class BetaForgePatch extends Patch {
     public BetaForgePatch() {
-        super("betaforge", "Beta Forge");
+        super("betaForge", "Beta Forge");
     }
 
     @Override
-    public boolean apply(Instrumentation inst) throws Exception {
+    public void apply(Instrumentation inst) throws Exception {
         CtClass clazz = pool.getOrNull("forge.ForgeHooksClient");
-        if (clazz == null) return false;
+        if (clazz == null) throw new PatchException("ForgeHooksClient not found! Is Forge even present?");
 
         clazz.instrument(new ExprEditor() {
             public void edit(MethodCall m) throws CannotCompileException {
@@ -31,6 +32,5 @@ public class BetaForgePatch extends Patch {
         });
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
-        return true;
     }
 }

@@ -5,7 +5,7 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 
 import java.lang.instrument.Instrumentation;
 
-public class Patch {
+public abstract class Patch {
     private final String id, name;
     private final Object setting;
     protected static final ClassPool pool = ClassPool.getDefault();
@@ -28,16 +28,15 @@ public class Patch {
      * Conditions for the patch to be applied. Usually JVM version checks if overridden.
      * @return If the patch should be applied
      */
+    @SuppressWarnings("all")
     public boolean shouldApply() {
         return setting != null;
     }
 
     /**
      * Applies the patch. Should only ever be called in the agent's premain.
-     * @return If the patch was correctly applied
-     * @throws Exception Exceptions related to class patching
+     * @throws PatchException Exceptions thrown by the patches
+     * @throws Exception Other exceptions, usually related to class patching
      */
-    public boolean apply(final Instrumentation inst) throws Exception {
-        return true;
-    }
+    public abstract void apply(final Instrumentation inst) throws PatchException, Exception;
 }

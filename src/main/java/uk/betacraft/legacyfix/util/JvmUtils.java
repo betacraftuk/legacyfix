@@ -2,29 +2,22 @@ package uk.betacraft.legacyfix.util;
 
 import java.lang.management.ManagementFactory;
 import java.util.Iterator;
-import java.util.List;
 
-public class    JvmUtils {
+public class JvmUtils {
+    private static final int jvmVersion = fetchJvmVersion();
+
     public static String getJvmArguments() {
-        String name = javaVmName();
+        String name = System.getProperty("java.vm.name");
         return (contains(name, "Server") ? "-server "
                 : contains(name, "Client") ? "-client " : "")
-                + join(" ", vmArguments());
-    }
-
-    static List<String> vmArguments() {
-        return ManagementFactory.getRuntimeMXBean().getInputArguments();
+                + join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
     }
 
     static boolean contains(String s, String b) {
         return s != null && s.contains(b);
     }
 
-    static String javaVmName() {
-        return System.getProperty("java.vm.name");
-    }
-
-    public static String join(String glue, Iterable<String> strings) {
+    static String join(String glue, Iterable<String> strings) {
         if (strings == null) return "";
         StringBuilder buf = new StringBuilder();
         Iterator<String> i = strings.iterator();
@@ -34,5 +27,28 @@ public class    JvmUtils {
                 buf.append(glue).append(i.next());
         }
         return buf.toString();
+    }
+
+    private static int fetchJvmVersion() {
+        String javaVersion = System.getProperty("java.version");
+
+        if (javaVersion.startsWith("1.")) {
+            javaVersion = javaVersion.substring(2, 3);
+        } else {
+            int dot = javaVersion.indexOf(".");
+            if (dot != -1) {
+                javaVersion = javaVersion.substring(0, dot);
+            }
+        }
+
+        try {
+            return Integer.parseInt(javaVersion);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    public static int getJvmVersion() {
+        return jvmVersion;
     }
 }
