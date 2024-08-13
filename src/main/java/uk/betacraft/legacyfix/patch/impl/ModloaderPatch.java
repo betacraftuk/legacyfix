@@ -20,8 +20,8 @@ public class ModloaderPatch extends Patch {
 
     @Override
     public void apply(Instrumentation inst) throws Exception {
+        String args = JvmUtils.getJvmArguments();
         if (JvmUtils.getJvmVersion() >= 11) {
-            String args = JvmUtils.getJvmArguments();
             if (!(
                 args.contains("--add-opens=java.base/java.nio=ALL-UNNAMED") &&
                 args.contains("--add-opens=java.base/java.net=ALL-UNNAMED") &&
@@ -43,9 +43,14 @@ public class ModloaderPatch extends Patch {
                     "--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED " +
                     "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
                 );
-
-                throw new PatchException();
+                throw new PatchException("Conditions not met");
             }
+        } else if (!args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")) {
+            LFLogger.error(
+                    "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with a JVM argument:",
+                    "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
+            );
+            throw new PatchException("URLClassLoaderBridge not active");
         }
 
         CtClass clazz = pool.get("java.lang.Class");
