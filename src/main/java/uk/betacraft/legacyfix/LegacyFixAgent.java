@@ -37,17 +37,25 @@ public class LegacyFixAgent {
             new DeAwtPatch()
         ));
 
+        List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
             if (!patch.shouldApply()) continue;
 
             try {
                 patch.apply(inst);
-                LFLogger.info("Applied " + patch.getName());
+                patchStates.add(patch.getId() + " - Applied");
             } catch (PatchException e) {
-                LFLogger.error("Failed to apply " + patch.getName());
+                patchStates.add(patch.getId() + " - Error: " + e.getMessage());
             } catch (Exception e) {
+                patchStates.add(patch.getId() + " - Exception, see stacktrace");
                 LFLogger.error(patch, e);
             }
+        }
+
+        if (!patchStates.isEmpty()) {
+            LFLogger.logList("Patches:", patchStates);
+        } else {
+            LFLogger.log("No patches applied");
         }
     }
 

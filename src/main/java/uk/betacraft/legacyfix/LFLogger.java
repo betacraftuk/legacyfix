@@ -2,13 +2,15 @@ package uk.betacraft.legacyfix;
 
 import uk.betacraft.legacyfix.patch.Patch;
 
+import java.util.List;
+
 public class LFLogger {
     public static void info(String ...lines) {
         log("INFO", lines);
     }
 
     public static void error(Patch patch, Exception e) {
-        error(patch.getName(), e.toString());
+        error(patch.getId(), e.toString());
     }
 
     public static void error(String ...lines) {
@@ -22,6 +24,13 @@ public class LFLogger {
             } else {
                 System.out.println("        " + lines[i]);
             }
+        }
+    }
+
+    public static void logList(String header, List<String> lines) {
+        System.out.println("[LF] " + header);
+        for (String line : lines) {
+            System.out.println("        " + line);
         }
     }
 }
