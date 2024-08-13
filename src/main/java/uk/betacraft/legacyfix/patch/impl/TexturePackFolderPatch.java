@@ -28,8 +28,12 @@ public class TexturePackFolderPatch extends Patch {
             "	String txpfolder = $1.substring(7);" +
             "	try {" +
             "		Class desktopClass = Class.forName(\"java.awt.Desktop\");" +
-            "		Object desktop = desktopClass.getMethod(\"getDesktop\").invoke((Object) null);" +
-            "		desktopClass.getMethod(\"browse\", java.net.URI.class).invoke(desktop, (new java.io.File(txpfolder)).toURI());" +
+            "		Object desktop = desktopClass.getMethod(\"getDesktop\", null).invoke((Object) null, null);" +
+            "       Class[] browseParameterTypes = new Class[1];" +
+            "       browseParameterTypes[0] = java.net.URI.class;" +
+            "       Object[] browseInvokeParameters = new Object[1];" +
+            "       browseInvokeParameters[0] = (new java.io.File(txpfolder)).toURI();" +
+            "		desktopClass.getMethod(\"browse\", browseParameterTypes).invoke(desktop, browseInvokeParameters);" +
             "		return true;" +
             "	} catch (Throwable t) {" +
             "		t.printStackTrace();" + // if failed, don't return and have a shot at the Sys.openURL method (vanilla behavior since 1.2-pre)
