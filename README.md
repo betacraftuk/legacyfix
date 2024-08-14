@@ -6,9 +6,7 @@
 
 ![](/.github/img/banner.webp)
 
-### What does it patch?
-It aims to patch all known issues with running legacy Minecraft.<br>
-As of now:
+## Patches
 - [ ] Skins on versions that support them
 - [ ] Online mode support
 - [ ] Flipped color channels on versions before 13w16a on Silicon Macs
@@ -27,6 +25,7 @@ As of now:
 - [ ] Unnecessary duplicates of sound files and assets
 - [ ] Offline saving in Classic versions
 
-### How can I use it?
-- Used by default in the [BetaCraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2)
-- Apply the javaagent in the launcher of your choice
+## Usage
+Use the [BetaCraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2) which includes LF by default,<br>
+or apply the javaagent in the launcher of your choice.
+
