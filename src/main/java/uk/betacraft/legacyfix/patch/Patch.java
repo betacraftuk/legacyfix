@@ -42,7 +42,7 @@ public abstract class Patch {
      */
     @SuppressWarnings("all")
     public boolean shouldApply() {
-        return setting != null;
+        return isDefault ? setting == null : setting != null;
     }
 
     /**
