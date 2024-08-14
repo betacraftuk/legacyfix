@@ -5,6 +5,7 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 
 import java.lang.instrument.Instrumentation;
 
+@SuppressWarnings("unused")
 public abstract class Patch {
     private final String id, description;
     private final Object setting;

@@ -1,6 +1,5 @@
 package uk.betacraft.legacyfix.patch.impl;
 
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 
 import java.lang.instrument.Instrumentation;
