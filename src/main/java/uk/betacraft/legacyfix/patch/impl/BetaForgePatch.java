@@ -15,7 +15,7 @@ import java.lang.instrument.Instrumentation;
  */
 public class BetaForgePatch extends Patch {
     public BetaForgePatch() {
-        super("betaForge", "Beta Forge");
+        super("betaForge", "Fixes Forge on beta versions of the game", false);
     }
 
     @Override

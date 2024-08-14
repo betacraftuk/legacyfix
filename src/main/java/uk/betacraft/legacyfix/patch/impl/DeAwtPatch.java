@@ -7,15 +7,10 @@ import java.lang.instrument.Instrumentation;
 
 public class DeAwtPatch extends Patch {
     public DeAwtPatch() {
-        super("deawt", "DeAWT");
+        super("deawt", "Forces the game to use LWJGL's Display instead of AWT's Frame", true);
     }
 
     @Override
     public void apply(final Instrumentation inst) {
-    }
-
-    @Override
-    public boolean shouldApply() {
-        return !LegacyFixAgent.getSettings().containsKey("lf.deawt.disable");
     }
 }

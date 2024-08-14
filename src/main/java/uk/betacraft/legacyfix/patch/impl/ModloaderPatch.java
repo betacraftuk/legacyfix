@@ -15,7 +15,7 @@ import java.lang.instrument.Instrumentation;
  */
 public class ModloaderPatch extends Patch {
     public ModloaderPatch() {
-        super("modloader", "ModLoader");
+        super("modloader", "Allows Risugami's ModLoader to work on Java 9 and higher", false);
     }
 
     @Override

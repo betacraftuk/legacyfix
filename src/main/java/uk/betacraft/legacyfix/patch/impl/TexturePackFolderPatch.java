@@ -8,11 +8,11 @@ import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 
 /**
- * Patch for unresponsive "Open texture pack folder" button in versions before 1.2-pre on Linux and macOS
+ * Patch for the unresponsive "Open texture pack folder" button in versions before 1.2-pre on Linux and macOS
  */
 public class TexturePackFolderPatch extends Patch {
 	public TexturePackFolderPatch() {
-		super("texturePackButton", "Patch open texture pack folder button");
+		super("texturePackButton", "Fixes the open texture pack folder button", true);
 	}
 
 	@Override
@@ -43,9 +43,4 @@ public class TexturePackFolderPatch extends Patch {
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
 	}
-
-    @Override
-    public boolean shouldApply() {
-        return true;
-    }
 }

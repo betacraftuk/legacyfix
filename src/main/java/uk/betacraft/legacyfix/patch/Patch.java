@@ -6,26 +6,37 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 import java.lang.instrument.Instrumentation;
 
 public abstract class Patch {
-    private final String id, name;
+    private final String id, description;
     private final Object setting;
+    private final boolean isDefault;
     protected static final ClassPool pool = ClassPool.getDefault();
 
-    public Patch(String id, String name) {
+    /**
+     * @param id The ID of the patch. Formatted with camelCase.
+     * @param description A brief description of the patch.
+     * @param isDefault Whether this patch is enabled by default. Adds a disable option.
+     */
+    public Patch(String id, String description, boolean isDefault) {
         this.id = id;
-        this.name = name;
-        this.setting = LegacyFixAgent.getSettings().get("lf." + getId());
+        this.description = description;
+        this.isDefault = isDefault;
+        this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
     }
 
     public String getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isDefault() {
+        return isDefault;
     }
 
     /**
-     * Conditions for the patch to be applied. Usually JVM version checks if overridden.
+     * Conditions for the patch to be applied.
      * @return If the patch should be applied
      */
     @SuppressWarnings("all")
