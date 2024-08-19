@@ -5,7 +5,7 @@ import uk.betacraft.legacyfix.patch.Patch;
 import java.util.List;
 
 public class LFLogger {
-    public static void info(String... lines) {
+    public static void info(String ...lines) {
         log("INFO", lines);
     }
 
@@ -13,11 +13,11 @@ public class LFLogger {
         error(patch.getId(), e.toString());
     }
 
-    public static void error(String... lines) {
+    public static void error(String ...lines) {
         log("ERROR", lines);
     }
 
-    public static void log(String prefix, String... lines) {
+    public static void log(String prefix, String ...lines) {
         for (int i = 0; i < lines.length; i++) {
             if (i == 0) {
                 System.out.println("[LF] " + prefix + ": " + lines[i]);

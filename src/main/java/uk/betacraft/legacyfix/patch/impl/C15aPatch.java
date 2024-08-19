@@ -23,7 +23,7 @@ public class C15aPatch extends Patch {
         // Join server method
         CtClass minecraftClass = pool.get("com.mojang.minecraft.c");
 
-        CtMethod setServerMethod = minecraftClass.getDeclaredMethod("a", new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
+        CtMethod setServerMethod = minecraftClass.getDeclaredMethod("a", new CtClass[] {PatchHelper.stringClass, PatchHelper.intClass});
 
         String server = System.getProperty("server", null);
         String port = System.getProperty("port", "25565");
@@ -34,14 +34,14 @@ public class C15aPatch extends Patch {
         } else {
             // Block calls to the dead Notchian server and use our address instead
             setServerMethod.setBody(
-                    "{" +
-                            "    if ($1.equals(\"79.136.77.240\") && $2 == 5565) {" +
-                            "        return;" +
-                            "    }" +
-                            "    try {" +
-                            "        $0.C = new com.mojang.minecraft.net.b(this, \"" + server + "\", " + port + ", $0.e.a);" +
-                            "    } catch (Throwable t) { t.printStackTrace(); }" +
-                            "}"
+                "{" +
+                "    if ($1.equals(\"79.136.77.240\") && $2 == 5565) {" +
+                "        return;" +
+                "    }" +
+                "    try {" +
+                "        $0.C = new com.mojang.minecraft.net.b(this, \"" + server + "\", " + port + ", $0.e.a);" +
+                "    } catch (Throwable t) { t.printStackTrace(); }" +
+                "}"
             );
         }
 
@@ -52,6 +52,6 @@ public class C15aPatch extends Patch {
                 "$0.a(\"nothing\", 420);"
         );
 
-        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode())});
     }
 }

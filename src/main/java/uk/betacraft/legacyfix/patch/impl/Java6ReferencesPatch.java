@@ -44,10 +44,10 @@ public class Java6ReferencesPatch extends Patch {
                 }
             });
 
-            inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(affectedClassicClass.getName()), affectedClassicClass.toBytecode())});
+            inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(affectedClassicClass.getName()), affectedClassicClass.toBytecode())});
         }
 
-        String[] affectedBetaClassNames = new String[]{"dz", "fp", "jn", "nr"};
+        String[] affectedBetaClassNames = new String[] {"dz", "fp", "jn", "nr"};
 
         for (String className : affectedBetaClassNames) {
             CtClass affectedBetaClass = pool.getOrNull(className);
@@ -66,7 +66,7 @@ public class Java6ReferencesPatch extends Patch {
                     }
                 });
 
-                inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(affectedBetaClass.getName()), affectedBetaClass.toBytecode())});
+                inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(affectedBetaClass.getName()), affectedBetaClass.toBytecode())});
             }
         }
     }

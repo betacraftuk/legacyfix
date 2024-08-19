@@ -30,18 +30,18 @@ public class LegacyFixAgent {
         }
 
         PATCHES.addAll(Arrays.asList(
-                new DisableControllersPatch(),
-                new TexturePackFolderPatch(),
-                new Java6PreclassicPatch(),
-                new Java6ReferencesPatch(),
-                new SeecretSaturdayPatch(),
-                new IndevSoundPatch(),
-                new BetaForgePatch(),
-                new ModloaderPatch(),
-                new CloudPatch(),
-                new DeAwtPatch(),
-                new MousePatch(),
-                new C15aPatch()
+            new DisableControllersPatch(),
+            new TexturePackFolderPatch(),
+            new Java6PreclassicPatch(),
+            new Java6ReferencesPatch(),
+            new SeecretSaturdayPatch(),
+            new IndevSoundPatch(),
+            new BetaForgePatch(),
+            new ModloaderPatch(),
+            new CloudPatch(),
+            new DeAwtPatch(),
+            new MousePatch(),
+            new C15aPatch()
         ));
 
         List<String> patchStates = new ArrayList<String>();

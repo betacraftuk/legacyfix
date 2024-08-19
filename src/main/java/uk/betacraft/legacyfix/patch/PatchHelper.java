@@ -25,7 +25,7 @@ public class PatchHelper {
         if (minecraftAppletClass != null)
             return minecraftAppletClass;
 
-        String[] typicalPaths = new String[]{"net.minecraft.client.MinecraftApplet", "com.mojang.minecraft.MinecraftApplet"};
+        String[] typicalPaths = new String[] {"net.minecraft.client.MinecraftApplet", "com.mojang.minecraft.MinecraftApplet"};
 
         for (String path : typicalPaths) {
             minecraftAppletClass = pool.getOrNull(path);
