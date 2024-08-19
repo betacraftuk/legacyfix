@@ -25,6 +25,7 @@ public class CloudPatch extends Patch {
             displayClass.defrost();
 
         CtMethod createMethod = displayClass.getDeclaredMethod("create");
+        // @formatter:off
         createMethod.setBody(
             "{" + 
             "   org.lwjgl.opengl.PixelFormat pixelformat = new org.lwjgl.opengl.PixelFormat();" +

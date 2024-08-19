@@ -26,6 +26,7 @@ public class IndevSoundPatch extends Patch {
             CtClass byteBufferClass = pool.get("java.nio.ByteBuffer");
             CtMethod alBufferDataMethod = al10Class.getDeclaredMethod("alBufferData", new CtClass[] {PatchHelper.intClass, PatchHelper.intClass, byteBufferClass, PatchHelper.intClass});
 
+            // @formatter:off
             alBufferDataMethod.insertBefore(
                 "java.lang.reflect.Field f = java.lang.ClassLoader.getSystemClassLoader().loadClass(\"java.nio.ByteBuffer\").getDeclaredField(\"hb\");" +
                 "f.setAccessible(true);" +

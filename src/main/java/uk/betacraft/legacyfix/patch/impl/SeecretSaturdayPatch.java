@@ -20,7 +20,6 @@ public class SeecretSaturdayPatch extends Patch {
 
     @Override
     public void apply(Instrumentation inst) throws PatchException, Exception {
-
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
         
         if (displayClass.isFrozen())

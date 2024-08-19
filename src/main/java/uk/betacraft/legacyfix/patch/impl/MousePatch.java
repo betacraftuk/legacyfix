@@ -28,11 +28,9 @@ public class MousePatch extends Patch {
 
     @Override
     public void apply(final Instrumentation inst) throws PatchException, Exception {
-
         final CtClass mouseHelperClass = PatchHelper.findMouseHelperClass(pool);
-
+        // @formatter:off
         if (mouseHelperClass != null) {
-
             CtMethod[] mouseHelperMethods = mouseHelperClass.getDeclaredMethods();
             mouseHelperMethods[0].setBody(
                 "{" +
@@ -76,15 +74,11 @@ public class MousePatch extends Patch {
 
             inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode())});
         }
+        // @formatter:on
 
         // Replace all calls to Mouse.getDX() and Mouse.getDY() with 0
         inst.addTransformer(new ClassFileTransformer() {
-            public byte[] transform(ClassLoader loader,
-                    String className,
-                    Class<?> classRedefined,
-                    ProtectionDomain domain,
-                    byte[] classfileBuffer) {
-
+            public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
                 CtClass clas = pool.getOrNull(className.replace("/", "."));
                 if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName()))
                     return null;
@@ -92,7 +86,6 @@ public class MousePatch extends Patch {
                 try {
                     clas.instrument(new ExprEditor() {
                         public void edit(MethodCall m) throws CannotCompileException {
-
                             if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
                                     "getDX".equals(m.getMethodName()) &&
                                     "()I".equalsIgnoreCase(m.getSignature())) {
@@ -130,6 +123,7 @@ public class MousePatch extends Patch {
         CtClass cursorClass = pool.get("org.lwjgl.input.Cursor");
         CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[] {cursorClass});
 
+        // @formatter:off
         setNativeCursorMethod.setBody(
             "{" +
             "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +

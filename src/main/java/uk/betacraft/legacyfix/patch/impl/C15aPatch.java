@@ -33,6 +33,7 @@ public class C15aPatch extends Patch {
             setServerMethod.setBody("{}");
         } else {
             // Block calls to the dead Notchian server and use our address instead
+            // @formatter:off
             setServerMethod.setBody(
                 "{" +
                 "    if ($1.equals(\"79.136.77.240\") && $2 == 5565) {" +

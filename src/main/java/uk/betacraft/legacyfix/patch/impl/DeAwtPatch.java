@@ -54,6 +54,7 @@ public class DeAwtPatch extends Patch {
 
         CtMethod initMethod = appletClass.getDeclaredMethod("init");
 
+        // @formatter:off
         initMethod.insertAfter(
             // Dispose of all AWT/Swing components
             "java.awt.Component parent = $0;" +
@@ -67,12 +68,12 @@ public class DeAwtPatch extends Patch {
             // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
             "$0." + minecraftClass.getName() + "." + appletModeField.getName() + " = false;"
         );
+        // @formatter:on
 
         // Take the canvas class name to later edit out its removeNotify() method
         // The method relies on AWT/Swing components, so it has to be hijacked
 
         initMethod.instrument(new ExprEditor() {
-
             public void edit(NewExpr m) throws CannotCompileException {
                 try {
                     if (m.getConstructor().getLongName().contains("(" + appletClassName + ")") &&
@@ -197,6 +198,7 @@ public class DeAwtPatch extends Patch {
         resizeThreadClass.addField(resizeThreadMinecraftField);
 
         CtConstructor resizeThreadConstructor = new CtConstructor(new CtClass[] {minecraftClass}, resizeThreadClass);
+        // @formatter:off
         resizeThreadConstructor.setBody(
             "{" +
             "    $0.mc = $1;" +
@@ -275,6 +277,7 @@ public class DeAwtPatch extends Patch {
             "    }" +
             "}"
         );
+        // @formatter:on
 
         resizeThreadClass.addMethod(resizeThreadRunMethod);
 
@@ -344,6 +347,7 @@ public class DeAwtPatch extends Patch {
         CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[] {PatchHelper.stringClass});
 
         // On init
+        // @formatter:off
         setTitleMethod.insertBefore(
             // Title
             "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +
