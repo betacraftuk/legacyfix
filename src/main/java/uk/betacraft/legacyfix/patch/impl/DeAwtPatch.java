@@ -3,7 +3,6 @@ package uk.betacraft.legacyfix.patch.impl;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
-import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
@@ -28,30 +27,24 @@ public class DeAwtPatch extends Patch {
 
     @Override
     public void apply(final Instrumentation inst) throws Exception {
-        // Attempt to load icons
         try {
             IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
         } catch (Exception e) {
             LFLogger.error(this, e);
         }
 
-        // Find the applet class
         CtClass appletClass = PatchHelper.findMinecraftAppletClass(pool);
-
-        if (appletClass == null)
+        if (appletClass == null) {
             throw new PatchException("No applet class could be found");
-
+        }
         final String appletClassName = appletClass.getName();
 
-        // Find the main Minecraft class
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
-
-        if (minecraftClass == null)
+        if (minecraftClass == null) {
             throw new PatchException("No main Minecraft class could be found");
+        }
 
-        // Find the appletMode field
         CtField appletModeField = PatchHelper.findAppletModeField(pool);
-
         CtMethod initMethod = appletClass.getDeclaredMethod("init");
 
         // @formatter:off
@@ -72,9 +65,8 @@ public class DeAwtPatch extends Patch {
 
         // Take the canvas class name to later edit out its removeNotify() method
         // The method relies on AWT/Swing components, so it has to be hijacked
-
         initMethod.instrument(new ExprEditor() {
-            public void edit(NewExpr m) throws CannotCompileException {
+            public void edit(NewExpr m) {
                 try {
                     if (m.getConstructor().getLongName().contains("(" + appletClassName + ")") &&
                             m.getSignature().equals("(L" + appletClassName.replace(".", "/") + ";)V")) {
@@ -87,14 +79,14 @@ public class DeAwtPatch extends Patch {
             }
         });
 
-        if (this.thrown != null)
+        if (this.thrown != null) {
             throw this.thrown;
+        }
 
-        // Redefine the applet class
-        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode()));
 
         // Find ways to hook into dynamic width/height changing
-        // sacred code don't touch (!!!)
+        // Sacred code, don't touch (!!!)
         CtClass guiScreenClass = null;
         CtMethod guiScreenInitMethod = null;
         CtField guiScreenField = null;
@@ -103,11 +95,9 @@ public class DeAwtPatch extends Patch {
 
         for (CtField field : minecraftClassFields) {
             CtMethod[] methods = field.getType().getDeclaredMethods();
-
             for (CtMethod method : methods) {
                 CtClass[] params = method.getParameterTypes();
                 if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-
                     guiScreenClass = field.getType();
                     guiScreenInitMethod = method;
                     guiScreenField = field;
@@ -117,21 +107,19 @@ public class DeAwtPatch extends Patch {
                 }
             }
 
-            if (guiScreenField != null)
+            if (guiScreenField != null) {
                 break;
+            }
         }
 
-        // Find InGameHud
         CtClass inGameHudClass = null;
         CtField inGameHudField = null;
 
         for (CtField field : minecraftClassFields) {
             CtConstructor[] constrs = field.getType().getDeclaredConstructors();
-
             for (CtConstructor constr : constrs) {
                 CtClass[] params = constr.getParameterTypes();
                 if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-
                     inGameHudClass = field.getType();
                     inGameHudField = field;
 
@@ -140,30 +128,29 @@ public class DeAwtPatch extends Patch {
                 }
             }
 
-            if (inGameHudField != null)
+            if (inGameHudField != null) {
                 break;
+            }
         }
 
         // Find resolution fields in InGameHud class
         CtField[] inGameHudResFields = new CtField[]{null, null};
 
         if (inGameHudClass != null) {
-
             // We take for granted that first two int fields are: width & height
             int intOccurences = 0;
-
             for (CtField field : inGameHudClass.getDeclaredFields()) {
                 String className = field.getType().getName();
 
                 if (className.equals("int") && intOccurences < 2) {
-                    LFLogger.info("Found InGameHud resolution field (" + Integer.toString(intOccurences) + "): " + field.getName());
+                    LFLogger.info("Found InGameHud resolution field (" + intOccurences + "): " + field.getName());
 
                     inGameHudResFields[intOccurences] = field;
-
                     intOccurences++;
 
-                    if (intOccurences > 1)
+                    if (intOccurences > 1) {
                         break;
+                    }
                 }
             }
         }
@@ -173,19 +160,17 @@ public class DeAwtPatch extends Patch {
 
         // We take for granted that first two int fields are: width & height
         int intOccurences = 0;
-
         for (CtField field : minecraftClass.getDeclaredFields()) {
             String className = field.getType().getName();
-
             if (className.equals("int") && intOccurences < 2) {
-                LFLogger.info("Found Minecraft resolution field (" + Integer.toString(intOccurences) + "): " + field.getName());
+                LFLogger.info("Found Minecraft resolution field (" + intOccurences + "): " + field.getName());
 
                 minecraftResFields[intOccurences] = field;
-
                 intOccurences++;
 
-                if (intOccurences > 1)
+                if (intOccurences > 1) {
                     break;
+                }
             }
         }
 
@@ -244,8 +229,8 @@ public class DeAwtPatch extends Patch {
             "            int xtoset = org.lwjgl.opengl.Display.getWidth();" +
             "            int ytoset = org.lwjgl.opengl.Display.getHeight();" +
 
-            "            if (xtoset <= 0) {xtoset = 1;}" +
-            "            if (ytoset <= 0) {ytoset = 1;}" +
+            "            if (xtoset <= 0) { xtoset = 1; }" +
+            "            if (ytoset <= 0) { ytoset = 1; }" +
             "            mcwidth.setInt($0.mc, xtoset);" +
             "            mcheight.setInt($0.mc, ytoset);" +
 
@@ -260,7 +245,6 @@ public class DeAwtPatch extends Patch {
             "            hudWidth.setInt(hudinstance, hudx);" +
             "            hudHeight.setInt(hudinstance, hudy);" : ""
             ) +
-
             (guiScreenField != null ?
             "            " + guiScreenClass.getName() + " gsinstance = (" + guiScreenClass.getName() + ") guiscreen.get($0.mc);" +
             "            if (gsinstance != null) {" +
@@ -272,24 +256,21 @@ public class DeAwtPatch extends Patch {
             "                gsinstance." + guiScreenInitMethod.getName() + "($0.mc, x, y);" +
             "            }" : ""
             ) +
-
             "        }" +
             "    }" +
             "}"
         );
         // @formatter:on
-
         resizeThreadClass.addMethod(resizeThreadRunMethod);
-
         resizeThreadClass.toClass(pool.getClassLoader(), pool.getClassLoader().getClass().getProtectionDomain());
 
         // Initialize the ResizeThread class, so that it can be found by the game
         Class.forName("uk.betacraft.legacyfix.ResizeThread", true, pool.getClassLoader());
 
         // deAWT main Minecraft class
-
-        if (minecraftClass.isFrozen())
+        if (minecraftClass.isFrozen()) {
             minecraftClass.defrost();
+        }
 
         // Hook the resolution thread into the Minecraft.run() method
         CtMethod minecraftRunMethod = minecraftClass.getMethod("run", "()V");
@@ -300,17 +281,16 @@ public class DeAwtPatch extends Patch {
         CtConstructor minecraftConstructor = minecraftClass.getConstructors()[0];
 
         // Nullify Canvas/MinecraftApplet
-
         // The typical formula of a Minecraft constructor goes like this:
         //  Component, Canvas, MinecraftApplet, int, int, boolean
         CtClass[] paramTypes = minecraftConstructor.getParameterTypes();
 
         for (int i = 0; i < paramTypes.length; i++) {
             String className = paramTypes[i].getName();
-
             // If we're at int already, it's done
-            if (className.equals("int"))
+            if (className.equals("int")) {
                 break;
+            }
 
             // Nullify Canvas
             if (className.equals("java.awt.Canvas") ||
@@ -318,28 +298,27 @@ public class DeAwtPatch extends Patch {
                     ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null)
                             && className.equals(appletClassName))) {
 
-                minecraftConstructor.insertBefore("$" + Integer.toString(i + 1) + " = null;");
+                minecraftConstructor.insertBefore("$" + (i + 1) + " = null;");
             }
         }
 
         byte[] minecraftClassBytes = minecraftClass.toBytecode();
-
         minecraftClass.defrost();
-
-        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes)});
+        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes));
 
         // deAWT Canvas
         // Stop all calls from the canvas when it gets removed
         canvasClassName = canvasClassName.replace("/", ".");
         CtClass canvasClass = pool.get(canvasClassName);
         CtMethod canvasRemoveNotifyMethod = canvasClass.getDeclaredMethod("removeNotify");
+        // @formatter:off
         canvasRemoveNotifyMethod.setBody(
-                "{" +
-                        "    super.removeNotify();" +
-                        "}"
+            "{" +
+            "    super.removeNotify();" +
+            "}"
         );
-
-        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode())});
+        // @formatter:on
+        inst.redefineClasses(new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode()));
 
         // Hooks for LWJGL to set title, icons, and resizable status
         // and a part of Apple Silicon color patch
@@ -373,13 +352,12 @@ public class DeAwtPatch extends Patch {
 
         // On tick - couldn't really hook anywhere else, this looks like a safe spot
         CtMethod isCloseRequestedMethod = displayClass.getDeclaredMethod("isCloseRequested");
-
         isCloseRequestedMethod.insertBefore(
             "if (org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER).contains(\"Apple M\")) {" + 
             "   org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB);" +
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
     }
 }

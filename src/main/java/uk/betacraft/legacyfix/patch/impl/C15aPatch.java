@@ -6,22 +6,19 @@ import java.lang.instrument.Instrumentation;
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
 /**
  * Fixes server joining for the first c0.0.15a
  */
 public class C15aPatch extends Patch {
-
     public C15aPatch() {
         super("c0.0.15a", "Patches c0.0.15a to not join Notchian server", false);
     }
 
     @Override
-    public void apply(Instrumentation inst) throws PatchException, Exception {
-        // Join server method
-        CtClass minecraftClass = pool.get("com.mojang.minecraft.c");
+    public void apply(Instrumentation inst) throws Exception {
+        CtClass minecraftClass = pool.get("com.mojang.minecraft.c"); // server join
 
         CtMethod setServerMethod = minecraftClass.getDeclaredMethod("a", new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
 
@@ -53,6 +50,6 @@ public class C15aPatch extends Patch {
                 "$0.a(\"nothing\", 420);"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
     }
 }

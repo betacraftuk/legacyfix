@@ -10,24 +10,20 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 
 /**
  * Makes certain versions compatible with Java 5, as they were supposed to be
  */
 public class Java6ReferencesPatch extends Patch {
-
     public Java6ReferencesPatch() {
         super("java6refs", "Makes versions c0.0.15a to c0.0.16a_02 and b1.3 playable with Java 5", true);
     }
 
     @Override
-    public void apply(Instrumentation inst) throws PatchException, Exception {
-
+    public void apply(Instrumentation inst) throws Exception {
         CtClass affectedClassicClass = pool.getOrNull("com.mojang.a.a");
 
         if (affectedClassicClass != null) {
-
             affectedClassicClass.instrument(new ExprEditor() {
                 public void edit(MethodCall m) throws CannotCompileException {
                     if (m.getSignature().equals("(Ljava/nio/charset/Charset;)[B")) {
@@ -44,16 +40,14 @@ public class Java6ReferencesPatch extends Patch {
                 }
             });
 
-            inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(affectedClassicClass.getName()), affectedClassicClass.toBytecode())});
+            inst.redefineClasses(new ClassDefinition(Class.forName(affectedClassicClass.getName()), affectedClassicClass.toBytecode()));
         }
 
         String[] affectedBetaClassNames = new String[]{"dz", "fp", "jn", "nr"};
-
         for (String className : affectedBetaClassNames) {
             CtClass affectedBetaClass = pool.getOrNull(className);
 
             if (affectedBetaClass != null) {
-
                 affectedBetaClass.instrument(new ExprEditor() {
 
                     public void edit(MethodCall m) throws CannotCompileException {
@@ -66,7 +60,7 @@ public class Java6ReferencesPatch extends Patch {
                     }
                 });
 
-                inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(affectedBetaClass.getName()), affectedBetaClass.toBytecode())});
+                inst.redefineClasses(new ClassDefinition(Class.forName(affectedBetaClass.getName()), affectedBetaClass.toBytecode()));
             }
         }
     }

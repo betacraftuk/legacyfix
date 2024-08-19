@@ -13,7 +13,6 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
 /**
@@ -27,7 +26,7 @@ public class MousePatch extends Patch {
     }
 
     @Override
-    public void apply(final Instrumentation inst) throws PatchException, Exception {
+    public void apply(final Instrumentation inst) throws Exception {
         final CtClass mouseHelperClass = PatchHelper.findMouseHelperClass(pool);
         // @formatter:off
         if (mouseHelperClass != null) {
@@ -56,8 +55,7 @@ public class MousePatch extends Patch {
 
             // Mouse handling changed sometime during alpha
             boolean invert = "invert".equals(LegacyFixAgent.getSettings().get("invertMouse"));
-
-            LFLogger.info("MOUSE Y INVERT: " + Boolean.toString(invert));
+            LFLogger.info("MOUSE Y INVERT: " + invert);
 
             if (mouseHelperMethods.length == 2) {
                 mouseHelperMethods[1].setBody((invert ? body2invert : body2));
@@ -68,11 +66,10 @@ public class MousePatch extends Patch {
                     "    org.lwjgl.input.Mouse.setGrabbed(false);" +
                     "}"
                 );
-
                 mouseHelperMethods[2].setBody((invert ? body2invert : body2));
             }
 
-            inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode())});
+            inst.redefineClasses(new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode()));
         }
         // @formatter:on
 
@@ -80,8 +77,9 @@ public class MousePatch extends Patch {
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
                 CtClass clas = pool.getOrNull(className.replace("/", "."));
-                if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName()))
+                if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
                     return null;
+                }
 
                 try {
                     clas.instrument(new ExprEditor() {
@@ -89,7 +87,6 @@ public class MousePatch extends Patch {
                             if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
                                     "getDX".equals(m.getMethodName()) &&
                                     "()I".equalsIgnoreCase(m.getSignature())) {
-
                                 mouseDXYmatched = true;
                                 m.replace("$_ = 0;");
                                 LFLogger.info("Mouse.getDX() match!");
@@ -97,7 +94,6 @@ public class MousePatch extends Patch {
                             } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
                                     "getDY".equals(m.getMethodName()) &&
                                     "()I".equalsIgnoreCase(m.getSignature())) {
-
                                 mouseDXYmatched = true;
                                 m.replace("$_ = 0;");
                                 LFLogger.info("Mouse.getDY() match!");
@@ -108,11 +104,13 @@ public class MousePatch extends Patch {
                     if (mouseDXYmatched) {
                         mouseDXYmatched = false;
                         inst.removeTransformer(this); // job is done, don't fire any more classes
+
                         return clas.toBytecode();
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LFLogger.error(t.toString());
                 }
+
                 return null;
             }
         });
@@ -134,6 +132,6 @@ public class MousePatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouseClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouseClass.toBytecode()));
     }
 }

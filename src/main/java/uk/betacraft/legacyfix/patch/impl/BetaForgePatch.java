@@ -21,7 +21,9 @@ public class BetaForgePatch extends Patch {
     @Override
     public void apply(Instrumentation inst) throws Exception {
         CtClass clazz = pool.getOrNull("forge.ForgeHooksClient");
-        if (clazz == null) throw new PatchException("ForgeHooksClient not found! Is Forge even present?");
+        if (clazz == null) {
+            throw new PatchException("ForgeHooksClient not found! Is Forge even present?");
+        }
 
         clazz.instrument(new ExprEditor() {
             public void edit(MethodCall m) throws CannotCompileException {

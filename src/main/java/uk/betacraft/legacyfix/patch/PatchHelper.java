@@ -10,10 +10,9 @@ import javassist.NotFoundException;
 import uk.betacraft.legacyfix.LFLogger;
 
 public class PatchHelper {
-
-    public static CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
-    public static CtClass floatClass = ClassPool.getDefault().getOrNull("float");
-    public static CtClass intClass = ClassPool.getDefault().getOrNull("int");
+    public static final CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
+    public static final CtClass floatClass = ClassPool.getDefault().getOrNull("float");
+    public static final CtClass intClass = ClassPool.getDefault().getOrNull("int");
 
     private static CtClass minecraftAppletClass = null;
     private static CtClass mouseHelperClass = null;
@@ -22,27 +21,30 @@ public class PatchHelper {
     private static CtField appletModeField = null;
 
     public static CtClass findMinecraftAppletClass(ClassPool pool) {
-        if (minecraftAppletClass != null)
+        if (minecraftAppletClass != null) {
             return minecraftAppletClass;
+        }
 
         String[] typicalPaths = new String[]{"net.minecraft.client.MinecraftApplet", "com.mojang.minecraft.MinecraftApplet"};
 
         for (String path : typicalPaths) {
             minecraftAppletClass = pool.getOrNull(path);
-
-            if (minecraftAppletClass != null)
+            if (minecraftAppletClass != null) {
                 break;
+            }
         }
 
         return minecraftAppletClass;
     }
 
     public static CtClass findMinecraftClass(ClassPool pool) throws NotFoundException {
-        if (minecraftClass != null)
+        if (minecraftClass != null) {
             return minecraftClass;
+        }
 
-        if (minecraftAppletClass == null)
+        if (minecraftAppletClass == null) {
             findMinecraftAppletClass(pool);
+        }
 
         minecraftClass = pool.getOrNull("net.minecraft.client.Minecraft");
 
@@ -64,11 +66,13 @@ public class PatchHelper {
     }
 
     public static CtField findAppletModeField(ClassPool pool) throws NotFoundException {
-        if (appletModeField != null)
+        if (appletModeField != null) {
             return appletModeField;
+        }
 
-        if (minecraftClass == null)
+        if (minecraftClass == null) {
             findMinecraftClass(pool);
+        }
 
         for (CtField field : minecraftClass.getDeclaredFields()) {
             String className = field.getType().getName();
@@ -85,14 +89,15 @@ public class PatchHelper {
     }
 
     public static CtClass findMouseHelperClass(ClassPool pool) throws NotFoundException {
-        if (mouseHelperClass != null)
+        if (mouseHelperClass != null) {
             return mouseHelperClass;
+        }
 
-        if (minecraftClass == null)
+        if (minecraftClass == null) {
             findMinecraftClass(pool);
+        }
 
         CtField[] minecraftFields = minecraftClass.getDeclaredFields();
-
         for (CtField field : minecraftFields) {
             CtConstructor[] constructors = field.getType().getConstructors();
 

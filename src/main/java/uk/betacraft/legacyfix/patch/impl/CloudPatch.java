@@ -6,23 +6,22 @@ import java.lang.instrument.Instrumentation;
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 
 /**
  * Fixes cloud glitches on AMD GPUs
  */
 public class CloudPatch extends Patch {
-
     public CloudPatch() {
         super("amdClouds", "Fixes torn clouds on AMD GPUs", true);
     }
 
     @Override
-    public void apply(Instrumentation inst) throws PatchException, Exception {
+    public void apply(Instrumentation inst) throws Exception {
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
 
-        if (displayClass.isFrozen())
+        if (displayClass.isFrozen()) {
             displayClass.defrost();
+        }
 
         CtMethod createMethod = displayClass.getDeclaredMethod("create");
         // @formatter:off
@@ -33,6 +32,6 @@ public class CloudPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
     }
 }
