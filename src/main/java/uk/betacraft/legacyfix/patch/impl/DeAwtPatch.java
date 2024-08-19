@@ -27,7 +27,7 @@ public class DeAwtPatch extends Patch {
     }
 
     @Override
-    public void apply(final Instrumentation inst) throws Exception  {
+    public void apply(final Instrumentation inst) throws Exception {
         // Attempt to load icons
         try {
             IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
@@ -55,17 +55,17 @@ public class DeAwtPatch extends Patch {
         CtMethod initMethod = appletClass.getDeclaredMethod("init");
 
         initMethod.insertAfter(
-            // Dispose of all AWT/Swing components
-            "java.awt.Component parent = $0;" +
-            "while (parent != null) {" +
-            "    parent.setVisible(false);" +
-            "    if (parent instanceof java.awt.Frame) {" +
-            "        ((java.awt.Frame)parent).dispose();" +
-            "    }" +
-            "    parent = parent.getParent();" +
-            "}" +
-            // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
-            "$0." + minecraftClass.getName() + "." + appletModeField.getName() + " = false;"
+                // Dispose of all AWT/Swing components
+                "java.awt.Component parent = $0;" +
+                        "while (parent != null) {" +
+                        "    parent.setVisible(false);" +
+                        "    if (parent instanceof java.awt.Frame) {" +
+                        "        ((java.awt.Frame)parent).dispose();" +
+                        "    }" +
+                        "    parent = parent.getParent();" +
+                        "}" +
+                        // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
+                        "$0." + minecraftClass.getName() + "." + appletModeField.getName() + " = false;"
         );
 
         // Take the canvas class name to later edit out its removeNotify() method
@@ -90,7 +90,7 @@ public class DeAwtPatch extends Patch {
             throw this.thrown;
 
         // Redefine the applet class
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode())});
 
         // Find ways to hook into dynamic width/height changing
         // sacred code don't touch (!!!)
@@ -144,7 +144,7 @@ public class DeAwtPatch extends Patch {
         }
 
         // Find resolution fields in InGameHud class
-        CtField[] inGameHudResFields = new CtField[] {null, null};
+        CtField[] inGameHudResFields = new CtField[]{null, null};
 
         if (inGameHudClass != null) {
 
@@ -168,7 +168,7 @@ public class DeAwtPatch extends Patch {
         }
 
         // Find the resolution fields in Minecraft class
-        CtField[] minecraftResFields = new CtField[] {null, null};
+        CtField[] minecraftResFields = new CtField[]{null, null};
 
         // We take for granted that first two int fields are: width & height
         int intOccurences = 0;
@@ -196,11 +196,11 @@ public class DeAwtPatch extends Patch {
         CtField resizeThreadMinecraftField = CtField.make("public final " + minecraftClass.getName() + " mc;", resizeThreadClass);
         resizeThreadClass.addField(resizeThreadMinecraftField);
 
-        CtConstructor resizeThreadConstructor = new CtConstructor(new CtClass[] {minecraftClass}, resizeThreadClass);
+        CtConstructor resizeThreadConstructor = new CtConstructor(new CtClass[]{minecraftClass}, resizeThreadClass);
         resizeThreadConstructor.setBody(
-            "{" +
-            "    $0.mc = $1;" +
-            "}"
+                "{" +
+                        "    $0.mc = $1;" +
+                        "}"
         );
 
         resizeThreadClass.addConstructor(resizeThreadConstructor);
@@ -213,67 +213,67 @@ public class DeAwtPatch extends Patch {
 
         CtMethod resizeThreadRunMethod = CtMethod.make("public void run() {}", resizeThreadClass);
         resizeThreadRunMethod.setBody(
-            "{" +
-            (guiScreenField != null ?
-            "    java.lang.reflect.Field guiscreen = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + guiScreenField.getName() + "\");" +
-            "    guiscreen.setAccessible(true);" : ""
-            ) +
+                "{" +
+                        (guiScreenField != null ?
+                                "    java.lang.reflect.Field guiscreen = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + guiScreenField.getName() + "\");" +
+                                        "    guiscreen.setAccessible(true);" : ""
+                        ) +
 
-            (hudWidthFieldName != null ? 
-            "    java.lang.reflect.Field hud = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + inGameHudField.getName() + "\");" +
-            "    hud.setAccessible(true);" +
-            "    java.lang.reflect.Field hudWidth = ClassLoader.getSystemClassLoader().loadClass(\"" + inGameHudClass.getName() + "\").getDeclaredField(\"" + hudWidthFieldName + "\");" +
-            "    hudWidth.setAccessible(true);" +
-            "    java.lang.reflect.Field hudHeight = ClassLoader.getSystemClassLoader().loadClass(\"" + inGameHudClass.getName() + "\").getDeclaredField(\"" + hudHeightFieldName + "\");" +
-            "    hudHeight.setAccessible(true);" : ""
-            ) +
+                        (hudWidthFieldName != null ?
+                                "    java.lang.reflect.Field hud = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + inGameHudField.getName() + "\");" +
+                                        "    hud.setAccessible(true);" +
+                                        "    java.lang.reflect.Field hudWidth = ClassLoader.getSystemClassLoader().loadClass(\"" + inGameHudClass.getName() + "\").getDeclaredField(\"" + hudWidthFieldName + "\");" +
+                                        "    hudWidth.setAccessible(true);" +
+                                        "    java.lang.reflect.Field hudHeight = ClassLoader.getSystemClassLoader().loadClass(\"" + inGameHudClass.getName() + "\").getDeclaredField(\"" + hudHeightFieldName + "\");" +
+                                        "    hudHeight.setAccessible(true);" : ""
+                        ) +
 
-            "    java.lang.reflect.Field mcwidth = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + widthFieldName + "\");" +
-            "    mcwidth.setAccessible(true);" +
-            "    java.lang.reflect.Field mcheight = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + heightFieldName + "\");" +
-            "    mcheight.setAccessible(true);" +
+                        "    java.lang.reflect.Field mcwidth = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + widthFieldName + "\");" +
+                        "    mcwidth.setAccessible(true);" +
+                        "    java.lang.reflect.Field mcheight = ClassLoader.getSystemClassLoader().loadClass(\"" + minecraftClass.getName() + "\").getDeclaredField(\"" + heightFieldName + "\");" +
+                        "    mcheight.setAccessible(true);" +
 
-            "    while (!org.lwjgl.opengl.Display.isCreated()) {}" +
-            "    while (org.lwjgl.opengl.Display.isCreated()) {" +
-            "        int mcWidth = mcwidth.getInt($0.mc);" +
-            "        int mcHeight = mcheight.getInt($0.mc);" +
-            "        if ((org.lwjgl.opengl.Display.getWidth() != mcWidth || org.lwjgl.opengl.Display.getHeight() != mcHeight)) {" +
+                        "    while (!org.lwjgl.opengl.Display.isCreated()) {}" +
+                        "    while (org.lwjgl.opengl.Display.isCreated()) {" +
+                        "        int mcWidth = mcwidth.getInt($0.mc);" +
+                        "        int mcHeight = mcheight.getInt($0.mc);" +
+                        "        if ((org.lwjgl.opengl.Display.getWidth() != mcWidth || org.lwjgl.opengl.Display.getHeight() != mcHeight)) {" +
 
-            "            int xtoset = org.lwjgl.opengl.Display.getWidth();" +
-            "            int ytoset = org.lwjgl.opengl.Display.getHeight();" +
+                        "            int xtoset = org.lwjgl.opengl.Display.getWidth();" +
+                        "            int ytoset = org.lwjgl.opengl.Display.getHeight();" +
 
-            "            if (xtoset <= 0) {xtoset = 1;}" +
-            "            if (ytoset <= 0) {ytoset = 1;}" +
-            "            mcwidth.setInt($0.mc, xtoset);" +
-            "            mcheight.setInt($0.mc, ytoset);" +
+                        "            if (xtoset <= 0) {xtoset = 1;}" +
+                        "            if (ytoset <= 0) {ytoset = 1;}" +
+                        "            mcwidth.setInt($0.mc, xtoset);" +
+                        "            mcheight.setInt($0.mc, ytoset);" +
 
-            (hudWidthFieldName != null ? 
-            "            " + inGameHudClass.getName() + " hudinstance = (" + inGameHudClass.getName() + ") hud.get($0.mc);" +
-            "            int hudx = xtoset;" +
-            "            int hudy = ytoset;" +
-            "            int factor = 1;" +
-            "            for(; factor < 1000 && hudx / (factor + 1) >= 320 && hudy / (factor + 1) >= 240; factor++) { }" +
-            "            hudx = (int)Math.ceil((double)hudx / (double)factor);" +
-            "            hudy = (int)Math.ceil((double)hudy / (double)factor);" +
-            "            hudWidth.setInt(hudinstance, hudx);" +
-            "            hudHeight.setInt(hudinstance, hudy);" : ""
-            ) +
+                        (hudWidthFieldName != null ?
+                                "            " + inGameHudClass.getName() + " hudinstance = (" + inGameHudClass.getName() + ") hud.get($0.mc);" +
+                                        "            int hudx = xtoset;" +
+                                        "            int hudy = ytoset;" +
+                                        "            int factor = 1;" +
+                                        "            for(; factor < 1000 && hudx / (factor + 1) >= 320 && hudy / (factor + 1) >= 240; factor++) { }" +
+                                        "            hudx = (int)Math.ceil((double)hudx / (double)factor);" +
+                                        "            hudy = (int)Math.ceil((double)hudy / (double)factor);" +
+                                        "            hudWidth.setInt(hudinstance, hudx);" +
+                                        "            hudHeight.setInt(hudinstance, hudy);" : ""
+                        ) +
 
-            (guiScreenField != null ?
-            "            " + guiScreenClass.getName() + " gsinstance = (" + guiScreenClass.getName() + ") guiscreen.get($0.mc);" +
-            "            if (gsinstance != null) {" +
-            "                int x = xtoset;" +
-            "                int y = ytoset;" +
-            "                for(xtoset = 1; x / (xtoset + 1) >= 320 && y / (xtoset + 1) >= 240; ++xtoset) {}" +
-            "                x /= xtoset;" +
-            "                y /= xtoset;" +
-            "                gsinstance." + guiScreenInitMethod.getName() + "($0.mc, x, y);" +
-            "            }" : ""
-            ) +
+                        (guiScreenField != null ?
+                                "            " + guiScreenClass.getName() + " gsinstance = (" + guiScreenClass.getName() + ") guiscreen.get($0.mc);" +
+                                        "            if (gsinstance != null) {" +
+                                        "                int x = xtoset;" +
+                                        "                int y = ytoset;" +
+                                        "                for(xtoset = 1; x / (xtoset + 1) >= 320 && y / (xtoset + 1) >= 240; ++xtoset) {}" +
+                                        "                x /= xtoset;" +
+                                        "                y /= xtoset;" +
+                                        "                gsinstance." + guiScreenInitMethod.getName() + "($0.mc, x, y);" +
+                                        "            }" : ""
+                        ) +
 
-            "        }" +
-            "    }" +
-            "}"
+                        "        }" +
+                        "    }" +
+                        "}"
         );
 
         resizeThreadClass.addMethod(resizeThreadRunMethod);
@@ -291,7 +291,7 @@ public class DeAwtPatch extends Patch {
         // Hook the resolution thread into the Minecraft.run() method
         CtMethod minecraftRunMethod = minecraftClass.getMethod("run", "()V");
         minecraftRunMethod.insertBefore(
-            "new uk.betacraft.legacyfix.ResizeThread($0).start();"
+                "new uk.betacraft.legacyfix.ResizeThread($0).start();"
         );
 
         CtConstructor minecraftConstructor = minecraftClass.getConstructors()[0];
@@ -312,10 +312,10 @@ public class DeAwtPatch extends Patch {
             // Nullify Canvas
             if (className.equals("java.awt.Canvas") ||
                     // Only nullify MinecraftApplet if it's not a Classic version
-                    ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null) 
-                    && className.equals(appletClassName))) {
+                    ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null)
+                            && className.equals(appletClassName))) {
 
-                minecraftConstructor.insertBefore("$" + Integer.toString(i+1) + " = null;");
+                minecraftConstructor.insertBefore("$" + Integer.toString(i + 1) + " = null;");
             }
         }
 
@@ -323,7 +323,7 @@ public class DeAwtPatch extends Patch {
 
         minecraftClass.defrost();
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes)});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes)});
 
         // deAWT Canvas
         // Stop all calls from the canvas when it gets removed
@@ -331,51 +331,51 @@ public class DeAwtPatch extends Patch {
         CtClass canvasClass = pool.get(canvasClassName);
         CtMethod canvasRemoveNotifyMethod = canvasClass.getDeclaredMethod("removeNotify");
         canvasRemoveNotifyMethod.setBody(
-            "{" +
-            "    super.removeNotify();" +
-            "}"
+                "{" +
+                        "    super.removeNotify();" +
+                        "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode())});
 
         // Hooks for LWJGL to set title, icons, and resizable status
         // and a part of Apple Silicon color patch
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[] {PatchHelper.stringClass});
+        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{PatchHelper.stringClass});
 
         // On init
         setTitleMethod.insertBefore(
-            // Title
-            "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +
+                // Title
+                "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +
 
-            // Resizable
-            "org.lwjgl.opengl.Display.setResizable(true);" +
+                        // Resizable
+                        "org.lwjgl.opengl.Display.setResizable(true);" +
 
-            // 16x16 icon
-            "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels16\");" +
-            "f16.setAccessible(true);" +
-            "java.nio.ByteBuffer pix16 = f16.get(null);" +
+                        // 16x16 icon
+                        "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
+                        "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels16\");" +
+                        "f16.setAccessible(true);" +
+                        "java.nio.ByteBuffer pix16 = f16.get(null);" +
 
-            // 32x32 icon
-            "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels32\");" +
-            "f32.setAccessible(true);" +
-            "java.nio.ByteBuffer pix32 = f32.get(null);" +
+                        // 32x32 icon
+                        "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
+                        "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels32\");" +
+                        "f32.setAccessible(true);" +
+                        "java.nio.ByteBuffer pix32 = f32.get(null);" +
 
-            // Setting the icon
-            "org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});"
+                        // Setting the icon
+                        "org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});"
         );
 
         // On tick - couldn't really hook anywhere else, this looks like a safe spot
         CtMethod isCloseRequestedMethod = displayClass.getDeclaredMethod("isCloseRequested");
 
         isCloseRequestedMethod.insertBefore(
-            "if (org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER).contains(\"Apple M\")) {" + 
-            "   org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB);" +
-            "}"
+                "if (org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER).contains(\"Apple M\")) {" +
+                        "   org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB);" +
+                        "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
     }
 }

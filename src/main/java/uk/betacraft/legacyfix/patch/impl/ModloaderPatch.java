@@ -24,25 +24,25 @@ public class ModloaderPatch extends Patch {
         String args = JvmUtils.getJvmArguments();
         if (JvmUtils.getJvmVersion() >= 11) {
             if (!(
-                args.contains("--add-opens=java.base/java.nio=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.base/java.net=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.base/java.lang.reflect=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.base/java.util=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.desktop/java.awt=ALL-UNNAMED") &&
-                args.contains("--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED") &&
-                args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")
+                    args.contains("--add-opens=java.base/java.nio=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.base/java.net=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.base/java.lang.reflect=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.base/java.util=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.desktop/java.awt=ALL-UNNAMED") &&
+                            args.contains("--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED") &&
+                            args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")
             )) {
                 LFLogger.error(
-                    "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED " +
-                    "--add-opens=java.base/java.net=ALL-UNNAMED " +
-                    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED " +
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED " +
-                    "--add-opens=java.base/java.util=ALL-UNNAMED " +
-                    "--add-opens=java.desktop/java.awt=ALL-UNNAMED " +
-                    "--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED " +
-                    "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
+                        "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
+                        "--add-opens=java.base/java.nio=ALL-UNNAMED " +
+                                "--add-opens=java.base/java.net=ALL-UNNAMED " +
+                                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED " +
+                                "--add-opens=java.base/java.lang=ALL-UNNAMED " +
+                                "--add-opens=java.base/java.util=ALL-UNNAMED " +
+                                "--add-opens=java.desktop/java.awt=ALL-UNNAMED " +
+                                "--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED " +
+                                "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
                 );
                 throw new PatchException("Conditions not met");
             }
@@ -55,36 +55,36 @@ public class ModloaderPatch extends Patch {
         }
 
         CtClass clazz = pool.get("java.lang.Class");
-        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {PatchHelper.stringClass});
+        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[]{PatchHelper.stringClass});
 
         method.setBody(
-            "{" +
-            "    java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
-            "    for (int i = 0; i < fieldz.length; i++) {" +
-            "        java.lang.reflect.Field one = fieldz[i];" +
-            "        if ($1.equals(one.getName())) {" +
-            "            return one;" +
-            "        }" +
-            "    }" +
-            "    return null;" +
-            "}"
+                "{" +
+                        "    java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
+                        "    for (int i = 0; i < fieldz.length; i++) {" +
+                        "        java.lang.reflect.Field one = fieldz[i];" +
+                        "        if ($1.equals(one.getName())) {" +
+                        "            return one;" +
+                        "        }" +
+                        "    }" +
+                        "    return null;" +
+                        "}"
         );
 
         method = clazz.getDeclaredMethod("getDeclaredFields");
         method.setBody(
-            "{" +
-            "    return copyFields($0.getDeclaredFields0(false));" +
-            "}"
+                "{" +
+                        "    return copyFields($0.getDeclaredFields0(false));" +
+                        "}"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
 
         clazz = pool.get("java.lang.ClassLoader");
-        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {PatchHelper.stringClass});
+        method = clazz.getDeclaredMethod("loadClass", new CtClass[]{PatchHelper.stringClass});
         method.insertBefore(
-            "if ($1.startsWith(\"\\.mod_\")) {" +
-            "    $1 = $1.substring(1);" +
-            "}"
+                "if ($1.startsWith(\"\\.mod_\")) {" +
+                        "    $1 = $1.substring(1);" +
+                        "}"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));

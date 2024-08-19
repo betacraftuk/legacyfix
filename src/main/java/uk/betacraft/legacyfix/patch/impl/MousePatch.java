@@ -35,25 +35,25 @@ public class MousePatch extends Patch {
 
             CtMethod[] mouseHelperMethods = mouseHelperClass.getDeclaredMethods();
             mouseHelperMethods[0].setBody(
-                "{" +
-                "    org.lwjgl.input.Mouse.setGrabbed(true);" +
-                "    $0.a = 0;" +
-                "    $0.b = 0;" +
-                "}"
+                    "{" +
+                            "    org.lwjgl.input.Mouse.setGrabbed(true);" +
+                            "    $0.a = 0;" +
+                            "    $0.b = 0;" +
+                            "}"
             );
 
             String body2 = (
-                "{" +
-                "    $0.a = org.lwjgl.input.Mouse.getDX();" +
-                "    $0.b = org.lwjgl.input.Mouse.getDY();" +
-                "}"
+                    "{" +
+                            "    $0.a = org.lwjgl.input.Mouse.getDX();" +
+                            "    $0.b = org.lwjgl.input.Mouse.getDY();" +
+                            "}"
             );
 
             String body2invert = (
-                "{" +
-                "    $0.a = org.lwjgl.input.Mouse.getDX();" +
-                "    $0.b = -(org.lwjgl.input.Mouse.getDY());" +
-                "}"
+                    "{" +
+                            "    $0.a = org.lwjgl.input.Mouse.getDX();" +
+                            "    $0.b = -(org.lwjgl.input.Mouse.getDY());" +
+                            "}"
             );
 
             // Mouse handling changed sometime during alpha
@@ -65,25 +65,25 @@ public class MousePatch extends Patch {
                 mouseHelperMethods[1].setBody((invert ? body2invert : body2));
             } else {
                 mouseHelperMethods[1].setBody(
-                    "{" +
-                    "    org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
-                    "    org.lwjgl.input.Mouse.setGrabbed(false);" +
-                    "}"
+                        "{" +
+                                "    org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
+                                "    org.lwjgl.input.Mouse.setGrabbed(false);" +
+                                "}"
                 );
 
                 mouseHelperMethods[2].setBody((invert ? body2invert : body2));
             }
 
-            inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode())});
+            inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode())});
         }
 
         // Replace all calls to Mouse.getDX() and Mouse.getDY() with 0
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader,
-                    String className,
-                    Class<?> classRedefined,
-                    ProtectionDomain domain,
-                    byte[] classfileBuffer) {
+                                    String className,
+                                    Class<?> classRedefined,
+                                    ProtectionDomain domain,
+                                    byte[] classfileBuffer) {
 
                 CtClass clas = pool.getOrNull(className.replace("/", "."));
                 if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName()))
@@ -128,18 +128,18 @@ public class MousePatch extends Patch {
         // we need to account for that too
         CtClass mouseClass = pool.get("org.lwjgl.input.Mouse");
         CtClass cursorClass = pool.get("org.lwjgl.input.Cursor");
-        CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[] {cursorClass});
+        CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[]{cursorClass});
 
         setNativeCursorMethod.setBody(
-            "{" +
-            "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
-            "    if ($1 == null) {" +
-            "        org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
-            "    }" +
-            "    return null;" + // we don't need this to return anything
-            "}"
+                "{" +
+                        "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
+                        "    if ($1 == null) {" +
+                        "        org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
+                        "    }" +
+                        "    return null;" + // we don't need this to return anything
+                        "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouseClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouseClass.toBytecode())});
     }
 }

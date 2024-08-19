@@ -26,12 +26,12 @@ public class CloudPatch extends Patch {
 
         CtMethod createMethod = displayClass.getDeclaredMethod("create");
         createMethod.setBody(
-            "{" + 
-            "   org.lwjgl.opengl.PixelFormat pixelformat = new org.lwjgl.opengl.PixelFormat();" +
-            "   create(pixelformat.withDepthBits(24));" + 
-            "}"
+                "{" +
+                        "   org.lwjgl.opengl.PixelFormat pixelformat = new org.lwjgl.opengl.PixelFormat();" +
+                        "   create(pixelformat.withDepthBits(24));" +
+                        "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
     }
 }

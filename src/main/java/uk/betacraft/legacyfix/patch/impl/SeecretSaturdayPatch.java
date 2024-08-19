@@ -22,15 +22,15 @@ public class SeecretSaturdayPatch extends Patch {
     public void apply(Instrumentation inst) throws PatchException, Exception {
 
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        
+
         if (displayClass.isFrozen())
             displayClass.defrost();
 
-        CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[] {PatchHelper.floatClass, PatchHelper.floatClass, PatchHelper.floatClass});
+        CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[]{PatchHelper.floatClass, PatchHelper.floatClass, PatchHelper.floatClass});
         theProblemMethod.setBody(
-            "{ return; }"
+                "{ return; }"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode())});
     }
 }

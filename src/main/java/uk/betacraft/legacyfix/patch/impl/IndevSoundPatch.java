@@ -24,22 +24,22 @@ public class IndevSoundPatch extends Patch {
 
         if (al10Class != null) {
             CtClass byteBufferClass = pool.get("java.nio.ByteBuffer");
-            CtMethod alBufferDataMethod = al10Class.getDeclaredMethod("alBufferData", new CtClass[] {PatchHelper.intClass, PatchHelper.intClass, byteBufferClass, PatchHelper.intClass});
+            CtMethod alBufferDataMethod = al10Class.getDeclaredMethod("alBufferData", new CtClass[]{PatchHelper.intClass, PatchHelper.intClass, byteBufferClass, PatchHelper.intClass});
 
             alBufferDataMethod.insertBefore(
-                "java.lang.reflect.Field f = java.lang.ClassLoader.getSystemClassLoader().loadClass(\"java.nio.ByteBuffer\").getDeclaredField(\"hb\");" +
-                "f.setAccessible(true);" +
-                "byte[] buffer = (byte[]) f.get($3);" +
-                "if (buffer != null) {" +
-                "   java.nio.ByteBuffer buf = org.lwjgl.BufferUtils.createByteBuffer(buffer.length);" +
-                "   buf.clear();" +
-                "   buf.put(buffer);" +
-                "   buf.flip();" +
-                "   $3 = buf;" +
-                "}"
+                    "java.lang.reflect.Field f = java.lang.ClassLoader.getSystemClassLoader().loadClass(\"java.nio.ByteBuffer\").getDeclaredField(\"hb\");" +
+                            "f.setAccessible(true);" +
+                            "byte[] buffer = (byte[]) f.get($3);" +
+                            "if (buffer != null) {" +
+                            "   java.nio.ByteBuffer buf = org.lwjgl.BufferUtils.createByteBuffer(buffer.length);" +
+                            "   buf.clear();" +
+                            "   buf.put(buffer);" +
+                            "   buf.flip();" +
+                            "   $3 = buf;" +
+                            "}"
             );
 
-            inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(al10Class.getName()), al10Class.toBytecode())});
+            inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(al10Class.getName()), al10Class.toBytecode())});
         }
     }
 }

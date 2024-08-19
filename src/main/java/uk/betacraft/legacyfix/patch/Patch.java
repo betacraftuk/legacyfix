@@ -13,9 +13,9 @@ public abstract class Patch {
     protected static final ClassPool pool = ClassPool.getDefault();
 
     /**
-     * @param id The ID of the patch. Formatted with camelCase.
+     * @param id          The ID of the patch. Formatted with camelCase.
      * @param description A brief description of the patch.
-     * @param isDefault Whether this patch is enabled by default. Adds a disable option.
+     * @param isDefault   Whether this patch is enabled by default. Adds a disable option.
      */
     public Patch(String id, String description, boolean isDefault) {
         this.id = id;
@@ -38,6 +38,7 @@ public abstract class Patch {
 
     /**
      * Conditions for the patch to be applied.
+     *
      * @return If the patch should be applied
      */
     @SuppressWarnings("all")
@@ -47,8 +48,9 @@ public abstract class Patch {
 
     /**
      * Applies the patch. Should only ever be called in the agent's premain.
+     *
      * @throws PatchException Exceptions thrown by the patches
-     * @throws Exception Other exceptions, usually related to class patching
+     * @throws Exception      Other exceptions, usually related to class patching
      */
     public abstract void apply(final Instrumentation inst) throws PatchException, Exception;
 }
