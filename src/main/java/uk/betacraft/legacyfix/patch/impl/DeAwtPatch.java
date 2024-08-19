@@ -27,7 +27,7 @@ public class DeAwtPatch extends Patch {
     }
 
     @Override
-    public void apply(final Instrumentation inst) throws Exception  {
+    public void apply(final Instrumentation inst) throws Exception {
         // Attempt to load icons
         try {
             IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
@@ -91,7 +91,7 @@ public class DeAwtPatch extends Patch {
             throw this.thrown;
 
         // Redefine the applet class
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode())});
 
         // Find ways to hook into dynamic width/height changing
         // sacred code don't touch (!!!)
@@ -145,7 +145,7 @@ public class DeAwtPatch extends Patch {
         }
 
         // Find resolution fields in InGameHud class
-        CtField[] inGameHudResFields = new CtField[] {null, null};
+        CtField[] inGameHudResFields = new CtField[]{null, null};
 
         if (inGameHudClass != null) {
 
@@ -169,7 +169,7 @@ public class DeAwtPatch extends Patch {
         }
 
         // Find the resolution fields in Minecraft class
-        CtField[] minecraftResFields = new CtField[] {null, null};
+        CtField[] minecraftResFields = new CtField[]{null, null};
 
         // We take for granted that first two int fields are: width & height
         int intOccurences = 0;
@@ -197,7 +197,7 @@ public class DeAwtPatch extends Patch {
         CtField resizeThreadMinecraftField = CtField.make("public final " + minecraftClass.getName() + " mc;", resizeThreadClass);
         resizeThreadClass.addField(resizeThreadMinecraftField);
 
-        CtConstructor resizeThreadConstructor = new CtConstructor(new CtClass[] {minecraftClass}, resizeThreadClass);
+        CtConstructor resizeThreadConstructor = new CtConstructor(new CtClass[]{minecraftClass}, resizeThreadClass);
         // @formatter:off
         resizeThreadConstructor.setBody(
             "{" +
@@ -294,7 +294,7 @@ public class DeAwtPatch extends Patch {
         // Hook the resolution thread into the Minecraft.run() method
         CtMethod minecraftRunMethod = minecraftClass.getMethod("run", "()V");
         minecraftRunMethod.insertBefore(
-            "new uk.betacraft.legacyfix.ResizeThread($0).start();"
+                "new uk.betacraft.legacyfix.ResizeThread($0).start();"
         );
 
         CtConstructor minecraftConstructor = minecraftClass.getConstructors()[0];
@@ -315,10 +315,10 @@ public class DeAwtPatch extends Patch {
             // Nullify Canvas
             if (className.equals("java.awt.Canvas") ||
                     // Only nullify MinecraftApplet if it's not a Classic version
-                    ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null) 
-                    && className.equals(appletClassName))) {
+                    ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null)
+                            && className.equals(appletClassName))) {
 
-                minecraftConstructor.insertBefore("$" + Integer.toString(i+1) + " = null;");
+                minecraftConstructor.insertBefore("$" + Integer.toString(i + 1) + " = null;");
             }
         }
 
@@ -326,7 +326,7 @@ public class DeAwtPatch extends Patch {
 
         minecraftClass.defrost();
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes)});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes)});
 
         // deAWT Canvas
         // Stop all calls from the canvas when it gets removed
@@ -334,17 +334,17 @@ public class DeAwtPatch extends Patch {
         CtClass canvasClass = pool.get(canvasClassName);
         CtMethod canvasRemoveNotifyMethod = canvasClass.getDeclaredMethod("removeNotify");
         canvasRemoveNotifyMethod.setBody(
-            "{" +
-            "    super.removeNotify();" +
-            "}"
+                "{" +
+                        "    super.removeNotify();" +
+                        "}"
         );
 
-        inst.redefineClasses(new ClassDefinition[] {new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode())});
+        inst.redefineClasses(new ClassDefinition[]{new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode())});
 
         // Hooks for LWJGL to set title, icons, and resizable status
         // and a part of Apple Silicon color patch
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[] {PatchHelper.stringClass});
+        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{PatchHelper.stringClass});
 
         // On init
         // @formatter:off

@@ -22,39 +22,39 @@ public class Java6PreclassicPatch extends Patch {
     public void apply(Instrumentation inst) throws PatchException, Exception {
         // order matters
         String[] preclassicClasses = {
-            "RubyDung",
-            "Textures",
-            "Timer",
-            "HitResult",
-            "Entity",
-            "Player",
-            "character.Cube",
-            "character.Polygon",
-            "character.Vec3",
-            "character.Vertex",
-            "character.Zombie",
-            "character.ZombieModel",
-            "level.Chunk",
-            "level.DirtyChunkSorter",
-            "level.Frustum",
-            "level.Level",
-            "level.LevelListener",
-            "level.LevelRenderer",
-            "level.PerlinNoiseFilter",
-            "level.Tesselator",
-            "particle.Particle",
-            "particle.ParticleEngine",
-            "phys.AABB",
-            "level.Tile",
-            "level.tile.Tile",
-            "level.tile.Bush",
-            "level.tile.DirtTile",
-            "level.tile.GrassTile"
+                "RubyDung",
+                "Textures",
+                "Timer",
+                "HitResult",
+                "Entity",
+                "Player",
+                "character.Cube",
+                "character.Polygon",
+                "character.Vec3",
+                "character.Vertex",
+                "character.Zombie",
+                "character.ZombieModel",
+                "level.Chunk",
+                "level.DirtyChunkSorter",
+                "level.Frustum",
+                "level.Level",
+                "level.LevelListener",
+                "level.LevelRenderer",
+                "level.PerlinNoiseFilter",
+                "level.Tesselator",
+                "particle.Particle",
+                "particle.ParticleEngine",
+                "phys.AABB",
+                "level.Tile",
+                "level.tile.Tile",
+                "level.tile.Bush",
+                "level.tile.DirtTile",
+                "level.tile.GrassTile"
         };
 
         String[] packages = {
-            "com.mojang.minecraft",
-            "com.mojang.rubydung"
+                "com.mojang.minecraft",
+                "com.mojang.rubydung"
         };
 
         ArrayList<ClassDefinition> defList = new ArrayList<ClassDefinition>();
@@ -63,7 +63,7 @@ public class Java6PreclassicPatch extends Patch {
         for (int i = 0; i < packages.length; i++) {
             for (String className : preclassicClasses) {
                 CtClass pcClass = pool.getOrNull(packages[i] + "." + className);
-                
+
                 if (pcClass == null)
                     continue;
 

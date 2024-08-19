@@ -23,7 +23,7 @@ public class C15aPatch extends Patch {
         // Join server method
         CtClass minecraftClass = pool.get("com.mojang.minecraft.c");
 
-        CtMethod setServerMethod = minecraftClass.getDeclaredMethod("a", new CtClass[] {PatchHelper.stringClass, PatchHelper.intClass});
+        CtMethod setServerMethod = minecraftClass.getDeclaredMethod("a", new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
 
         String server = System.getProperty("server", null);
         String port = System.getProperty("port", "25565");

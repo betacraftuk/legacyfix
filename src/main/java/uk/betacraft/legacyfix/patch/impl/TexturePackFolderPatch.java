@@ -19,7 +19,7 @@ public class TexturePackFolderPatch extends Patch {
     @Override
     public void apply(final Instrumentation inst) throws Exception {
         CtClass sysClass = pool.get("org.lwjgl.Sys");
-        CtMethod openURLMethod = sysClass.getDeclaredMethod("openURL", new CtClass[] {PatchHelper.stringClass});
+        CtMethod openURLMethod = sysClass.getDeclaredMethod("openURL", new CtClass[]{PatchHelper.stringClass});
         // @formatter:off
         openURLMethod.insertBefore(
             "if ($1 != null && $1.indexOf(\"file://\") == 0) {" +

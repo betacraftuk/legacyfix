@@ -121,7 +121,7 @@ public class MousePatch extends Patch {
         // we need to account for that too
         CtClass mouseClass = pool.get("org.lwjgl.input.Mouse");
         CtClass cursorClass = pool.get("org.lwjgl.input.Cursor");
-        CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[] {cursorClass});
+        CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[]{cursorClass});
 
         // @formatter:off
         setNativeCursorMethod.setBody(
