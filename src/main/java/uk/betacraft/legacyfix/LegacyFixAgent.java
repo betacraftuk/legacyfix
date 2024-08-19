@@ -36,7 +36,8 @@ public class LegacyFixAgent {
             new ModloaderPatch(),
             new BetaForgePatch(),
             new DeAwtPatch(),
-            new CloudPatch()
+            new CloudPatch(),
+            new MousePatch()
         ));
 
         List<String> patchStates = new ArrayList<String>();

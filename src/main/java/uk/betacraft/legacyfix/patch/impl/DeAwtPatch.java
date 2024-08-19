@@ -2,7 +2,6 @@ package uk.betacraft.legacyfix.patch.impl;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Modifier;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
@@ -16,6 +15,7 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
+import uk.betacraft.legacyfix.patch.PatchHelper;
 import uk.betacraft.legacyfix.util.IconUtils;
 
 public class DeAwtPatch extends Patch {
@@ -36,15 +36,7 @@ public class DeAwtPatch extends Patch {
         }
 
         // Find the applet class
-        String[] typicalPaths = new String[] {"net.minecraft.client.MinecraftApplet", "com.mojang.minecraft.MinecraftApplet"};
-
-        CtClass appletClass = null;
-        for (String path : typicalPaths) {
-            appletClass = pool.getOrNull(path);
-
-            if (appletClass != null)
-                break;
-        }
+        CtClass appletClass = PatchHelper.findMinecraftAppletClass(pool);
 
         if (appletClass == null)
             throw new PatchException("No applet class could be found");
@@ -52,36 +44,13 @@ public class DeAwtPatch extends Patch {
         final String appletClassName = appletClass.getName();
 
         // Find the main Minecraft class
-        CtClass minecraftClass = pool.getOrNull("net.minecraft.client.Minecraft");
-
-        if (minecraftClass == null) {
-            for (CtField field : appletClass.getDeclaredFields()) {
-                String className = field.getType().getName();
-
-                if (!className.equals("java.awt.Canvas") &&
-                        !className.equals("java.lang.Thread") &&
-                        !className.equals("long")) {
-
-                    minecraftClass = field.getType();
-                    LFLogger.info("Found Minecraft class: " + minecraftClass.getName());
-                }
-            }
-        }
+        CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
 
         if (minecraftClass == null)
             throw new PatchException("No main Minecraft class could be found");
 
         // Find the appletMode field
-        CtField appletmodeField = null;
-        for (CtField field : minecraftClass.getDeclaredFields()) {
-            String className = field.getType().getName();
-
-            if (className.equals("boolean") && Modifier.isPublic(field.getModifiers())) {
-                appletmodeField = field;
-                LFLogger.info("Found appletMode field: " + appletmodeField.getName());
-                break;
-            }
-        }
+        CtField appletModeField = PatchHelper.findAppletModeField(pool);
 
         CtMethod initMethod = appletClass.getDeclaredMethod("init");
 
@@ -96,7 +65,7 @@ public class DeAwtPatch extends Patch {
             "    parent = parent.getParent();" +
             "}" +
             // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
-            "$0." + minecraftClass.getName() + "." + appletmodeField.getName() + " = false;"
+            "$0." + minecraftClass.getName() + "." + appletModeField.getName() + " = false;"
         );
 
         // Take the canvas class name to later edit out its removeNotify() method
