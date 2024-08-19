@@ -78,4 +78,9 @@ public class Java6PreclassicPatch extends Patch {
         if (!defList.isEmpty())
             inst.redefineClasses(defList.toArray(new ClassDefinition[0]));
     }
+
+    @Override
+    public boolean shouldApply() {
+        return super.shouldApply() && (pool.getOrNull("com.mojang.minecraft.RubyDung") != null || pool.getOrNull("com.mojang.rubydung.RubyDung") != null);
+    }
 }
