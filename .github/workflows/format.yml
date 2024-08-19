@@ -1,0 +1,27 @@
+name: IntelliJ Format
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+      - if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Cache IDEA
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/work/_temp/_github_workflow/idea-cache
+          key: ${{ runner.os }}-idea-cache-v2
+      - name: Run Formatter
+        uses: notdevcody/intellij-format-action@v2
+        with:
+          path: src/
