@@ -34,6 +34,7 @@ public class LegacyFixAgent {
             new TexturePackFolderPatch(),
             new SeecretSaturdayPatch(),
             new Java6ReferencesPatch(),
+            new IndevSoundPatch(),
             new ModloaderPatch(),
             new BetaForgePatch(),
             new DeAwtPatch(),
