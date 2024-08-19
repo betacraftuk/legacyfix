@@ -32,6 +32,7 @@ public class LegacyFixAgent {
         PATCHES.addAll(Arrays.asList(
             new DisableControllersPatch(),
             new TexturePackFolderPatch(),
+            new SeecretSaturdayPatch(),
             new ModloaderPatch(),
             new BetaForgePatch(),
             new DeAwtPatch()
