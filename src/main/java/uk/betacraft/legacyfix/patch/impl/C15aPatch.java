@@ -14,7 +14,7 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
  */
 public class C15aPatch extends Patch {
 
-    public C15aPatch(String id, String description, boolean isDefault) {
+    public C15aPatch() {
         super("c0.0.15a", "Patches c0.0.15a to not join Notchian server", false);
     }
 

@@ -33,11 +33,13 @@ public class LegacyFixAgent {
             new DisableControllersPatch(),
             new TexturePackFolderPatch(),
             new SeecretSaturdayPatch(),
+            new Java6ReferencesPatch(),
             new ModloaderPatch(),
             new BetaForgePatch(),
             new DeAwtPatch(),
             new CloudPatch(),
-            new MousePatch()
+            new MousePatch(),
+            new C15aPatch()
         ));
 
         List<String> patchStates = new ArrayList<String>();
