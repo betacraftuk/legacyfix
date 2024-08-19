@@ -16,6 +16,7 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
+import uk.betacraft.legacyfix.util.IconUtils;
 
 public class DeAwtPatch extends Patch {
     private String canvasClassName;
@@ -27,12 +28,19 @@ public class DeAwtPatch extends Patch {
 
     @Override
     public void apply(final Instrumentation inst) throws Exception  {
+        // Attempt to load icons
+        try {
+            IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
+        } catch (Exception e) {
+            LFLogger.error(this, e);
+        }
+
         // Find the applet class
         String[] typicalPaths = new String[] {"net.minecraft.client.MinecraftApplet", "com.mojang.minecraft.MinecraftApplet"};
 
         CtClass appletClass = null;
-        for (int i = 0; i < typicalPaths.length; i++) {
-            appletClass = pool.getOrNull(typicalPaths[i]);
+        for (String path : typicalPaths) {
+            appletClass = pool.getOrNull(path);
 
             if (appletClass != null)
                 break;
@@ -370,17 +378,26 @@ public class DeAwtPatch extends Patch {
         // On init
         // TODO: Implement instance icons
         setTitleMethod.insertBefore(
+            // Title
             "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +
-            "org.lwjgl.opengl.Display.setResizable(true);"// +
-//            "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
-//            "       .loadClass(\"legacyfix.agent.LegacyFixAgent\").getDeclaredField(\"pixels16\");" +
-//            "f16.setAccessible(true);" +
-//            "java.nio.ByteBuffer pix16 = f16.get(null);" +
-//            "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
-//            "       .loadClass(\"legacyfix.agent.LegacyFixAgent\").getDeclaredField(\"pixels32\");" +
-//            "f32.setAccessible(true);" +
-//            "java.nio.ByteBuffer pix32 = f32.get(null);" +
-//            "org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});"
+
+            // Resizable
+            "org.lwjgl.opengl.Display.setResizable(true);" +
+
+            // 16x16 icon
+            "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
+            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels16\");" +
+            "f16.setAccessible(true);" +
+            "java.nio.ByteBuffer pix16 = f16.get(null);" +
+
+            // 32x32 icon
+            "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
+            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels32\");" +
+            "f32.setAccessible(true);" +
+            "java.nio.ByteBuffer pix32 = f32.get(null);" +
+
+            // Setting the icon
+            "org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});"
         );
 
         // On tick - couldn't really hook anywhere else, this looks like a safe spot
