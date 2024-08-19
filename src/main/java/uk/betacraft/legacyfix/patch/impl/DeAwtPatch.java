@@ -10,6 +10,7 @@ public class DeAwtPatch extends Patch {
     }
 
     @Override
-    public void apply(final Instrumentation inst) {
+    public void apply(final Instrumentation inst) throws Exception  {
+        
     }
 }

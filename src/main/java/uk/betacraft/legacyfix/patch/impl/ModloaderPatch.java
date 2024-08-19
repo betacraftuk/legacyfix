@@ -59,21 +59,21 @@ public class ModloaderPatch extends Patch {
 
         method.setBody(
             "{" +
-            "	java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
-            "	for (int i = 0; i < fieldz.length; i++) {" +
-            "		java.lang.reflect.Field one = fieldz[i];" +
-            "		if ($1.equals(one.getName())) {" +
-            "			return one;" +
-            "		}" +
-            "	}" +
-            "	return null;" +
+            "    java.lang.reflect.Field[] fieldz = getDeclaredFields0(false);" +
+            "    for (int i = 0; i < fieldz.length; i++) {" +
+            "        java.lang.reflect.Field one = fieldz[i];" +
+            "        if ($1.equals(one.getName())) {" +
+            "            return one;" +
+            "        }" +
+            "    }" +
+            "    return null;" +
             "}"
         );
 
         method = clazz.getDeclaredMethod("getDeclaredFields");
         method.setBody(
             "{" +
-            "	return copyFields($0.getDeclaredFields0(false));" +
+            "    return copyFields($0.getDeclaredFields0(false));" +
             "}"
         );
 
@@ -82,8 +82,8 @@ public class ModloaderPatch extends Patch {
         clazz = pool.get("java.lang.ClassLoader");
         method = clazz.getDeclaredMethod("loadClass", new CtClass[] {string});
         method.insertBefore(
-        "if ($1.startsWith(\"\\.mod_\")) {" +
-            "	$1 = $1.substring(1);" +
+            "if ($1.startsWith(\"\\.mod_\")) {" +
+            "    $1 = $1.substring(1);" +
             "}"
         );
 
