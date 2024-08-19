@@ -6,6 +6,7 @@ import java.lang.instrument.Instrumentation;
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.patch.PatchHelper;
 
 /**
  * Patch for the unresponsive "Open texture pack folder" button in versions before 1.2-pre on Linux and macOS
@@ -17,13 +18,11 @@ public class TexturePackFolderPatch extends Patch {
 
     @Override
     public void apply(final Instrumentation inst) throws Exception {
-        CtClass clazz;
-        CtMethod method;
-        CtClass string = pool.get("java.lang.String");
+        CtClass sysClass = pool.get("org.lwjgl.Sys");
 
-        clazz = pool.get("org.lwjgl.Sys");
-        method = clazz.getDeclaredMethod("openURL", new CtClass[] {string});
-        method.insertBefore(
+        CtMethod openURLMethod = sysClass.getDeclaredMethod("openURL", new CtClass[] {PatchHelper.stringClass});
+
+        openURLMethod.insertBefore(
             "if ($1 != null && $1.indexOf(\"file://\") == 0) {" +
             "    String txpfolder = $1.substring(7);" +
             "    try {" +
@@ -41,6 +40,6 @@ public class TexturePackFolderPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        inst.redefineClasses(new ClassDefinition(Class.forName(sysClass.getName()), sysClass.toBytecode()));
     }
 }

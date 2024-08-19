@@ -5,6 +5,7 @@ import javassist.CtMethod;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
+import uk.betacraft.legacyfix.patch.PatchHelper;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.lang.instrument.ClassDefinition;
@@ -54,8 +55,7 @@ public class ModloaderPatch extends Patch {
         }
 
         CtClass clazz = pool.get("java.lang.Class");
-        CtClass string = pool.get("java.lang.String");
-        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {string});
+        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {PatchHelper.stringClass});
 
         method.setBody(
             "{" +
@@ -80,7 +80,7 @@ public class ModloaderPatch extends Patch {
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
 
         clazz = pool.get("java.lang.ClassLoader");
-        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {string});
+        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {PatchHelper.stringClass});
         method.insertBefore(
             "if ($1.startsWith(\"\\.mod_\")) {" +
             "    $1 = $1.substring(1);" +

@@ -340,12 +340,10 @@ public class DeAwtPatch extends Patch {
 
         // Hooks for LWJGL to set title, icons, and resizable status
         // and a part of Apple Silicon color patch
-        CtClass stringClass = pool.get("java.lang.String");
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[] {stringClass});
+        CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[] {PatchHelper.stringClass});
 
         // On init
-        // TODO: Implement instance icons
         setTitleMethod.insertBefore(
             // Title
             "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +

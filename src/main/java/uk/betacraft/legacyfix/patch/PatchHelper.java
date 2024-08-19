@@ -11,6 +11,10 @@ import uk.betacraft.legacyfix.LFLogger;
 
 public class PatchHelper {
 
+    public static CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
+    public static CtClass floatClass = ClassPool.getDefault().getOrNull("float");
+    public static CtClass intClass = ClassPool.getDefault().getOrNull("int");
+
     private static CtClass minecraftAppletClass = null;
     private static CtClass mouseHelperClass = null;
     private static CtClass minecraftClass = null;

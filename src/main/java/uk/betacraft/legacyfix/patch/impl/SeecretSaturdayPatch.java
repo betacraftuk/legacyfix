@@ -7,6 +7,7 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
+import uk.betacraft.legacyfix.patch.PatchHelper;
 
 /**
  * Fixes a1.1.1's gray screen
@@ -19,14 +20,13 @@ public class SeecretSaturdayPatch extends Patch {
 
     @Override
     public void apply(Instrumentation inst) throws PatchException, Exception {
-        CtClass floatClass = pool.get("float");
 
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
         
         if (displayClass.isFrozen())
             displayClass.defrost();
 
-        CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[] {floatClass, floatClass, floatClass});
+        CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[] {PatchHelper.floatClass, PatchHelper.floatClass, PatchHelper.floatClass});
         theProblemMethod.setBody(
             "{ return; }"
         );
