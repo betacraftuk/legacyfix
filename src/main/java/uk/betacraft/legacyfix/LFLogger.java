@@ -10,7 +10,17 @@ public class LFLogger {
     }
 
     public static void error(Patch patch, Exception e) {
-        error(patch.getId(), e.toString());
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        String[] stackTraceStrings = new String[stackTraceElements.length + 2];
+
+        stackTraceStrings[0] = patch.getId();
+        stackTraceStrings[1] = e.getMessage();
+
+        for (int i = 0; i < stackTraceElements.length; i++) {
+            stackTraceStrings[i + 2] = stackTraceElements[i].toString();
+        }
+
+        error(stackTraceStrings);
     }
 
     public static void error(String... lines) {
