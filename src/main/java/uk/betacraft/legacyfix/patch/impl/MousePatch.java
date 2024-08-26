@@ -70,50 +70,51 @@ public class MousePatch extends Patch {
             }
 
             inst.redefineClasses(new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode()));
-        }
-        // @formatter:on
 
-        // Replace all calls to Mouse.getDX() and Mouse.getDY() with 0
-        inst.addTransformer(new ClassFileTransformer() {
-            public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
-                CtClass clas = pool.getOrNull(className.replace("/", "."));
-                if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
+            // @formatter:on
+
+            // Replace all calls to Mouse.getDX() and Mouse.getDY() with 0
+            inst.addTransformer(new ClassFileTransformer() {
+                public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
+                    CtClass clas = pool.getOrNull(className.replace("/", "."));
+                    if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
+                        return null;
+                    }
+
+                    try {
+                        clas.instrument(new ExprEditor() {
+                            public void edit(MethodCall m) throws CannotCompileException {
+                                if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
+                                        "getDX".equals(m.getMethodName()) &&
+                                        "()I".equalsIgnoreCase(m.getSignature())) {
+                                    mouseDXYmatched = true;
+                                    m.replace("$_ = 0;");
+                                    LFLogger.info("Mouse.getDX() match!");
+
+                                } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
+                                        "getDY".equals(m.getMethodName()) &&
+                                        "()I".equalsIgnoreCase(m.getSignature())) {
+                                    mouseDXYmatched = true;
+                                    m.replace("$_ = 0;");
+                                    LFLogger.info("Mouse.getDY() match!");
+                                }
+                            }
+                        });
+
+                        if (mouseDXYmatched) {
+                            mouseDXYmatched = false;
+                            inst.removeTransformer(this); // job is done, don't fire any more classes
+
+                            return clas.toBytecode();
+                        }
+                    } catch (Throwable t) {
+                        LFLogger.error(t.toString());
+                    }
+
                     return null;
                 }
-
-                try {
-                    clas.instrument(new ExprEditor() {
-                        public void edit(MethodCall m) throws CannotCompileException {
-                            if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                                    "getDX".equals(m.getMethodName()) &&
-                                    "()I".equalsIgnoreCase(m.getSignature())) {
-                                mouseDXYmatched = true;
-                                m.replace("$_ = 0;");
-                                LFLogger.info("Mouse.getDX() match!");
-
-                            } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                                    "getDY".equals(m.getMethodName()) &&
-                                    "()I".equalsIgnoreCase(m.getSignature())) {
-                                mouseDXYmatched = true;
-                                m.replace("$_ = 0;");
-                                LFLogger.info("Mouse.getDY() match!");
-                            }
-                        }
-                    });
-
-                    if (mouseDXYmatched) {
-                        mouseDXYmatched = false;
-                        inst.removeTransformer(this); // job is done, don't fire any more classes
-
-                        return clas.toBytecode();
-                    }
-                } catch (Throwable t) {
-                    LFLogger.error(t.toString());
-                }
-
-                return null;
-            }
-        });
+            });
+        }
 
         // Some versions refer to setNativeCursor within methods of the Minecraft class,
         // we need to account for that too
