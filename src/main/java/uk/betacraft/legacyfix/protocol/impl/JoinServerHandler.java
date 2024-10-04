@@ -28,12 +28,12 @@ public class JoinServerHandler extends HandlerBase {
         Matcher matcher = JOIN_SERVER_PATTERN.matcher(this.getURLString());
         if (!matcher.find()) {
             LFLogger.error("JoinServerHandler", "No match for join server URL :(");
-            return null;
+            return new ByteArrayInputStream("LF - No match for join server URL".getBytes());
         }
         String sessionId = matcher.group(8);
         String serverId = matcher.group(10);
 
-        String uuid = (String) LegacyFixAgent.getSettings().get("minecraft.user.uuid");
+        String uuid = System.getProperty("minecraft.user.uuid", "no-uuid");
         String accessToken;
         if (sessionId.contains(":"))
             accessToken = sessionId.split(":")[1];

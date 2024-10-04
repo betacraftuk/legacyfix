@@ -2,10 +2,7 @@ package uk.betacraft.legacyfix.protocol.http;
 
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
-import uk.betacraft.legacyfix.protocol.impl.HandlerBase;
-import uk.betacraft.legacyfix.protocol.impl.JoinServerHandler;
-import uk.betacraft.legacyfix.protocol.impl.ResourceIndexHandler;
-import uk.betacraft.legacyfix.protocol.impl.SkinHandler;
+import uk.betacraft.legacyfix.protocol.impl.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -23,7 +20,12 @@ public class Handler extends URLStreamHandler {
     private static final List<Class<? extends HandlerBase>> handlers = Arrays.asList(
             SkinHandler.class,
             ResourceIndexHandler.class,
-            JoinServerHandler.class
+            JoinServerHandler.class,
+            IndevAntiPiracyHandler.class,
+            BetaAntiPiracyHandler.class,
+            LevelListHandler.class,
+            LevelSaveHandler.class,
+            LevelLoadHandler.class
     );
 
     @Override
