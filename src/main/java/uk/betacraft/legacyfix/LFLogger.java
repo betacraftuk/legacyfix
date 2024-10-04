@@ -9,12 +9,16 @@ public class LFLogger {
         log("INFO", lines);
     }
 
-    public static void error(Patch patch, Exception e) {
-        StackTraceElement[] stackTraceElements = e.getStackTrace();
+    public static void error(Patch patch, Throwable t) {
+        error(patch.getId(), t);
+    }
+
+    public static void error(String component, Throwable t) {
+        StackTraceElement[] stackTraceElements = t.getStackTrace();
         String[] stackTraceStrings = new String[stackTraceElements.length + 2];
 
-        stackTraceStrings[0] = patch.getId();
-        stackTraceStrings[1] = e.getMessage();
+        stackTraceStrings[0] = component;
+        stackTraceStrings[1] = t.getMessage();
 
         for (int i = 0; i < stackTraceElements.length; i++) {
             stackTraceStrings[i + 2] = stackTraceElements[i].toString();

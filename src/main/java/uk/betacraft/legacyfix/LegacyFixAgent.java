@@ -1,10 +1,11 @@
 package uk.betacraft.legacyfix;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.json.JSONTokener;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.impl.*;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,9 +16,8 @@ public class LegacyFixAgent {
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
     private static final List<Patch> PATCHES = new ArrayList<Patch>();
 
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final HashMap<?, ?> RELEASE_INFO = GSON.fromJson(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/releaseInfo.json"))), HashMap.class);
-    public static final String VERSION = RELEASE_INFO.containsKey("version") ? (String) RELEASE_INFO.get("version") : "unknown";
+    private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/releaseInfo.json")))));
+    public static final String VERSION = RELEASE_INFO.optString("version", "unknown");
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         LFLogger.info("Loading build " + VERSION);
@@ -38,6 +38,7 @@ public class LegacyFixAgent {
                 new IndevSoundPatch(),
                 new BetaForgePatch(),
                 new ModloaderPatch(),
+                new GameDirPatch(),
                 new CloudPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
@@ -68,5 +69,13 @@ public class LegacyFixAgent {
 
     public static Map<String, Object> getSettings() {
         return SETTINGS;
+    }
+
+    public static boolean isDebug() {
+        return getSettings().containsKey("lf.debug");
+    }
+
+    public static String getGameDir() {
+        return getSettings().containsKey("lf.gameDir") ? (String) getSettings().get("lf.gameDir") : "minecraft";
     }
 }

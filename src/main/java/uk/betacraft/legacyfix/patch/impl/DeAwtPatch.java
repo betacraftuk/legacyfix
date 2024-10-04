@@ -39,9 +39,10 @@ public class DeAwtPatch extends Patch {
         }
         final String appletClassName = appletClass.getName();
 
+        CtField minecraftField = PatchHelper.findMinecraftField(pool);
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
-        if (minecraftClass == null) {
-            throw new PatchException("No main Minecraft class could be found");
+        if (minecraftField == null || minecraftClass == null) {
+            throw new PatchException("No main Minecraft field could be found");
         }
 
         CtField appletModeField = PatchHelper.findAppletModeField(pool);
@@ -59,7 +60,7 @@ public class DeAwtPatch extends Patch {
             "    parent = parent.getParent();" +
             "}" +
             // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
-            "$0." + minecraftClass.getName() + "." + appletModeField.getName() + " = false;"
+            "$0." + minecraftField.getName() + "." + appletModeField.getName() + " = false;"
         );
         // @formatter:on
 
@@ -224,10 +225,9 @@ public class DeAwtPatch extends Patch {
             "    while (org.lwjgl.opengl.Display.isCreated()) {" +
             "        int mcWidth = mcwidth.getInt($0.mc);" +
             "        int mcHeight = mcheight.getInt($0.mc);" +
-            "        if ((org.lwjgl.opengl.Display.getWidth() != mcWidth || org.lwjgl.opengl.Display.getHeight() != mcHeight)) {" +
-
-            "            int xtoset = org.lwjgl.opengl.Display.getWidth();" +
-            "            int ytoset = org.lwjgl.opengl.Display.getHeight();" +
+            "        int xtoset = org.lwjgl.opengl.Display.getWidth();" +
+            "        int ytoset = org.lwjgl.opengl.Display.getHeight();" +
+            "        if ((xtoset != mcWidth || ytoset != mcHeight)) {" +
 
             "            if (xtoset <= 0) { xtoset = 1; }" +
             "            if (ytoset <= 0) { ytoset = 1; }" +
@@ -323,13 +323,14 @@ public class DeAwtPatch extends Patch {
         // Hooks for LWJGL to set title, icons, and resizable status
         // and a part of Apple Silicon color patch
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
+        displayClass.defrost();
         CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{PatchHelper.stringClass});
 
         // On init
         // @formatter:off
         setTitleMethod.insertBefore(
             // Title
-            "$1 = \"" + LegacyFixAgent.getSettings().get("frameName") + "\";" +
+            "$1 = \"" + LegacyFixAgent.getSettings().get("lf.frameName") + "\";" +
 
             // Resizable
             "org.lwjgl.opengl.Display.setResizable(true);" +

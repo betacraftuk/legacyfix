@@ -19,6 +19,7 @@ public class PatchHelper {
     private static CtClass minecraftClass = null;
 
     private static CtField appletModeField = null;
+    private static CtField minecraftField = null;
 
     public static CtClass findMinecraftAppletClass(ClassPool pool) {
         if (minecraftAppletClass != null) {
@@ -58,11 +59,37 @@ public class PatchHelper {
 
                     minecraftClass = field.getType();
                     LFLogger.info("Found Minecraft class: " + minecraftClass.getName());
+                    break;
                 }
             }
         }
 
         return minecraftClass;
+    }
+
+    public static CtField findMinecraftField(ClassPool pool) throws NotFoundException {
+        if (minecraftField != null) {
+            return minecraftField;
+        }
+
+        if (minecraftAppletClass == null) {
+            findMinecraftAppletClass(pool);
+        }
+
+        for (CtField field : minecraftAppletClass.getDeclaredFields()) {
+            String className = field.getType().getName();
+
+            if (!className.equals("java.awt.Canvas") &&
+                    !className.equals("java.lang.Thread") &&
+                    !className.equals("long")) {
+
+                minecraftField = field;
+                LFLogger.info("Found Minecraft field: " + field.getName());
+                return field;
+            }
+        }
+
+        return minecraftField;
     }
 
     public static CtField findAppletModeField(ClassPool pool) throws NotFoundException {

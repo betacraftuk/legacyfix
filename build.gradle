@@ -19,7 +19,7 @@ configurations {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     library files('libs/javassist-java5.jar')
-    library files('libs/gson-java5-2.8.10.jar')
+    library files('libs/json-v20240303-SNAPSHOT.jar')
 }
 
 processResources {
