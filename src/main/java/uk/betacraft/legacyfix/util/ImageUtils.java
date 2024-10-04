@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 /**
  * use this for whatever you want
+ *
  * @author Moresteck
  */
 public class ImageUtils {
@@ -29,7 +30,7 @@ public class ImageUtils {
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         for (int i = 0; i < bufWidth; i++) {
             for (int j = 0; j < bufHeight; j++) {
-                if (j >= y && j < y + height && i >= x && i < x+width) {
+                if (j >= y && j < y + height && i >= x && i < x + width) {
                     img.setRGB(i - x, j - y, pixels[i][j]);
                 }
             }

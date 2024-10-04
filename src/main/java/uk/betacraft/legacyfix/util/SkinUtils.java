@@ -19,13 +19,13 @@ public class SkinUtils {
     // name->uuid requests have a rate limit, so here's cache
     public static Map<String, String> cacheNameToUUID = new HashMap<String, String>();
     public static Map<String, SkinData> cacheUUIDToSkin = new HashMap<String, SkinData>();
-    public static long rateLimitCooldown	= -1L;
+    public static long rateLimitCooldown = -1L;
 
-    public static final boolean OVERLAY_OUTER_HEAD_LAYER		= System.getProperties().containsKey("lf.OVERLAY_OUTER_HEAD_LAYER");
-    public static final boolean OVERLAY_OUTER_BODY_TO_BASE	= System.getProperties().containsKey("lf.OVERLAY_OUTER_BODY_TO_BASE");
-    public static final boolean ROTATE_BOTTOM_TEXTURES		= System.getProperties().containsKey("lf.ROTATE_BOTTOM_TEXTURES");
-    public static final boolean CONVERT_ALEX_TO_STEVE		= System.getProperties().containsKey("lf.CONVERT_ALEX_TO_STEVE");
-    public static final boolean SERVE_AS_64x32			= System.getProperties().containsKey("lf.SERVE_AS_64x32");
+    public static final boolean OVERLAY_OUTER_HEAD_LAYER = System.getProperties().containsKey("lf.OVERLAY_OUTER_HEAD_LAYER");
+    public static final boolean OVERLAY_OUTER_BODY_TO_BASE = System.getProperties().containsKey("lf.OVERLAY_OUTER_BODY_TO_BASE");
+    public static final boolean ROTATE_BOTTOM_TEXTURES = System.getProperties().containsKey("lf.ROTATE_BOTTOM_TEXTURES");
+    public static final boolean CONVERT_ALEX_TO_STEVE = System.getProperties().containsKey("lf.CONVERT_ALEX_TO_STEVE");
+    public static final boolean SERVE_AS_64x32 = System.getProperties().containsKey("lf.SERVE_AS_64x32");
 
     public static String getUUID(String username) {
         String cachedUUID = cacheNameToUUID.get(username);
@@ -90,7 +90,7 @@ public class SkinUtils {
 
             JSONObject capeObj = textures.getJSONObject("CAPE");
             if (capeObj != null) {
-                URL capeUrl	= new URL(capeObj.getString("url"));
+                URL capeUrl = new URL(capeObj.getString("url"));
 
                 cape = RequestUtil.readInputStream(capeUrl.openStream());
             } else {

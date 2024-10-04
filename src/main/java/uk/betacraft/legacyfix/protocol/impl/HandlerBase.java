@@ -16,13 +16,15 @@ public abstract class HandlerBase extends HttpURLConnection {
         super(u);
     }
 
-    public void disconnect() {}
+    public void disconnect() {
+    }
 
     public boolean usingProxy() {
         return false;
     }
 
-    public void connect() throws IOException {}
+    public void connect() throws IOException {
+    }
 
     public InputStream getInputStream() throws IOException {
         return this.stream;
