@@ -5,6 +5,8 @@ import uk.betacraft.legacyfix.LFLogger;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,5 +75,11 @@ public class LevelLoadHandler extends HandlerBase {
         }
 
         return buffer.toByteArray();
+    }
+
+    public static List<Pattern> regexPatterns() {
+        return Arrays.asList(
+                LEVEL_LOAD_PATTERN
+        );
     }
 }

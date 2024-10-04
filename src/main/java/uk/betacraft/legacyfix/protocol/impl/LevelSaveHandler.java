@@ -4,6 +4,8 @@ import uk.betacraft.legacyfix.LFLogger;
 
 import java.io.*;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
@@ -87,5 +89,11 @@ public class LevelSaveHandler extends HandlerBase {
     @Override
     public OutputStream getOutputStream() throws IOException {
         return levelOutput;
+    }
+
+    public static List<Pattern> regexPatterns() {
+        return Arrays.asList(
+                LEVEL_SAVE_PATTERN
+        );
     }
 }
