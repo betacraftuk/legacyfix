@@ -6,6 +6,7 @@ import uk.betacraft.legacyfix.protocol.impl.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -28,6 +29,11 @@ public class Handler extends URLStreamHandler {
             LevelLoadHandler.class,
             Minecraft1_6AvailableHandler.class
     );
+
+    @Override
+    protected URLConnection openConnection(URL url, Proxy p) throws IOException {
+        return this.openConnection(url);
+    }
 
     @Override
     protected URLConnection openConnection(URL url) throws IOException {

@@ -1,7 +1,6 @@
 package uk.betacraft.legacyfix.util;
 
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -17,8 +16,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AssetUtils {
-    private static final String WORKING_DIR = System.getProperty("user.home");
-    private static final File RESOURCES_DIR = new File(WORKING_DIR, "minecraft/resources/");
+    private static final File ASSETS_DIR = new File(LegacyFixAgent.getAssetsDir());
+    private static final File RESOURCES_DIR = new File(LegacyFixAgent.getGameDir(), "resources/");
+
+    public static List<AssetObject> assets = new LinkedList<AssetObject>();
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
         return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream((String) LegacyFixAgent.getSettings().get("lf.assetIndex"))))).getJSONObject("objects");
@@ -30,7 +31,7 @@ public class AssetUtils {
 
             JSONObject assetIndex = getAssetIndex();
 
-            final List<AssetObject> assets = getAssets(assetIndex);
+            initAssets(assetIndex);
 
             for (AssetObject assetObject : assets) {
                 txtIndex.append("\n").append(assetObject.key).append(",").append(assetObject.size).append(",0");
@@ -38,7 +39,7 @@ public class AssetUtils {
 
             return txtIndex.substring(1);
         } catch (Throwable t) {
-            LFLogger.error("AssetUtils", t);
+            LFLogger.error("generateTxtIndex", t);
             return "";
         }
     }
@@ -51,7 +52,7 @@ public class AssetUtils {
 
             JSONObject assetIndex = getAssetIndex();
 
-            final List<AssetObject> assets = getAssets(assetIndex);
+            initAssets(assetIndex);
 
             for (AssetObject assetObject : assets) {
                 rootElement.appendChild(makeContentsNode(xmlDocument, assetObject.key, assetObject.size));
@@ -63,7 +64,7 @@ public class AssetUtils {
 
             return stringWriter.toString();
         } catch (Throwable t) {
-            LFLogger.error("AssetUtils", t);
+            LFLogger.error("generateXmlIndex", t);
             return "";
         }
     }
@@ -91,7 +92,7 @@ public class AssetUtils {
             try {
                 list.add(localAsset.getCanonicalFile());
             } catch (IOException e) {
-                LFLogger.error("AssetUtils", e);
+                LFLogger.error("recursePaths", e);
             }
 
             if (localAsset.isDirectory())
@@ -101,14 +102,15 @@ public class AssetUtils {
         return list;
     }
 
-    public static List<AssetObject> getAssets(JSONObject assetIndex) {
-        List<AssetObject> assets = new LinkedList<AssetObject>();
+    public static void initAssets(JSONObject assetIndex) {
+        assets.clear();
         try {
             List<File> localAssetsToSkip = new LinkedList<File>();
 
             for (String key : assetIndex.keySet()) {
                 JSONObject assetObject = assetIndex.getJSONObject(key);
 
+                final String hash = assetObject.getString("hash");
                 long size;
 
                 // Use local file if it overrides the asset at its path
@@ -116,12 +118,16 @@ public class AssetUtils {
 
                 localAssetsToSkip.add(localAsset);
 
-                if (localAsset.exists() && localAsset.isFile())
+                final String path;
+                if (localAsset.exists() && localAsset.isFile()) {
                     size = localAsset.length();
-                else
+                    path = localAsset.getPath();
+                } else {
                     size = assetObject.getLong("size");
+                    path = new File(ASSETS_DIR, "objects/" + hash.substring(0, 2) + "/" + hash).getPath();
+                }
 
-                assets.add(new AssetObject(key, size));
+                assets.add(new AssetObject(key, size, path));
             }
 
             // Add the remaining (additional) local asset files
@@ -130,25 +136,97 @@ public class AssetUtils {
             localAssets.removeAll(localAssetsToSkip);
 
             for (File additionalAsset : localAssets) {
+                if (additionalAsset.isDirectory())
+                    continue;
 
-                String key = additionalAsset.getCanonicalPath().substring(RESOURCES_DIR.getCanonicalPath().length());
+                String key = additionalAsset.getCanonicalPath().substring(RESOURCES_DIR.getCanonicalPath().length() + 1).replace("\\", "/");
 
-                assets.add(new AssetObject(key, additionalAsset.length()));
+                if (key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini"))
+                    continue;
+
+                assets.add(new AssetObject(key, additionalAsset.length(), additionalAsset.getPath()));
             }
+
+            System.setProperty("assets-loaded", "true");
         } catch (Throwable t) {
-            LFLogger.error("AssetUtils", t);
+            LFLogger.error("getAssets", t);
+        }
+    }
+
+    // Used by GameDirPatch
+    public static String getAssetPathFromExpectedPath(String path) {
+        AssetObject asset = getAssetFromExpectedPath(path);
+        if (asset != null) {
+            return asset.path;
+        }
+        return null;
+    }
+
+    // Used by GameDirPatch
+    public static long getAssetSizeFromExpectedPath(String path) {
+        AssetObject asset = getAssetFromExpectedPath(path);
+        if (asset != null) {
+            return asset.size;
+        }
+        return -1L;
+    }
+
+    // Used by GameDirPatch
+    public static boolean isExpectedAssetsDir(String path) {
+        return new File(LegacyFixAgent.getGameDir(), "assets").getPath().equals(path);
+    }
+
+    // Used by GameDirPatch
+    public static File[] getAssetsAsFileArray() {
+        if (assets.isEmpty()) {
+            try {
+                initAssets(getAssetIndex());
+            } catch (FileNotFoundException e) {
+                LFLogger.error("getAssetsAsFileArray", e);
+            }
         }
 
-        return assets;
+        List<File> listFiles = new LinkedList<File>();
+
+        for (AssetObject asset : assets) {
+            listFiles.add(new File(new File(LegacyFixAgent.getGameDir(), "assets"), asset.key));
+        }
+
+        return listFiles.toArray(new File[0]);
+    }
+
+    public static AssetObject getAssetFromExpectedPath(String path) {
+        if (assets.isEmpty()) {
+            try {
+                initAssets(getAssetIndex());
+            } catch (FileNotFoundException e) {
+                LFLogger.error("getAssetFromExpectedPath", e);
+            }
+        }
+
+        String winEscaped = path.replace("\\", "/");
+
+        for (AssetObject asset : assets) {
+            if (winEscaped.endsWith(asset.key)) {
+                return asset;
+            }
+        }
+
+        return null;
     }
 
     public static class AssetObject {
         public final String key;
         public final long size;
+        public final String path;
 
-        public AssetObject(String key, long size) {
+        public AssetObject(String key, long size, String path) {
             this.key = key;
             this.size = size;
+            this.path = path;
+
+            if (LegacyFixAgent.isDebug())
+                LFLogger.info("AssetUtils", key + ", " + size + ", " + path);
         }
     }
 }
