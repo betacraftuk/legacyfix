@@ -30,6 +30,7 @@ public class LegacyFixAgent {
         }
 
         PATCHES.addAll(Arrays.asList(
+                new PreclassicPatch(),
                 new DisableControllersPatch(),
                 new TexturePackFolderPatch(),
                 new Java6PreclassicPatch(),
@@ -38,10 +39,11 @@ public class LegacyFixAgent {
                 new IndevSoundPatch(),
                 new BetaForgePatch(),
                 new ModloaderPatch(),
+                new BitDepthPatch(),
                 new GameDirPatch(),
-                new CloudPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
+                new VSyncPatch(),
                 new C15aPatch()
         ));
 
@@ -71,15 +73,19 @@ public class LegacyFixAgent {
         return SETTINGS;
     }
 
+    public static String getSetting(String key, String alt) {
+        return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
+    }
+
     public static boolean isDebug() {
         return getSettings().containsKey("lf.debug");
     }
 
     public static String getGameDir() {
-        return getSettings().containsKey("lf.gameDir") ? (String) getSettings().get("lf.gameDir") : "minecraft";
+        return getSetting("lf.gameDir", "minecraft");
     }
 
     public static String getAssetsDir() {
-        return getSettings().containsKey("lf.assetsDir") ? (String) getSettings().get("lf.assetsDir") : "assets";
+        return getSetting("lf.assetsDir", "assets");
     }
 }

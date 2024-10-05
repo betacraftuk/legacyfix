@@ -20,7 +20,7 @@ public class IndevAntiPiracyHandler extends HandlerBase {
 
     public InputStream getInputStream() throws IOException {
         return new ByteArrayInputStream(
-                ("true".equals(LegacyFixAgent.getSettings().get("lf.demo")) ? "no" : "42069").getBytes()
+                ("true".equals(LegacyFixAgent.getSetting("lf.demo", "false")) ? "no" : "42069").getBytes()
         );
     }
 

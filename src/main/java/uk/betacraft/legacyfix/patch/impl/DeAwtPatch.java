@@ -330,7 +330,7 @@ public class DeAwtPatch extends Patch {
         // @formatter:off
         setTitleMethod.insertBefore(
             // Title
-            "$1 = \"" + LegacyFixAgent.getSettings().get("lf.frameName") + "\";" +
+            "$1 = \"" + LegacyFixAgent.getSetting("lf.frameName", "Minecraft") + "\";" +
 
             // Resizable
             "org.lwjgl.opengl.Display.setResizable(true);" +

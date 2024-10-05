@@ -54,7 +54,7 @@ public class MousePatch extends Patch {
             );
 
             // Mouse handling changed sometime during alpha
-            boolean invert = "invert".equals(LegacyFixAgent.getSettings().get("invertMouse"));
+            boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", "no"));
             LFLogger.info("MOUSE Y INVERT: " + invert);
 
             if (mouseHelperMethods.length == 2) {

@@ -16,7 +16,7 @@ public class BetaAntiPiracyHandler extends HandlerBase {
     }
 
     public int getResponseCode() {
-        return "true".equals(LegacyFixAgent.getSettings().get("lf.demo")) ? 400 : 200;
+        return "true".equals(LegacyFixAgent.getSetting("lf.demo", "false")) ? 400 : 200;
     }
 
     public static List<Pattern> regexPatterns() {
