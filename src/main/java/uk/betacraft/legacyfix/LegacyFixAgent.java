@@ -78,4 +78,8 @@ public class LegacyFixAgent {
     public static String getGameDir() {
         return getSettings().containsKey("lf.gameDir") ? (String) getSettings().get("lf.gameDir") : "minecraft";
     }
+
+    public static String getAssetsDir() {
+        return getSettings().containsKey("lf.assetsDir") ? (String) getSettings().get("lf.assetsDir") : "assets";
+    }
 }

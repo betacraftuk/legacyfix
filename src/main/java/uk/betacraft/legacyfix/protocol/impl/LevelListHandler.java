@@ -10,9 +10,11 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
 public class LevelListHandler extends HandlerBase {
-    public static final String EMPTY_LEVEL = "-";
-    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelsDir", LegacyFixAgent.getGameDir() + "/levels");
     private static final Pattern LEVEL_LIST_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/game\\/listmaps\\.jsp\\?user=(.+)?)");
+
+    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelsDir", LegacyFixAgent.getGameDir() + "/levels");
+
+    public static final String EMPTY_LEVEL = "-";
 
     public LevelListHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);

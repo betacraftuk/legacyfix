@@ -25,7 +25,8 @@ public class Handler extends URLStreamHandler {
             BetaAntiPiracyHandler.class,
             LevelListHandler.class,
             LevelSaveHandler.class,
-            LevelLoadHandler.class
+            LevelLoadHandler.class,
+            Minecraft1_6AvailableHandler.class
     );
 
     @Override
