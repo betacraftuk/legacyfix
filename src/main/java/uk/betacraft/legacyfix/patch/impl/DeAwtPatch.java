@@ -120,7 +120,7 @@ public class DeAwtPatch extends Patch {
         // TODO: Investigate another way to patch early classic saving
         final int documentPort = minecraftClass.getPackageName().startsWith("com") ? 80 : -1;
         getDocumentBaseMethod.insertBefore(
-            "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
+                "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(javaAppletClass.getName()), javaAppletClass.toBytecode()));
