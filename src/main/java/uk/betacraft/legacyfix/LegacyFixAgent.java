@@ -30,12 +30,12 @@ public class LegacyFixAgent {
         }
 
         PATCHES.addAll(Arrays.asList(
-                new PreclassicPatch(),
                 new DisableControllersPatch(),
                 new TexturePackFolderPatch(),
                 new Java6PreclassicPatch(),
                 new Java6ReferencesPatch(),
                 new SeecretSaturdayPatch(),
+                new LWJGLFramePatch(),
                 new IndevSoundPatch(),
                 new BetaForgePatch(),
                 new ModloaderPatch(),
