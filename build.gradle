@@ -37,7 +37,7 @@ jar {
 
     manifest {
         attributes(
-                'Main-Class': 'uk.betacraft.legacyfix.LegacyFix',
+                'Main-Class': 'uk.betacraft.legacyfix.LegacyFixLauncher',
                 'Premain-Class': 'uk.betacraft.legacyfix.LegacyFixAgent',
                 'Can-Redefine-Classes': 'true',
                 'Can-Retransform-Classes': 'true'

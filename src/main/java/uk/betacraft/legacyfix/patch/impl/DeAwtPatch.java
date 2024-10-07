@@ -107,11 +107,11 @@ public class DeAwtPatch extends Patch {
 
         // @formatter:off
         getParameterMethod.setBody(
-                "{" +
-                "    Class launcherClass = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-                "    java.lang.reflect.Method method = launcherClass.getMethod(\"getValue\", new Class[] {String.class, String.class});" +
-                "    return method.invoke(null, new Object[] {$1, null});" +
-                "}"
+            "{" +
+            "    Class launcherClass = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "    java.lang.reflect.Method method = launcherClass.getMethod(\"getValue\", new Class[] {String.class, String.class});" +
+            "    return method.invoke(null, new Object[] {$1, null});" +
+            "}"
         );
         // @formatter:on
 
@@ -119,9 +119,11 @@ public class DeAwtPatch extends Patch {
 
         // TODO: Investigate another way to patch early classic saving
         final int documentPort = minecraftClass.getPackageName().startsWith("com") ? 80 : -1;
+        // @formatter:off
         getDocumentBaseMethod.insertBefore(
-                "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
+            "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
         );
+        // @formatter:on
 
         inst.redefineClasses(new ClassDefinition(Class.forName(javaAppletClass.getName()), javaAppletClass.toBytecode()));
 
