@@ -19,6 +19,8 @@ public class LegacyFixAgent {
     private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/releaseInfo.json")))));
     public static final String VERSION = RELEASE_INFO.optString("version", "unknown");
 
+    private static Boolean debug;
+
     public static void premain(String agentArgs, final Instrumentation inst) {
         LFLogger.info("Loading build " + VERSION);
 
@@ -78,7 +80,10 @@ public class LegacyFixAgent {
     }
 
     public static boolean isDebug() {
-        return getSettings().containsKey("lf.debug");
+        if (debug == null)
+            debug = getSettings().containsKey("lf.debug");
+
+        return debug;
     }
 
     public static String getGameDir() {

@@ -10,7 +10,6 @@ import javassist.bytecode.ConstPool;
 import javassist.bytecode.Opcode;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
-import javassist.expr.NewExpr;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
@@ -19,7 +18,6 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
 import uk.betacraft.legacyfix.util.IconUtils;
 
 public class DeAwtPatch extends Patch {
-    private String canvasClassName;
     private Exception thrown;
 
     public DeAwtPatch() {
@@ -34,11 +32,10 @@ public class DeAwtPatch extends Patch {
             LFLogger.error(this, e);
         }
 
-        CtClass appletClass = PatchHelper.findMinecraftAppletClass(pool);
-        if (appletClass == null) {
+        CtClass minecraftAppletClass = PatchHelper.findMinecraftAppletClass(pool);
+        if (minecraftAppletClass == null) {
             throw new PatchException("No applet class could be found");
         }
-        final String appletClassName = appletClass.getName();
 
         CtField minecraftField = PatchHelper.findMinecraftField(pool);
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
@@ -47,33 +44,51 @@ public class DeAwtPatch extends Patch {
         }
 
         CtField appletModeField = PatchHelper.findAppletModeField(pool);
-        CtMethod initMethod = appletClass.getDeclaredMethod("init");
+        CtMethod initMethod = minecraftAppletClass.getDeclaredMethod("init");
 
         // @formatter:off
         initMethod.insertAfter(
-            // Dispose of all AWT/Swing components
-            "java.awt.Component parent = $0;" +
-            "while (parent != null) {" +
-            "    parent.setVisible(false);" +
-            "    if (parent instanceof java.awt.Frame) {" +
-            "        ((java.awt.Frame)parent).dispose();" +
-            "    }" +
-            "    parent = parent.getParent();" +
-            "}" +
             // Set 'appletMode' to 'false' so the game handles LWJGL Display correctly
-            "$0." + minecraftField.getName() + "." + appletModeField.getName() + " = false;"
+            "$0." + minecraftField.getName() + "." + appletModeField.getName() + " = false;" +
+            // Start Minecraft
+            "Thread mcThread = new Thread($0." + minecraftField.getName() + ", \"Minecraft main thread\");" +
+            "mcThread.start();"
         );
         // @formatter:on
 
-        // Take the canvas class name to later edit out its removeNotify() method
-        // The method relies on AWT/Swing components, so it has to be hijacked
+        // Remove references to AWT
         initMethod.instrument(new ExprEditor() {
-            public void edit(NewExpr m) {
+            public void edit(MethodCall mc) throws CannotCompileException {
                 try {
-                    if (m.getConstructor().getLongName().contains("(" + appletClassName + ")") &&
-                            m.getSignature().equals("(L" + appletClassName.replace(".", "/") + ";)V")) {
-                        canvasClassName = m.getClassName();
-                        LFLogger.info("Found Canvas class name: " + canvasClassName);
+                    if ("java.awt.Container".equals(mc.getMethod().getDeclaringClass().getName())) {
+                        if ("setLayout".equals(mc.getMethodName())) {
+                            if (LegacyFixAgent.isDebug())
+                                LFLogger.info("deAWT", "Found call to setLayout(), erasing");
+
+                            mc.replace("{}");
+                        } else if ("add".equals(mc.getMethodName())) {
+                            if (LegacyFixAgent.isDebug())
+                                LFLogger.info("deAWT", "Found call to add(), erasing");
+
+                            mc.replace("{}");
+                        } else if ("validate".equals(mc.getMethodName())) {
+                            if (LegacyFixAgent.isDebug())
+                                LFLogger.info("deAWT", "Found call to validate(), erasing");
+
+                            mc.replace("{}");
+                        }
+                    } else if ("java.awt.Component".equals(mc.getMethod().getDeclaringClass().getName())) {
+                        if ("setFocusable".equals(mc.getMethodName())) {
+                            if (LegacyFixAgent.isDebug())
+                                LFLogger.info("deAWT", "Found call to setFocusable(), erasing");
+
+                            mc.replace("{}");
+                        } else if ("setFocusTraversalKeysEnabled".equals(mc.getMethodName())) {
+                            if (LegacyFixAgent.isDebug())
+                                LFLogger.info("deAWT", "Found call to setFocusTraversalKeysEnabled(), erasing");
+
+                            mc.replace("{}");
+                        }
                     }
                 } catch (NotFoundException e) {
                     DeAwtPatch.this.thrown = e;
@@ -85,8 +100,30 @@ public class DeAwtPatch extends Patch {
             throw this.thrown;
         }
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(appletClassName), appletClass.toBytecode()));
+        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftAppletClass.getName()), minecraftAppletClass.toBytecode()));
 
+        CtClass javaAppletClass = pool.get("java.applet.Applet");
+        CtMethod getParameterMethod = javaAppletClass.getDeclaredMethod("getParameter");
+
+        // @formatter:off
+        getParameterMethod.setBody(
+                "{" +
+                "    Class launcherClass = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                "    java.lang.reflect.Method method = launcherClass.getMethod(\"getValue\", new Class[] {String.class, String.class});" +
+                "    return method.invoke(null, new Object[] {$1, null});" +
+                "}"
+        );
+        // @formatter:on
+
+        CtMethod getDocumentBaseMethod = javaAppletClass.getDeclaredMethod("getDocumentBase");
+
+        // TODO: Investigate another way to patch early classic saving
+        final int documentPort = minecraftClass.getPackageName().startsWith("com") ? 80 : -1;
+        getDocumentBaseMethod.insertBefore(
+            "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
+        );
+
+        inst.redefineClasses(new ClassDefinition(Class.forName(javaAppletClass.getName()), javaAppletClass.toBytecode()));
 
         // TODO: Investigate if this is at all useful in resizing versions before in-0111
 //        CtClass guiScreenClass = null;
@@ -189,32 +226,43 @@ public class DeAwtPatch extends Patch {
                         mc.replace("$_ = org.lwjgl.opengl.Display." + mc.getMethodName() + "();");
                     }
                 } catch (NotFoundException e) {
-                    LFLogger.error("DeAwt.minecraftClass", e);
+                    DeAwtPatch.this.thrown = e;
                 }
             }
         });
 
-        CtConstructor minecraftConstructor = minecraftClass.getConstructors()[0];
+        if (this.thrown != null) {
+            throw this.thrown;
+        }
 
-        // Nullify Canvas/MinecraftApplet
-        // The typical formula of a Minecraft constructor goes like this:
+        // Nullify Canvas & MinecraftApplet
+        CtConstructor minecraftConstructor = minecraftClass.getConstructors()[0];
+        // Typical parameters of a Minecraft class constructor go like this:
         //  Component, Canvas, MinecraftApplet, int, int, boolean
         CtClass[] paramTypes = minecraftConstructor.getParameterTypes();
 
+        int intCount = 0;
+        String width = LegacyFixAgent.getSetting("lf.width", "854");
+        String height = LegacyFixAgent.getSetting("lf.height", "480");
+        String fullscreen = LegacyFixAgent.getSetting("lf.fullscreen", "false");
+
         for (int i = 0; i < paramTypes.length; i++) {
             String className = paramTypes[i].getName();
-            // If we're at int already, it's done
+
+            // Resolution
             if (className.equals("int")) {
-                break;
+                intCount++;
+
+                minecraftConstructor.insertBefore("$" + (i + 1) + " = " + (intCount == 1 ? width : height) + ";");
             }
 
-            // Nullify Canvas
-            if (className.equals("java.awt.Canvas") ||
-                    // Only nullify MinecraftApplet if it's not a Classic version
-                    // TODO: Replace this with removing the www.minecraft.net check in loadLevel()
-                    ((!appletClassName.startsWith("com.mojang") && pool.getOrNull("com.a.a.a") == null)
-                            && className.equals(appletClassName))) {
+            // Fullscreen
+            if (className.equals("boolean")) {
+                minecraftConstructor.insertBefore("$" + (i + 1) + " = " + fullscreen + ";");
+            }
 
+            // Nullify Canvas & MinecraftApplet
+            if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
                 minecraftConstructor.insertBefore("$" + (i + 1) + " = null;");
             }
         }
@@ -232,47 +280,64 @@ public class DeAwtPatch extends Patch {
             while (codeIterator.hasNext()) {
                 int pos = codeIterator.next();
 
-                if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                        codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                        codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
-                        codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
-                    continue;
-                }
-
-                final int futurePos = pos + 8;
-                // A second ALOAD appears in triggerFullscreen(), IFNE appears in the runGameLoop() method
-                if (codeIterator.byteAt(futurePos) != Opcode.ALOAD_0 &&
-                        codeIterator.byteAt(futurePos + 3) != Opcode.IFNE) {
-                    continue;
-                }
-
-                String refType = runConstPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
-                if (!"Ljava/awt/Canvas;".equals(refType))
-                    continue;
-
-                // Erase the check
-                for (int i = 0; i < 7; i++) {
-                    codeIterator.writeByte(Opcode.NOP, pos + i);
-                }
+                eraseCanvasReferences(codeIterator, runConstPool, pos);
+                eraseAppletReferences(codeIterator, runConstPool, pos, minecraftAppletClass);
             }
         }
 
-        byte[] minecraftClassBytes = minecraftClass.toBytecode();
-        minecraftClass.defrost();
-        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClassBytes));
+        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+    }
 
-        // deAWT Canvas
-        // Stop all calls from the canvas when it gets removed
-        canvasClassName = canvasClassName.replace("/", ".");
-        CtClass canvasClass = pool.get(canvasClassName);
-        CtMethod canvasRemoveNotifyMethod = canvasClass.getDeclaredMethod("removeNotify");
-        // @formatter:off
-        canvasRemoveNotifyMethod.setBody(
-            "{" +
-            "    super.removeNotify();" +
-            "}"
-        );
-        // @formatter:on
-        inst.redefineClasses(new ClassDefinition(Class.forName(canvasClassName), canvasClass.toBytecode()));
+    private void eraseCanvasReferences(CodeIterator codeIterator, ConstPool constPool, int pos) {
+        if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
+                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
+            return;
+        }
+
+        final int futurePos = pos + 8;
+        // A second ALOAD appears in triggerFullscreen(), IFNE appears in the runGameLoop() method
+        if (codeIterator.byteAt(futurePos) != Opcode.ALOAD_0 &&
+                codeIterator.byteAt(futurePos + 3) != Opcode.IFNE) {
+            return;
+        }
+
+        String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
+        if (!"Ljava/awt/Canvas;".equals(refType))
+            return;
+
+        // Erase the check
+        for (int i = 0; i < 7; i++) {
+            codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
+    }
+
+    private void eraseAppletReferences(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+        // This check always appears at the start of the method
+        if (pos != 0)
+            return;
+
+        if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
+                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0 ||
+                codeIterator.byteAt(pos + 8) != Opcode.GETFIELD ||
+                codeIterator.byteAt(pos + 11) != Opcode.INVOKEVIRTUAL) {
+            return;
+        }
+
+        String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
+        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType))
+            return;
+
+        String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 12));
+        if (!"getDocumentBase".equals(refName))
+            return;
+
+        // Erase the check
+        for (int i = 0; i < 81; i++) {
+            codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
     }
 }
