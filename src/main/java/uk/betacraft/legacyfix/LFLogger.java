@@ -25,6 +25,11 @@ public class LFLogger {
         }
 
         error(stackTraceStrings);
+
+        if (t.getCause() != null) {
+            error("Caused by:");
+            error(component, t.getCause());
+        }
     }
 
     public static void error(String... lines) {
