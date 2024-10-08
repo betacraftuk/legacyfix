@@ -363,7 +363,7 @@ public class DeAwtPatch extends Patch {
 
         if (codeIterator.byteAt(pos) != Opcode.NEW ||
                 (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
-                codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
+                        codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
             return;
         }
 
