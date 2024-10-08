@@ -42,11 +42,11 @@ public class LegacyFixAgent {
                 new BetaForgePatch(),
                 new ModloaderPatch(),
                 new BitDepthPatch(),
+                new ClassicPatch(),
                 new GameDirPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
-                new VSyncPatch(),
-                new C15aPatch()
+                new VSyncPatch()
         ));
 
         List<String> patchStates = new ArrayList<String>();

@@ -37,6 +37,9 @@ public class DeAwtPatch extends Patch {
             throw new PatchException("No applet class could be found");
         }
 
+        if (minecraftAppletClass.isFrozen())
+            minecraftAppletClass.defrost();
+
         CtField minecraftField = PatchHelper.findMinecraftField(pool);
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
         if (minecraftField == null || minecraftClass == null) {
@@ -117,11 +120,9 @@ public class DeAwtPatch extends Patch {
 
         CtMethod getDocumentBaseMethod = javaAppletClass.getDeclaredMethod("getDocumentBase");
 
-        // TODO: Investigate another way to patch early classic saving
-        final int documentPort = minecraftClass.getPackageName().startsWith("com") ? 80 : -1;
         // @formatter:off
         getDocumentBaseMethod.insertBefore(
-            "return new java.net.URL(\"http\", \"www.minecraft.net\", " + documentPort + ", \"\");"
+            "return new java.net.URL(\"http://www.minecraft.net/\");"
         );
         // @formatter:on
 
