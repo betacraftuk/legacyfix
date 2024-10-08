@@ -7,6 +7,7 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.NotFoundException;
+import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.LFLogger;
 
 public class PatchHelper {
@@ -141,5 +142,13 @@ public class PatchHelper {
         }
 
         return mouseHelperClass;
+    }
+
+    public static boolean isString(ConstPool constPool, int ldcPos) {
+        return constPool.getTag(ldcPos) == ConstPool.CONST_String;
+    }
+
+    public static boolean isUtf8(ConstPool constPool, int ldcPos) {
+        return constPool.getTag(ldcPos) == ConstPool.CONST_Utf8;
     }
 }

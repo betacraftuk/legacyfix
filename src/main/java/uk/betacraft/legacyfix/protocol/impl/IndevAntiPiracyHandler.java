@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
 public class IndevAntiPiracyHandler extends HandlerBase {
-    private static final Pattern INDEV_ANTIPIRACY_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/game\\/\\?(.+)?)");
+    private static final Pattern INDEV_ANTIPIRACY_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/\\?(.+)?)");
 
     public IndevAntiPiracyHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);

@@ -10,6 +10,7 @@ import javassist.bytecode.CodeIterator;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.LFLogger;
+import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
@@ -58,7 +59,7 @@ public class ClassicPatch extends Patch {
         }
 
         int ldcPos = codeIterator.byteAt(pos + 5);
-        if (constPool.getTag(ldcPos) != ConstPool.CONST_String)
+        if (!PatchHelper.isString(constPool, ldcPos))
             return;
 
         String defaultString = constPool.getStringInfo(ldcPos);
@@ -80,10 +81,18 @@ public class ClassicPatch extends Patch {
 
             codeIterator.writeByte(serverRef, pos + 5);
             codeIterator.write16bit(port, pos + 7);
+
+            if (LegacyFixAgent.isDebug()) {
+                LFLogger.info("classicpatch", "Set server to join: " + server + ":" + port);
+            }
         } else {
             // Erase the call
             for (int i = 0; i < 12; i++) {
                 codeIterator.writeByte(Opcode.NOP, pos + i);
+            }
+
+            if (LegacyFixAgent.isDebug()) {
+                LFLogger.info("classicpatch", "Erased mc.setServer() method call from init()");
             }
         }
     }
@@ -107,7 +116,7 @@ public class ClassicPatch extends Patch {
         }
 
         int ldcPos = codeIterator.byteAt(pos + 14);
-        if (constPool.getTag(ldcPos) != ConstPool.CONST_String)
+        if (!PatchHelper.isString(constPool, ldcPos))
             return;
 
         String separatorString = constPool.getStringInfo(ldcPos);
@@ -136,6 +145,10 @@ public class ClassicPatch extends Patch {
         // Erase the port
         for (int i = 0; i < 15; i++) {
             codeIterator.writeByte(Opcode.NOP, pos + 13 + i);
+        }
+
+        if (LegacyFixAgent.isDebug()) {
+            LFLogger.info("classicpatch", "Erased minecraftUri port");
         }
     }
 }

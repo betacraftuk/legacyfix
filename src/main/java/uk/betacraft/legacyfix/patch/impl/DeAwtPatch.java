@@ -314,9 +314,18 @@ public class DeAwtPatch extends Patch {
         for (int i = 0; i < 7; i++) {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
+
+        if (LegacyFixAgent.isDebug()) {
+            LFLogger.info("deawt", "Erased Canvas references");
+        }
     }
 
     private void eraseAppletReferences(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+        eraseAppletReferencesClassic(codeIterator, constPool, pos, minecraftAppletClass);
+        eraseAppletReferencesIndev(codeIterator, constPool, pos);
+    }
+
+    private void eraseAppletReferencesClassic(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         // This check always appears at the start of the method
         if (pos != 0)
             return;
@@ -341,6 +350,51 @@ public class DeAwtPatch extends Patch {
         // Erase the check
         for (int i = 0; i < 81; i++) {
             codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
+
+        if (LegacyFixAgent.isDebug()) {
+            LFLogger.info("deawt", "Erased Classic applet references");
+        }
+    }
+
+    private void eraseAppletReferencesIndev(CodeIterator codeIterator, ConstPool constPool, int pos) {
+        if (codeIterator.getCodeLength() <= pos + 29)
+            return;
+
+        if (codeIterator.byteAt(pos) != Opcode.NEW ||
+                (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
+                codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
+            return;
+        }
+
+        // Support both LDC and LDC_W for modern mods support
+        String value;
+        if (codeIterator.byteAt(pos + 29) == Opcode.LDC && PatchHelper.isString(constPool, codeIterator.byteAt(pos + 30))) {
+            value = constPool.getStringInfo(codeIterator.byteAt(pos + 30));
+        } else if (codeIterator.byteAt(pos + 29) == Opcode.LDC_W && PatchHelper.isUtf8(constPool, codeIterator.u16bitAt(pos + 30))) {
+            value = constPool.getStringInfo(codeIterator.u16bitAt(pos + 30));
+        } else {
+            value = null;
+        }
+
+        if (!"?n=".equals(value))
+            return;
+
+        // Determine how far to erase
+        int eraseTo = -1;
+        for (int i = 0; i < codeIterator.getCodeLength() - pos; i++) {
+            if (codeIterator.byteAt(pos + i) == Opcode.IFEQ) {
+                eraseTo = i + 3;
+            }
+        }
+
+        // Erase the check
+        for (int i = 0; i < eraseTo; i++) {
+            codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
+
+        if (eraseTo != -1 && LegacyFixAgent.isDebug()) {
+            LFLogger.info("deawt", "Erased Indev applet references");
         }
     }
 }
