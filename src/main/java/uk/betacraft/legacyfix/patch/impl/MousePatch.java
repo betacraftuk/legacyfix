@@ -3,10 +3,12 @@ package uk.betacraft.legacyfix.patch.impl;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
@@ -28,28 +30,36 @@ public class MousePatch extends Patch {
     @Override
     public void apply(final Instrumentation inst) throws Exception {
         final CtClass mouseHelperClass = PatchHelper.findMouseHelperClass(pool);
+
         // @formatter:off
         if (mouseHelperClass != null) {
+            String[] deltaXYFieldNames = new String[2];
+            for (CtField field : mouseHelperClass.getDeclaredFields()) {
+                if (Modifier.isPublic(field.getModifiers()) && field.getType().getName().equals("int")) {
+                    deltaXYFieldNames[deltaXYFieldNames[0] == null ? 0 : 1] = field.getName();
+                }
+            }
+
             CtMethod[] mouseHelperMethods = mouseHelperClass.getDeclaredMethods();
             mouseHelperMethods[0].setBody(
                 "{" +
                 "    org.lwjgl.input.Mouse.setGrabbed(true);" +
-                "    $0.a = 0;" +
-                "    $0.b = 0;" +
+                "    $0." + deltaXYFieldNames[0] + " = 0;" +
+                "    $0." + deltaXYFieldNames[1] + " = 0;" +
                 "}"
             );
 
             String body2 = (
                 "{" +
-                "    $0.a = org.lwjgl.input.Mouse.getDX();" +
-                "    $0.b = org.lwjgl.input.Mouse.getDY();" +
+                "    $0." + deltaXYFieldNames[0] + " = org.lwjgl.input.Mouse.getDX();" +
+                "    $0." + deltaXYFieldNames[1] + " = org.lwjgl.input.Mouse.getDY();" +
                 "}"
             );
 
             String body2invert = (
                 "{" +
-                "    $0.a = org.lwjgl.input.Mouse.getDX();" +
-                "    $0.b = -(org.lwjgl.input.Mouse.getDY());" +
+                "    $0." + deltaXYFieldNames[0] + " = org.lwjgl.input.Mouse.getDX();" +
+                "    $0." + deltaXYFieldNames[1] + " = -(org.lwjgl.input.Mouse.getDY());" +
                 "}"
             );
 
