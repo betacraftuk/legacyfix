@@ -47,6 +47,7 @@ public class ClassicPatch extends Patch {
     }
 
     public static void patch15aServerJoin(CodeIterator codeIterator, ConstPool constPool, int pos) {
+        // TODO: Make this use this.getParameter("server") instead of pulling from JVM arguments
         String server = System.getProperty("server", null);
         int port = Integer.parseInt(System.getProperty("port", "25565"));
 

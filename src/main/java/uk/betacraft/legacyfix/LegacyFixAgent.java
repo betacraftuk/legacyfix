@@ -31,6 +31,7 @@ public class LegacyFixAgent {
             }
         }
 
+        // TODO: inf-0321 patch
         PATCHES.addAll(Arrays.asList(
                 new DisableControllersPatch(),
                 new TexturePackFolderPatch(),

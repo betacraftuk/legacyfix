@@ -8,6 +8,8 @@ public class LegacyURLStreamHandlerFactory implements URLStreamHandlerFactory {
     public URLStreamHandler createURLStreamHandler(String protocol) {
         if ("http".equals(protocol)) {
             return new uk.betacraft.legacyfix.protocol.http.Handler();
+        } else if ("https".equals(protocol)) {
+            return new uk.betacraft.legacyfix.protocol.https.Handler();
         }
 
         return null;

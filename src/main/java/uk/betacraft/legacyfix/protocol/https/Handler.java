@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.protocol.http;
+package uk.betacraft.legacyfix.protocol.https;
 
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
@@ -29,6 +29,6 @@ public class Handler extends URLStreamHandler {
         if (lookup != null)
             return lookup;
         else
-            return new URL(null, url.toString(), new sun.net.www.protocol.http.Handler()).openConnection();
+            return new URL(null, url.toString(), new sun.net.www.protocol.https.Handler()).openConnection();
     }
 }
