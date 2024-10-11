@@ -253,17 +253,21 @@ public class DeAwtPatch extends Patch {
                 // Resolution
                 intCount++;
 
+                // @formatter:off
                 minecraftConstructor.insertBefore(
-                        "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-                                "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
-                                "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
+                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
+                    "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
                 );
+                // @formatter:on
             } else if (className.equals("boolean")) {
                 // Fullscreen
+                // @formatter:off
                 minecraftConstructor.insertBefore(
-                        "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-                                "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
+                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
                 );
+                // @formatter:on
             } else if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
                 // Nullify Canvas & MinecraftApplet
                 minecraftConstructor.insertBefore("$" + (i + 1) + " = null;");
