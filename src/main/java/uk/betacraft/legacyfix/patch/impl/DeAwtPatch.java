@@ -254,15 +254,15 @@ public class DeAwtPatch extends Patch {
                 intCount++;
 
                 minecraftConstructor.insertBefore(
-                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-                    "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
-                    "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
+                        "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                                "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
+                                "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
                 );
             } else if (className.equals("boolean")) {
                 // Fullscreen
                 minecraftConstructor.insertBefore(
-                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-                    "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
+                        "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                                "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
                 );
             } else if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
                 // Nullify Canvas & MinecraftApplet
