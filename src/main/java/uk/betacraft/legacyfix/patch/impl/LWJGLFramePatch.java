@@ -19,10 +19,6 @@ public class LWJGLFramePatch extends Patch {
 
     @Override
     public void apply(Instrumentation inst) throws PatchException, Exception {
-        String frameName = LegacyFixAgent.getSetting("lf.frameName", "Minecraft");
-        String width = LegacyFixAgent.getSetting("lf.width", "854");
-        String height = LegacyFixAgent.getSetting("lf.height", "480");
-
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
         if (displayClass.isFrozen())
             displayClass.defrost();
@@ -33,7 +29,8 @@ public class LWJGLFramePatch extends Patch {
         // @formatter:off
         setTitleMethod.insertBefore(
             // Title
-            "$1 = \"" + frameName + "\";" +
+            "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "$1 = (String) legacyfix.getMethod(\"getFrameName\", null).invoke(null, null);" +
 
             // Resizable
             "org.lwjgl.opengl.Display.setResizable(true);" +
@@ -61,8 +58,9 @@ public class LWJGLFramePatch extends Patch {
 
         // @formatter:off
         displayModeConstructor.insertBefore(
-            "$1 = " + width + ";" +
-            "$2 = " + height + ";"
+            "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "$1 = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
+            "$2 = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
         );
         // @formatter:on
 

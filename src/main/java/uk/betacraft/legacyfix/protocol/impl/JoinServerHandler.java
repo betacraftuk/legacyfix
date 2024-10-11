@@ -3,6 +3,7 @@ package uk.betacraft.legacyfix.protocol.impl;
 import org.json.JSONObject;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.util.Request;
 import uk.betacraft.util.RequestUtil;
 import uk.betacraft.util.WebData;
@@ -33,7 +34,7 @@ public class JoinServerHandler extends HandlerBase {
         String sessionId = matcher.group(8);
         String serverId = matcher.group(10);
 
-        String uuid = System.getProperty("minecraft.user.uuid", "no-uuid");
+        String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
         String accessToken;
         if (sessionId.contains(":"))
             accessToken = sessionId.split(":")[1];

@@ -245,27 +245,27 @@ public class DeAwtPatch extends Patch {
         CtClass[] paramTypes = minecraftConstructor.getParameterTypes();
 
         int intCount = 0;
-        String width = LegacyFixAgent.getSetting("lf.width", "854");
-        String height = LegacyFixAgent.getSetting("lf.height", "480");
-        String fullscreen = LegacyFixAgent.getSetting("lf.fullscreen", "false");
 
         for (int i = 0; i < paramTypes.length; i++) {
             String className = paramTypes[i].getName();
 
-            // Resolution
-            if (className.equals("int")) {
+            if (className.equals("int") && intCount == 0) {
+                // Resolution
                 intCount++;
 
-                minecraftConstructor.insertBefore("$" + (i + 1) + " = " + (intCount == 1 ? width : height) + ";");
-            }
-
-            // Fullscreen
-            if (className.equals("boolean")) {
-                minecraftConstructor.insertBefore("$" + (i + 1) + " = " + fullscreen + ";");
-            }
-
-            // Nullify Canvas & MinecraftApplet
-            if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
+                minecraftConstructor.insertBefore(
+                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
+                    "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
+                );
+            } else if (className.equals("boolean")) {
+                // Fullscreen
+                minecraftConstructor.insertBefore(
+                    "Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
+                );
+            } else if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
+                // Nullify Canvas & MinecraftApplet
                 minecraftConstructor.insertBefore("$" + (i + 1) + " = null;");
             }
         }

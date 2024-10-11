@@ -6,6 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -16,13 +17,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AssetUtils {
-    private static final File ASSETS_DIR = new File(LegacyFixAgent.getAssetsDir());
-    private static final File RESOURCES_DIR = new File(LegacyFixAgent.getGameDir(), "resources/");
+    private static final File ASSETS_DIR = new File(LegacyFixLauncher.getAssetsDir());
+    private static final File RESOURCES_DIR = new File(LegacyFixLauncher.getGameDir(), "resources/");
 
     public static List<AssetObject> assets = new LinkedList<AssetObject>();
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
-        return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream((String) LegacyFixAgent.getSettings().get("lf.assetIndex"))))).getJSONObject("objects");
+        return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(LegacyFixLauncher.getAssetIndexPath())))).getJSONObject("objects");
     }
 
     public static String generateTxtIndex() {
@@ -173,7 +174,7 @@ public class AssetUtils {
 
     // Used by GameDirPatch
     public static boolean isExpectedAssetsDir(String path) {
-        return new File(LegacyFixAgent.getGameDir(), "assets").getPath().equals(path);
+        return new File(LegacyFixLauncher.getGameDir(), "assets").getPath().equals(path);
     }
 
     // Used by GameDirPatch
@@ -189,7 +190,7 @@ public class AssetUtils {
         List<File> listFiles = new LinkedList<File>();
 
         for (AssetObject asset : assets) {
-            listFiles.add(new File(new File(LegacyFixAgent.getGameDir(), "assets"), asset.key));
+            listFiles.add(new File(new File(LegacyFixLauncher.getGameDir(), "assets"), asset.key));
         }
 
         return listFiles.toArray(new File[0]);

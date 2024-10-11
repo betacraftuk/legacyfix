@@ -1,6 +1,6 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
-import uk.betacraft.legacyfix.LegacyFixAgent;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class IndevAntiPiracyHandler extends HandlerBase {
 
     public InputStream getInputStream() throws IOException {
         return new ByteArrayInputStream(
-                ("true".equals(LegacyFixAgent.getSetting("lf.demo", "false")) ? "no" : "42069").getBytes()
+                (LegacyFixLauncher.hasKey("demo") ? "no" : "42069").getBytes()
         );
     }
 

@@ -86,12 +86,4 @@ public class LegacyFixAgent {
 
         return debug;
     }
-
-    public static String getGameDir() {
-        return getSetting("lf.gameDir", "minecraft");
-    }
-
-    public static String getAssetsDir() {
-        return getSetting("lf.assetsDir", "assets");
-    }
 }

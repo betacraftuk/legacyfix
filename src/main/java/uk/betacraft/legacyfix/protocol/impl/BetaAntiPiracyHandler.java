@@ -1,6 +1,6 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
-import uk.betacraft.legacyfix.LegacyFixAgent;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public class BetaAntiPiracyHandler extends HandlerBase {
     }
 
     public int getResponseCode() {
-        return "true".equals(LegacyFixAgent.getSetting("lf.demo", "false")) ? 400 : 200;
+        return LegacyFixLauncher.hasKey("demo") ? 400 : 200;
     }
 
     public static List<Pattern> regexPatterns() {
