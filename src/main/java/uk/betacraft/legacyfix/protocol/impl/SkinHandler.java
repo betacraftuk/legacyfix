@@ -16,7 +16,7 @@ public class SkinHandler extends HandlerBase {
     private static final String DOMAIN_PATTERN = "(http:\\/\\/(skins\\.minecraft\\.net|(www\\.)?minecraft\\.net|s3\\.amazonaws\\.com)";
 
     private static final Pattern SKIN_PATTERN = Pattern.compile(DOMAIN_PATTERN + "\\/(skin|MinecraftSkins)\\/(.+)?\\.png)");
-    private static final Pattern CAPE_PATTERN = Pattern.compile(DOMAIN_PATTERN + "\\/(cloak\\/get\\.jsp\\?user=|MinecraftCloaks\\/)(.+)?\\.png)");
+    private static final Pattern CAPE_PATTERN = Pattern.compile(DOMAIN_PATTERN + "\\/(cloak\\/get\\.jsp\\?user=|MinecraftCloaks\\/)([a-zA-Z0-9_+]+)?(?:\\.png)?)");
 
     private boolean isCapeRequest = false;
     private Pattern patternUsed;
