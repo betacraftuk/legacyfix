@@ -4,10 +4,7 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 import javassist.*;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.CodeIterator;
-import javassist.bytecode.ConstPool;
-import javassist.bytecode.Opcode;
+import javassist.bytecode.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
@@ -289,6 +286,7 @@ public class DeAwtPatch extends Patch {
 
                 eraseCanvasReferences(codeIterator, runConstPool, pos);
                 eraseAppletReferences(codeIterator, runConstPool, pos, minecraftAppletClass);
+                injectShutdownMethod(aMinecraftMethod, codeIterator, runConstPool, pos, minecraftClass);
             }
         }
 
@@ -321,6 +319,90 @@ public class DeAwtPatch extends Patch {
 
         if (LegacyFixAgent.isDebug()) {
             LFLogger.info("deawt", "Erased Canvas references");
+        }
+    }
+
+    private void injectShutdownMethod(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftClass) throws NotFoundException, CannotCompileException, BadBytecode {
+        if (codeIterator.byteAt(pos) != Opcode.INVOKESTATIC) {
+            return;
+        }
+
+        String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 1));
+        String refClassName = constPool.getMethodrefClassName(codeIterator.u16bitAt(pos + 1));
+        if (!"destroy".equals(refName))
+            return;
+
+        if (!"org.lwjgl.input.Keyboard".equals(refClassName))
+            return;
+
+        CtMethod runMethod = minecraftClass.getDeclaredMethod("run");
+
+        if (doesShutdownFinally(runMethod, shutdownMethod.getName()))
+            return;
+
+        addCatchToSetWorld(shutdownMethod, codeIterator, constPool);
+
+        runMethod.insertAfter("$0." + shutdownMethod.getName() + "();", true);
+
+        if (LegacyFixAgent.isDebug()) {
+            LFLogger.info("deawt", "Injected shutdown method call into run() as finally");
+        }
+    }
+
+    private boolean doesShutdownFinally(CtMethod runMethod, String shutdownMethodName) throws BadBytecode {
+        ConstPool constPool = runMethod.getMethodInfo().getConstPool();
+        CodeAttribute codeAttribute = runMethod.getMethodInfo().getCodeAttribute();
+        CodeIterator codeIterator = codeAttribute.iterator();
+
+        while (codeIterator.hasNext()) {
+            int pos = codeIterator.next();
+
+            if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
+                    codeIterator.byteAt(pos + 1) != Opcode.INVOKEVIRTUAL) {
+                continue;
+            }
+
+            String methodName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 2));
+            String methodSign = constPool.getMethodrefType(codeIterator.u16bitAt(pos + 2));
+            if (!methodName.equals(shutdownMethodName) || !"()V".equals(methodSign))
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void addCatchToSetWorld(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool) throws BadBytecode, CannotCompileException {
+        for (int pos = 0; pos < codeIterator.getCodeLength(); pos++) {
+            if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
+                    codeIterator.byteAt(pos + 1) != Opcode.ACONST_NULL ||
+                    codeIterator.byteAt(pos + 2) != Opcode.INVOKEVIRTUAL ||
+
+                    (codeIterator.byteAt(pos + 5) == Opcode.GOTO &&
+                            codeIterator.byteAt(pos + 8) == Opcode.ASTORE_1)
+            ) {
+                continue;
+            }
+
+            String methodName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 3));
+
+            // Erase the method call
+            for (int i = 0; i < 5; i++) {
+                codeIterator.writeByte(Opcode.NOP, pos + i);
+            }
+
+            // @formatter:off
+            shutdownMethod.insertAt(shutdownMethod.getMethodInfo().getLineNumber(pos),
+                "try {" +
+                "    $0." + methodName + "(null);" +
+                "} catch (Throwable t) {}"
+            );
+            // @formatter:on
+
+            if (LegacyFixAgent.isDebug()) {
+                LFLogger.info("deawt", "Wrapped setWorld call in a try-catch block in shutdown method");
+            }
         }
     }
 
