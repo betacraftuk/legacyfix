@@ -3,15 +3,13 @@ package uk.betacraft.legacyfix.patch.impl;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
+import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.CodeIterator;
-import javassist.bytecode.ConstPool;
-import javassist.bytecode.Opcode;
+import javassist.NotFoundException;
+import javassist.bytecode.*;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
@@ -39,69 +37,101 @@ public class ClassicPatch extends Patch {
         while (codeIterator.hasNext()) {
             int pos = codeIterator.next();
 
-            patch15aServerJoin(codeIterator, initConstPool, pos);
+            if (patch15aServerJoin(initMethod, codeIterator, initConstPool, pos)) {
+                CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
+
+                inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+            }
+
             patchMinecraftUriPort(codeIterator, initConstPool, pos);
         }
 
         inst.redefineClasses(new ClassDefinition(Class.forName(minecraftAppletClass.getName()), minecraftAppletClass.toBytecode()));
     }
 
-    public static void patch15aServerJoin(CodeIterator codeIterator, ConstPool constPool, int pos) {
-        // TODO: Make this use this.getParameter("server") instead of pulling from JVM arguments
-        String server = System.getProperty("server", null);
-        int port = Integer.parseInt(System.getProperty("port", "25565"));
-
+    private boolean patch15aServerJoin(CtMethod initMethod, CodeIterator codeIterator, ConstPool constPool, int pos) throws BadBytecode, CannotCompileException, NotFoundException {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
                 codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
                 codeIterator.byteAt(pos + 4) != Opcode.LDC ||
                 codeIterator.byteAt(pos + 6) != Opcode.SIPUSH ||
                 codeIterator.byteAt(pos + 9) != Opcode.INVOKEVIRTUAL) {
-            return;
+            return false;
         }
 
         int ldcPos = codeIterator.byteAt(pos + 5);
         if (!PatchHelper.isString(constPool, ldcPos))
-            return;
+            return false;
 
         String defaultString = constPool.getStringInfo(ldcPos);
         int defaultPort = codeIterator.s16bitAt(pos + 7);
 
         if (!"79.136.77.240".equals(defaultString))
-            return;
+            return false;
 
         if (defaultPort != 5565)
-            return;
+            return false;
 
-        String refType = constPool.getMethodrefType(codeIterator.u16bitAt(pos + 10));
-        if (!"(Ljava/lang/String;I)V".equals(refType))
-            return;
+        int methodRef = codeIterator.u16bitAt(pos + 10);
+        String setServerMethodSign = constPool.getMethodrefType(methodRef);
+        if (!"(Ljava/lang/String;I)V".equals(setServerMethodSign))
+            return false;
 
-        if (server != null) {
-            // Inject the intended server
-            int serverRef = constPool.addStringInfo(server);
+        // Erase setServer call
+        for (int i = 0; i < 12; i++) {
+            codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
 
-            codeIterator.writeByte(serverRef, pos + 5);
-            codeIterator.write16bit(port, pos + 7);
+        String minecraftFieldName = constPool.getFieldrefName(codeIterator.u16bitAt(pos + 2));
+        String setServerMethodName = constPool.getMethodrefName(methodRef);
 
-            if (LegacyFixAgent.isDebug()) {
-                LFLogger.info("classicpatch", "Set server to join: " + server + ":" + port);
-            }
-        } else {
-            // Erase the call
-            for (int i = 0; i < 12; i++) {
-                codeIterator.writeByte(Opcode.NOP, pos + i);
-            }
+        // Add setServer at the end of init(), so that username gets read first
+        // @formatter:off
+        initMethod.insertAfter(
+            "if ($0.getParameter(\"server\") != null && $0.getParameter(\"port\") != null) {" +
+            "    $0." + minecraftFieldName + "." + setServerMethodName + "($0.getParameter(\"server\"), Integer.parseInt($0.getParameter(\"port\")));" +
+            "}"
+        );
+        // @formatter:on
 
-            if (LegacyFixAgent.isDebug()) {
-                LFLogger.info("classicpatch", "Erased mc.setServer() method call from init()");
-            }
+        CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
+        CtMethod setServerMethod = minecraftClass.getDeclaredMethod(setServerMethodName,
+                new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
+
+        replaceHardcodedPort(setServerMethod);
+
+        if (LegacyFixAgent.isDebug()) {
+            LFLogger.info("classicpatch", "Patched c0.0.15a's init()");
+        }
+
+        return true;
+    }
+
+    /**
+     * Server port is hardcoded to 5565 while instantiating ConnectionManager
+     */
+    private void replaceHardcodedPort(CtMethod setServerMethod) throws BadBytecode {
+        CodeAttribute codeAttribute = setServerMethod.getMethodInfo().getCodeAttribute();
+        CodeIterator codeIterator = codeAttribute.iterator();
+
+        while (codeIterator.hasNext()) {
+            int pos = codeIterator.next();
+
+            if (codeIterator.byteAt(pos) != Opcode.SIPUSH)
+                continue;
+
+            if (codeIterator.s16bitAt(pos + 1) != 5565)
+                continue;
+
+            codeIterator.writeByte(Opcode.ILOAD_2, pos);
+            codeIterator.writeByte(Opcode.NOP, pos + 1);
+            codeIterator.writeByte(Opcode.NOP, pos + 2);
         }
     }
 
     /**
      * Patch for negative port number during saving
      */
-    public static void patchMinecraftUriPort(CodeIterator codeIterator, ConstPool constPool, int pos) {
+    private void patchMinecraftUriPort(CodeIterator codeIterator, ConstPool constPool, int pos) {
         if (codeIterator.byteAt(pos) != Opcode.INVOKESPECIAL ||
                 codeIterator.byteAt(pos + 3) != Opcode.ALOAD_0 ||
                 codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
