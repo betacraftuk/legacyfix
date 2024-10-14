@@ -32,7 +32,7 @@ public class ModloaderPatch extends Patch {
                 args.contains("--add-opens=java.base/java.util=ALL-UNNAMED") &&
                 args.contains("--add-opens=java.desktop/java.awt=ALL-UNNAMED") &&
                 args.contains("--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED") &&
-                args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")
+                args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge")
             )) {
                 LFLogger.error(
                     "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
