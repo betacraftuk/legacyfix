@@ -30,7 +30,7 @@ public class URLClassLoaderBridge extends URLClassLoader {
     }
 
     public URLClassLoaderBridge(ClassLoader loader) {
-        super(urls.toArray(new URL[0]), null);
+        super(urls.toArray(new URL[0]), loader);
     }
 
     void appendToClassPathForInstrumentation(String path) throws MalformedURLException {
