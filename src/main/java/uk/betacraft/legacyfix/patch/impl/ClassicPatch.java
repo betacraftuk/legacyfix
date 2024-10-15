@@ -11,6 +11,7 @@ import javassist.bytecode.*;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
 /**
@@ -24,6 +25,9 @@ public class ClassicPatch extends Patch {
     @Override
     public void apply(Instrumentation inst) throws Exception {
         CtClass minecraftAppletClass = PatchHelper.findMinecraftAppletClass(pool);
+        if (minecraftAppletClass == null)
+            throw new PatchException("No applet class could be found");
+
         if (minecraftAppletClass.isFrozen())
             minecraftAppletClass.defrost();
 

@@ -12,7 +12,6 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
-import uk.betacraft.legacyfix.util.IconUtils;
 
 public class DeAwtPatch extends Patch {
     private Exception thrown;
@@ -23,12 +22,6 @@ public class DeAwtPatch extends Patch {
 
     @Override
     public void apply(final Instrumentation inst) throws Exception {
-        try {
-            IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
-        } catch (Exception e) {
-            LFLogger.error(this, e);
-        }
-
         CtClass minecraftAppletClass = PatchHelper.findMinecraftAppletClass(pool);
         if (minecraftAppletClass == null) {
             throw new PatchException("No applet class could be found");

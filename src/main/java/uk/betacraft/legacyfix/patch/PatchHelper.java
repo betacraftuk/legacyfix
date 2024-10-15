@@ -51,7 +51,7 @@ public class PatchHelper {
 
         minecraftClass = pool.getOrNull("net.minecraft.client.Minecraft");
 
-        if (minecraftClass == null) {
+        if (minecraftClass == null && minecraftAppletClass != null) {
             for (CtField field : minecraftAppletClass.getDeclaredFields()) {
                 String className = field.getType().getName();
 
@@ -130,6 +130,10 @@ public class PatchHelper {
 
         if (minecraftClass == null) {
             findMinecraftClass(pool);
+        }
+
+        if (minecraftClass == null) {
+            return null;
         }
 
         CtField[] minecraftFields = minecraftClass.getDeclaredFields();
