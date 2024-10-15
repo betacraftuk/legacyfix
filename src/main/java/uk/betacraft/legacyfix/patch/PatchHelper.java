@@ -9,6 +9,7 @@ import javassist.CtField;
 import javassist.NotFoundException;
 import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.LFLogger;
+import uk.betacraft.legacyfix.LegacyFixAgent;
 
 public class PatchHelper {
     public static final CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
@@ -59,7 +60,9 @@ public class PatchHelper {
                         !className.equals("long")) {
 
                     minecraftClass = field.getType();
-                    LFLogger.info("Found Minecraft class: " + minecraftClass.getName());
+                    if (LegacyFixAgent.isDebug())
+                        LFLogger.info("Found Minecraft class: " + minecraftClass.getName());
+
                     break;
                 }
             }
@@ -85,7 +88,9 @@ public class PatchHelper {
                     !className.equals("long")) {
 
                 minecraftField = field;
-                LFLogger.info("Found Minecraft field: " + field.getName());
+                if (LegacyFixAgent.isDebug())
+                    LFLogger.info("Found Minecraft field: " + field.getName());
+
                 return field;
             }
         }
@@ -108,7 +113,9 @@ public class PatchHelper {
             if (className.equals("boolean") && Modifier.isPublic(field.getModifiers())) {
                 appletModeField = field;
 
-                LFLogger.info("Found appletMode field: " + appletModeField.getName());
+                if (LegacyFixAgent.isDebug())
+                    LFLogger.info("Found appletMode field: " + appletModeField.getName());
+
                 break;
             }
         }
@@ -132,10 +139,14 @@ public class PatchHelper {
             for (CtConstructor constr : constructors) {
                 CtClass[] constrParams = constr.getParameterTypes();
 
-                if (constrParams.length >= 1 && constrParams[0].getName().equals("java.awt.Component")) {
+                if (constrParams.length >= 1 &&
+                        constrParams[0].getName().equals("java.awt.Component") &&
+                        !field.getType().getName().equals(minecraftClass.getName())) {
                     mouseHelperClass = field.getType();
 
-                    LFLogger.info("Found match for MouseHelper class: " + mouseHelperClass.getName());
+                    if (LegacyFixAgent.isDebug())
+                        LFLogger.info("Found match for MouseHelper class: " + mouseHelperClass.getName());
+
                     break;
                 }
             }

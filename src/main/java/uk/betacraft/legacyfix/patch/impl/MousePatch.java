@@ -65,7 +65,8 @@ public class MousePatch extends Patch {
 
             // Mouse handling changed sometime during alpha
             boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", "no"));
-            LFLogger.info("MOUSE Y INVERT: " + invert);
+            if (LegacyFixAgent.isDebug())
+                LFLogger.info("mouse", "Mouse Y invert: " + invert);
 
             if (mouseHelperMethods.length == 2) {
                 mouseHelperMethods[1].setBody((invert ? body2invert : body2));
@@ -87,7 +88,7 @@ public class MousePatch extends Patch {
             inst.addTransformer(new ClassFileTransformer() {
                 public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
                     CtClass clas = pool.getOrNull(className.replace("/", "."));
-                    if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
+                    if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName()) || clas.isFrozen()) {
                         return null;
                     }
 
@@ -99,14 +100,16 @@ public class MousePatch extends Patch {
                                         "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
-                                    LFLogger.info("Mouse.getDX() match!");
+                                    if (LegacyFixAgent.isDebug())
+                                        LFLogger.info("mouse", "Mouse.getDX() match!");
 
                                 } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
                                         "getDY".equals(m.getMethodName()) &&
                                         "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
-                                    LFLogger.info("Mouse.getDY() match!");
+                                    if (LegacyFixAgent.isDebug())
+                                        LFLogger.info("mouse", "Mouse.getDY() match!");
                                 }
                             }
                         });
@@ -118,7 +121,7 @@ public class MousePatch extends Patch {
                             return clas.toBytecode();
                         }
                     } catch (Throwable t) {
-                        LFLogger.error(t.toString());
+                        LFLogger.error("mouse", t);
                     }
 
                     return null;
