@@ -34,7 +34,7 @@ public class LegacyFixLauncher {
             String mainClassName = getValue("mainClass", "net.minecraft.client.main.Main");
             try {
                 Class<?> minecraftMainClass = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
-                minecraftMainClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[] {getAcceptableArguments()});
+                minecraftMainClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{getAcceptableArguments()});
             } catch (ClassNotFoundException ignored2) {
                 LFLogger.error("Failed to find the main class! Tried \"" + minecraftAppletClassName + "\" and \"" + mainClassName + "\"");
             } catch (Throwable t) {
@@ -53,7 +53,7 @@ public class LegacyFixLauncher {
         // 13w16a to 13w23a don't allow unrecognized arguments
         if (hasKey("limit13w16a")) {
             args.addAll(limit(false));
-        } else if (hasKey("limit13w23a"))  {
+        } else if (hasKey("limit13w23a")) {
             args.addAll(limit(true));
         } else {
             // 13w23b and later finally allow unrecognized arguments
