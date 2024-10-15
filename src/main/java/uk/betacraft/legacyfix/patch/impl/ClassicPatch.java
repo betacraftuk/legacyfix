@@ -73,6 +73,8 @@ public class ClassicPatch extends Patch {
 
         int methodRef = codeIterator.u16bitAt(pos + 10);
         String setServerMethodSign = constPool.getMethodrefType(methodRef);
+        String setServerMethodName = constPool.getMethodrefName(methodRef);
+        String minecraftFieldName = constPool.getFieldrefName(codeIterator.u16bitAt(pos + 2));
         if (!"(Ljava/lang/String;I)V".equals(setServerMethodSign))
             return false;
 
@@ -80,9 +82,6 @@ public class ClassicPatch extends Patch {
         for (int i = 0; i < 12; i++) {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
-
-        String minecraftFieldName = constPool.getFieldrefName(codeIterator.u16bitAt(pos + 2));
-        String setServerMethodName = constPool.getMethodrefName(methodRef);
 
         // Add setServer at the end of init(), so that username gets read first
         // @formatter:off
