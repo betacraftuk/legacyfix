@@ -45,6 +45,7 @@ public class LegacyFixAgent {
                 new BitDepthPatch(),
                 new ClassicPatch(),
                 new GameDirPatch(),
+                new IntelPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
                 new VSyncPatch()
