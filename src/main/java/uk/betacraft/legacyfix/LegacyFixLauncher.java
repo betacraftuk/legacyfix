@@ -131,7 +131,9 @@ public class LegacyFixLauncher {
     }
 
     public static String getAssetIndexPath() {
-        String assetIndex = getValue("assetIndex", "empty");
+        String assetIndex = getValue("assetIndex", null);
+        if (assetIndex == null)
+            return null;
 
         return new File(getAssetsDir(), "indexes/" + assetIndex + ".json").getAbsolutePath();
     }

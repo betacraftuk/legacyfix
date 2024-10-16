@@ -23,7 +23,11 @@ public class AssetUtils {
     public static List<AssetObject> assets = new LinkedList<AssetObject>();
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
-        return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(LegacyFixLauncher.getAssetIndexPath())))).getJSONObject("objects");
+        String assetIndexPath = LegacyFixLauncher.getAssetIndexPath();
+        if (assetIndexPath == null)
+            return new JSONObject();
+
+        return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))).getJSONObject("objects");
     }
 
     public static String generateTxtIndex() {
@@ -35,10 +39,10 @@ public class AssetUtils {
             initAssets(assetIndex);
 
             for (AssetObject assetObject : assets) {
-                txtIndex.append("\n").append(assetObject.key).append(",").append(assetObject.size).append(",0");
+                txtIndex.append(assetObject.key).append(",").append(assetObject.size).append(",0").append("\n");
             }
 
-            return txtIndex.substring(1);
+            return txtIndex.toString();
         } catch (Throwable t) {
             LFLogger.error("generateTxtIndex", t);
             return "";
