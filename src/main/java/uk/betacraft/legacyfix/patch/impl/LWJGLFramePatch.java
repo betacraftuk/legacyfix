@@ -23,7 +23,7 @@ public class LWJGLFramePatch extends Patch {
     @Override
     public void apply(final Instrumentation inst) throws PatchException, Exception {
         try {
-            IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("icon"));
+            IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("lf.icon"));
         } catch (Exception e) {
             LFLogger.error(this, e);
         }

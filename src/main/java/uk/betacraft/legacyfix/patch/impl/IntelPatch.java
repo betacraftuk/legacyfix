@@ -21,7 +21,7 @@ import java.security.ProtectionDomain;
  */
 public class IntelPatch extends Patch {
     public IntelPatch() {
-        super("intelpatch", "Patches rendering on Intel", false);
+        super("intelpatch", "Patches rendering on Intel", true);
     }
 
     public void apply(final Instrumentation inst) throws PatchException, Exception {
