@@ -8,14 +8,16 @@
 
 ## Patches
 - [x] Skins
+- [x] Sound
 - [x] Online mode support
 - [x] Offline saving in Classic versions
 - [x] deAWT - Fix for flipped red & blue colors in versions before 13w16a on Apple Silicon devices (M1, M2, etc.)
+- [x] Rendering issues in versions b1.9-1.7.10 with Intel graphics
+- [x] Running Classic, Indev & Infdev versions on modern macOS
+- [x] BitDepthFix - Fix for glitchy clouds with AMD graphics
 - [x] Running versions before 13w16a with no dependency on Java AWT/Swing
-- [x] Working "Open texture pack folder" button before 1.2-pre on Linux and macOS
 - [x] Playing c0.0.14a to 1.2.5 without crashing due to certain USB peripherals
-- [x] Running Classic/Indev/Infdev versions on modern macOS
-- [x] BitDepthFix - Fix for glitchy clouds on AMD graphics
+- [x] Functional "Open texture pack folder" button before 1.2-pre on Linux and macOS
 - [x] Running a1.1.1 without gray screening
 - [x] Playing Indev and Infdev versions
 - [x] Working sound in early Indev versions
