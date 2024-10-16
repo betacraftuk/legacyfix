@@ -3,7 +3,6 @@ package uk.betacraft.legacyfix.patch.impl;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
@@ -45,6 +44,13 @@ public class GameDirPatch extends Patch {
             //"                System.out.println($0.path);" +
             //"                System.out.println(asset);" +
             "                return true;" +
+            "            }" +
+            "        }" +
+            "        if ($0.path.endsWith(\".png\")) {" +
+            "            Class patchHelper = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.PatchHelper\");" +
+            "            java.io.File newFile = (java.io.File) patchHelper.getMethod(\"getIndevMapRenderFromExpectedPath\", new Class[] {java.io.File.class}).invoke(null, new Object[] {$0});" +
+            "            if (newFile != null) {" +
+            "                return newFile.exists();" +
             "            }" +
             "        }" +
             "    } catch (Throwable t) { t.printStackTrace(); }" +
@@ -125,5 +131,21 @@ public class GameDirPatch extends Patch {
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(fileInputStreamClass.getName()), fileInputStreamClass.toBytecode()));
+
+        CtClass fileOutputStreamClass = pool.get("java.io.FileOutputStream");
+        CtConstructor fileOutputStreamConstructor = fileOutputStreamClass.getDeclaredConstructor(
+                new CtClass[]{fileClass});
+
+        fileOutputStreamConstructor.insertBefore(
+            "try {" +
+            "    Class patchHelper = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.PatchHelper\");" +
+            "    java.io.File newFile = (java.io.File) patchHelper.getMethod(\"getIndevMapRenderFromExpectedPath\", new Class[] {java.io.File.class}).invoke(null, new Object[] {$1});" +
+            "    if (newFile != null) {" +
+            "        $1 = newFile;" +
+            "    }" +
+            "} catch (Throwable t) { t.printStackTrace(); }"
+        );
+
+        inst.redefineClasses(new ClassDefinition(Class.forName(fileOutputStreamClass.getName()), fileOutputStreamClass.toBytecode()));
     }
 }

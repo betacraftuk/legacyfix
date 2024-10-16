@@ -1,5 +1,6 @@
 package uk.betacraft.legacyfix.patch;
 
+import java.io.File;
 import java.lang.reflect.Modifier;
 
 import javassist.ClassPool;
@@ -10,6 +11,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 public class PatchHelper {
     public static final CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
@@ -159,6 +161,21 @@ public class PatchHelper {
         return mouseHelperClass;
     }
 
+    // Used by GameDirPatch
+    public static File getIndevMapRenderFromExpectedPath(File file) {
+        String fileName = file.getName();
+        File expectedFile = new File(new File(System.getProperty("user.home", ".")), fileName).getAbsoluteFile();
+
+        if (!fileName.startsWith("mc_map_") ||
+                !fileName.endsWith(".png") ||
+                !expectedFile.getPath().equals(file.getAbsoluteFile().getPath())) {
+            return null;
+        }
+
+        return new File(LegacyFixLauncher.getScreenshotsDir(), fileName).getAbsoluteFile();
+    }
+
+    // Bytecode manipulation helper methods
     public static boolean isString(ConstPool constPool, int ldcPos) {
         return constPool.getTag(ldcPos) == ConstPool.CONST_String;
     }

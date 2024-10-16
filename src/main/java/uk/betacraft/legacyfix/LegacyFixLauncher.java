@@ -118,37 +118,41 @@ public class LegacyFixLauncher {
         return arguments.contains("--" + key);
     }
 
+    public static String getScreenshotsDir() {
+        return getValue("screenshotsDir", new File(getGameDir(), "screenshots").getPath());
+    }
+
     public static String getGameDir() {
-        return LegacyFixLauncher.getValue("gameDir", "minecraft");
+        return getValue("gameDir", "minecraft");
     }
 
     public static String getAssetsDir() {
-        return LegacyFixLauncher.getValue("assetsDir", "assets");
+        return getValue("assetsDir", "assets");
     }
 
     public static String getAssetIndexPath() {
-        String assetIndex = LegacyFixLauncher.getValue("assetIndex", "empty");
+        String assetIndex = getValue("assetIndex", "empty");
 
         return new File(getAssetsDir(), "indexes/" + assetIndex + ".json").getAbsolutePath();
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
     public static int getWidth() {
-        return Integer.parseInt(LegacyFixLauncher.getValue("width", "854"));
+        return Integer.parseInt(getValue("width", "854"));
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
     public static int getHeight() {
-        return Integer.parseInt(LegacyFixLauncher.getValue("height", "480"));
+        return Integer.parseInt(getValue("height", "480"));
     }
 
     // Used by DeAwtPatch
     public static boolean getFullscreen() {
-        return Boolean.parseBoolean(LegacyFixLauncher.getValue("fullscreen", "false"));
+        return hasKey("fullscreen");
     }
 
     // Used by LWJGLFramePatch
     public static String getFrameName() {
-        return LegacyFixLauncher.getValue("version", "Minecraft");
+        return getValue("version", "Minecraft");
     }
 }
