@@ -155,6 +155,6 @@ public class LegacyFixLauncher {
 
     // Used by LWJGLFramePatch
     public static String getFrameName() {
-        return getValue("version", "Minecraft");
+        return getValue("frameName", "Minecraft");
     }
 }
