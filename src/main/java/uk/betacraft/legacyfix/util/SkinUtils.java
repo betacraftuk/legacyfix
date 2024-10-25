@@ -88,8 +88,8 @@ public class SkinUtils {
             byte[] cape;
             byte[] skin = RequestUtil.readInputStream(skinUrl.openStream());
 
-            JSONObject capeObj = textures.getJSONObject("CAPE");
-            if (capeObj != null) {
+            if (textures.has("CAPE")) {
+                JSONObject capeObj = textures.getJSONObject("CAPE");
                 URL capeUrl = new URL(capeObj.getString("url"));
 
                 cape = RequestUtil.readInputStream(capeUrl.openStream());
