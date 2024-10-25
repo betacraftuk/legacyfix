@@ -38,19 +38,19 @@ public class SkinHandler extends HandlerBase {
 
         String username = matcher.group(5);
 
+        byte[] data;
         if (this.isCapeRequest) {
-            this.stream = new ByteArrayInputStream(
-                    SkinUtils.getFixedCape(
-                            SkinUtils.getSkin(username)
-                    )
+            data = SkinUtils.getFixedCape(
+                    SkinUtils.getSkin(username)
             );
         } else {
-            this.stream = new ByteArrayInputStream(
-                    SkinUtils.getFixedSkin(
-                            SkinUtils.getSkin(username)
-                    )
+            data = SkinUtils.getFixedSkin(
+                    SkinUtils.getSkin(username)
             );
         }
+
+        if (data != null)
+            this.stream = new ByteArrayInputStream(data);
     }
 
     public static List<Pattern> regexPatterns() {
