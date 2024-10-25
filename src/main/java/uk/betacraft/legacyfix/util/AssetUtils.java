@@ -178,7 +178,15 @@ public class AssetUtils {
 
     // Used by GameDirPatch
     public static boolean isExpectedAssetsDir(String path) {
-        return new File(LegacyFixLauncher.getGameDir(), "assets").getPath().equals(path);
+        return getExpectedAssetsDir().getPath().equals(path);
+    }
+
+    public static File getExpectedAssetsDir() {
+        // 13w16a-13w23b
+        if (LegacyFixLauncher.hasKey("usesWorkDir"))
+            return new File(LegacyFixLauncher.getGameDir(), "assets");
+        else // 13w24a-13w48b
+            return ASSETS_DIR;
     }
 
     // Used by GameDirPatch
@@ -194,7 +202,7 @@ public class AssetUtils {
         List<File> listFiles = new LinkedList<File>();
 
         for (AssetObject asset : assets) {
-            listFiles.add(new File(new File(LegacyFixLauncher.getGameDir(), "assets"), asset.key));
+            listFiles.add(new File(getExpectedAssetsDir(), asset.key));
         }
 
         return listFiles.toArray(new File[0]);
