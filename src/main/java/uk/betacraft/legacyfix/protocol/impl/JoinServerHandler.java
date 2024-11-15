@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +32,7 @@ public class JoinServerHandler extends HandlerBase {
             LFLogger.error("JoinServerHandler", "No match for join server URL :(");
             return new ByteArrayInputStream("LF - No match for join server URL".getBytes());
         }
-        String sessionId = matcher.group(8);
+        String sessionId = URLDecoder.decode(matcher.group(8), "UTF-8");
         String serverId = matcher.group(10);
 
         String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
