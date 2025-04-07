@@ -9,6 +9,8 @@ import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
+import uk.betacraft.legacyfix.LFLogger;
+import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 
 /**
@@ -48,6 +50,9 @@ public class Java6ReferencesPatch extends Patch {
             CtClass affectedBetaClass = pool.getOrNull(className);
 
             if (affectedBetaClass != null) {
+                if (LegacyFixAgent.isDebug())
+                    LFLogger.info("java6refs", "Processing: " + affectedBetaClass.getName());
+
                 affectedBetaClass.instrument(new ExprEditor() {
 
                     public void edit(MethodCall m) throws CannotCompileException {
@@ -60,7 +65,9 @@ public class Java6ReferencesPatch extends Patch {
                     }
                 });
 
-                inst.redefineClasses(new ClassDefinition(Class.forName(affectedBetaClass.getName()), affectedBetaClass.toBytecode()));
+                inst.redefineClasses(new ClassDefinition(affectedBetaClass.toClass(), affectedBetaClass.toBytecode()));
+                if (LegacyFixAgent.isDebug())
+                    LFLogger.info("java6refs", "Finished processing: " + affectedBetaClass.getName());
             }
         }
     }
