@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.util.SkinUtils;
 import uk.betacraft.util.Request;
 import uk.betacraft.util.RequestUtil;
 import uk.betacraft.util.WebData;
@@ -36,6 +37,10 @@ public class JoinServerHandler extends HandlerBase {
         String serverId = matcher.group(10);
 
         String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
+        if (uuid.equals("no-uuid")) {
+            uuid = SkinUtils.getUUID(LegacyFixLauncher.getValue("username", ""));
+        }
+
         String accessToken;
         if (sessionId.contains(":"))
             accessToken = sessionId.split(":")[1];

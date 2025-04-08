@@ -23,8 +23,8 @@ dependencies {
 }
 
 processResources {
-    filesMatching("releaseInfo.json") {
-        expand "version": "${project.version}-${new Date().format("dd.MM.yyyy")}"
+    filesMatching("release_info.json") {
+        expand version: "${project.version}-${new Date().format('dd.MM.yyyy')}"
     }
 }
 

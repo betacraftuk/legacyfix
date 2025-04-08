@@ -31,15 +31,16 @@ public class RequestUtil {
             URL url = new URL(req.REQUEST_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-            for (String key : req.PROPERTIES.keySet()) {
-                con.addRequestProperty(key, req.PROPERTIES.get(key));
-            }
             con.setRequestMethod("POST");
             con.setReadTimeout(15000);
             con.setConnectTimeout(15000);
             con.setDoInput(true);
             con.setDoOutput(true);
             con.setUseCaches(false);
+
+            for (String key : req.PROPERTIES.keySet()) {
+                con.addRequestProperty(key, req.PROPERTIES.get(key));
+            }
 
             // Send POST
             DataOutputStream out = new DataOutputStream(con.getOutputStream());
@@ -85,8 +86,8 @@ public class RequestUtil {
             con.setDoInput(true);
             con.setDoOutput(true);
             con.setUseCaches(false);
-            // i'm a browser C:
             con.addRequestProperty("User-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36");
+
             for (String key : req.PROPERTIES.keySet()) {
                 con.addRequestProperty(key, req.PROPERTIES.get(key));
             }

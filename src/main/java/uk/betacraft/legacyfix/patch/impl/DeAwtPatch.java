@@ -55,31 +55,21 @@ public class DeAwtPatch extends Patch {
                 try {
                     if ("java.awt.Container".equals(mc.getMethod().getDeclaringClass().getName())) {
                         if ("setLayout".equals(mc.getMethodName())) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("deAWT", "Found call to setLayout(), erasing");
-
+                            LFLogger.debug("deAWT", "Found call to setLayout(), erasing");
                             mc.replace("{}");
                         } else if ("add".equals(mc.getMethodName())) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("deAWT", "Found call to add(), erasing");
-
+                            LFLogger.debug("deAWT", "Found call to add(), erasing");
                             mc.replace("{}");
                         } else if ("validate".equals(mc.getMethodName())) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("deAWT", "Found call to validate(), erasing");
-
+                            LFLogger.debug("deAWT", "Found call to validate(), erasing");
                             mc.replace("{}");
                         }
                     } else if ("java.awt.Component".equals(mc.getMethod().getDeclaringClass().getName())) {
                         if ("setFocusable".equals(mc.getMethodName())) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("deAWT", "Found call to setFocusable(), erasing");
-
+                            LFLogger.debug("deAWT", "Found call to setFocusable(), erasing");
                             mc.replace("{}");
                         } else if ("setFocusTraversalKeysEnabled".equals(mc.getMethodName())) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("deAWT", "Found call to setFocusTraversalKeysEnabled(), erasing");
-
+                            LFLogger.debug("deAWT", "Found call to setFocusTraversalKeysEnabled(), erasing");
                             mc.replace("{}");
                         }
                     }
@@ -118,93 +108,95 @@ public class DeAwtPatch extends Patch {
 
         inst.redefineClasses(new ClassDefinition(Class.forName(javaAppletClass.getName()), javaAppletClass.toBytecode()));
 
-        // TODO: Investigate if this is at all useful in resizing versions before in-0111
-//        CtClass guiScreenClass = null;
-//        CtMethod guiScreenInitMethod = null;
-//        CtField guiScreenField = null;
-//
-//        CtField[] minecraftClassFields = minecraftClass.getDeclaredFields();
-//
-//        for (CtField field : minecraftClassFields) {
-//            CtMethod[] methods = field.getType().getDeclaredMethods();
-//            for (CtMethod method : methods) {
-//                CtClass[] params = method.getParameterTypes();
-//                if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-//                    guiScreenClass = field.getType();
-//                    guiScreenInitMethod = method;
-//                    guiScreenField = field;
-//
-//                    LFLogger.info("Found match for GuiScreen: " + guiScreenClass.getName());
-//                    break;
-//                }
-//            }
-//
-//            if (guiScreenField != null) {
-//                break;
-//            }
-//        }
-//
-//        CtClass inGameHudClass = null;
-//        CtField inGameHudField = null;
-//
-//        for (CtField field : minecraftClassFields) {
-//            CtConstructor[] constrs = field.getType().getDeclaredConstructors();
-//            for (CtConstructor constr : constrs) {
-//                CtClass[] params = constr.getParameterTypes();
-//                if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
-//                    inGameHudClass = field.getType();
-//                    inGameHudField = field;
-//
-//                    LFLogger.info("Found match for InGameHud: " + field.getName() + " / " + inGameHudClass.getName());
-//                    break;
-//                }
-//            }
-//
-//            if (inGameHudField != null) {
-//                break;
-//            }
-//        }
-//
-//        // Find resolution fields in InGameHud class
-//        CtField[] inGameHudResFields = new CtField[]{null, null};
-//
-//        if (inGameHudClass != null) {
-//            // We take for granted that first two int fields are: width & height
-//            int intOccurences = 0;
-//            for (CtField field : inGameHudClass.getDeclaredFields()) {
-//                String className = field.getType().getName();
-//
-//                if (className.equals("int") && intOccurences < 2) {
-//                    LFLogger.info("Found InGameHud resolution field (" + intOccurences + "): " + field.getName());
-//
-//                    inGameHudResFields[intOccurences] = field;
-//                    intOccurences++;
-//
-//                    if (intOccurences > 1) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//
-//        // Find the resolution fields in Minecraft class
-//        CtField[] minecraftResFields = new CtField[]{null, null};
-//
-//        // We take for granted that first two int fields are: width & height
-//        int intOccurences = 0;
-//        for (CtField field : minecraftClass.getDeclaredFields()) {
-//            String className = field.getType().getName();
-//            if (className.equals("int") && intOccurences < 2) {
-//                LFLogger.info("Found Minecraft resolution field (" + intOccurences + "): " + field.getName());
-//
-//                minecraftResFields[intOccurences] = field;
-//                intOccurences++;
-//
-//                if (intOccurences > 1) {
-//                    break;
-//                }
-//            }
-//        }
+        /*
+        TODO: Investigate if this is at all useful in resizing versions before in-0111
+        CtClass guiScreenClass = null;
+        CtMethod guiScreenInitMethod = null;
+        CtField guiScreenField = null;
+
+        CtField[] minecraftClassFields = minecraftClass.getDeclaredFields();
+
+        for (CtField field : minecraftClassFields) {
+            CtMethod[] methods = field.getType().getDeclaredMethods();
+            for (CtMethod method : methods) {
+                CtClass[] params = method.getParameterTypes();
+                if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
+                    guiScreenClass = field.getType();
+                    guiScreenInitMethod = method;
+                    guiScreenField = field;
+
+                    LFLogger.info("Found match for GuiScreen: " + guiScreenClass.getName());
+                    break;
+                }
+            }
+
+            if (guiScreenField != null) {
+                break;
+            }
+        }
+
+        CtClass inGameHudClass = null;
+        CtField inGameHudField = null;
+
+        for (CtField field : minecraftClassFields) {
+            CtConstructor[] constrs = field.getType().getDeclaredConstructors();
+            for (CtConstructor constr : constrs) {
+                CtClass[] params = constr.getParameterTypes();
+                if (params.length == 3 && params[0].getName().equals(minecraftClass.getName()) && params[1].getName().equals("int") && params[2].getName().equals("int")) {
+                    inGameHudClass = field.getType();
+                    inGameHudField = field;
+
+                    LFLogger.info("Found match for InGameHud: " + field.getName() + " / " + inGameHudClass.getName());
+                    break;
+                }
+            }
+
+            if (inGameHudField != null) {
+                break;
+            }
+        }
+
+        // Find resolution fields in InGameHud class
+        CtField[] inGameHudResFields = new CtField[]{null, null};
+
+        if (inGameHudClass != null) {
+            // We take for granted that first two int fields are: width & height
+            int intOccurences = 0;
+            for (CtField field : inGameHudClass.getDeclaredFields()) {
+                String className = field.getType().getName();
+
+                if (className.equals("int") && intOccurences < 2) {
+                    LFLogger.info("Found InGameHud resolution field (" + intOccurences + "): " + field.getName());
+
+                    inGameHudResFields[intOccurences] = field;
+                    intOccurences++;
+
+                    if (intOccurences > 1) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Find the resolution fields in Minecraft class
+        CtField[] minecraftResFields = new CtField[]{null, null};
+
+        // We take for granted that first two int fields are: width & height
+        int intOccurences = 0;
+        for (CtField field : minecraftClass.getDeclaredFields()) {
+            String className = field.getType().getName();
+            if (className.equals("int") && intOccurences < 2) {
+                LFLogger.info("Found Minecraft resolution field (" + intOccurences + "): " + field.getName());
+
+                minecraftResFields[intOccurences] = field;
+                intOccurences++;
+
+                if (intOccurences > 1) {
+                    break;
+                }
+            }
+        }
+        */
 
         // deAWT main Minecraft class
         if (minecraftClass.isFrozen()) {
@@ -310,9 +302,7 @@ public class DeAwtPatch extends Patch {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
 
-        if (LegacyFixAgent.isDebug()) {
-            LFLogger.info("deawt", "Erased Canvas references");
-        }
+        LFLogger.debug("deawt", "Erased Canvas references");
     }
 
     private void injectShutdownMethod(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftClass) throws NotFoundException, CannotCompileException, BadBytecode {
@@ -337,9 +327,7 @@ public class DeAwtPatch extends Patch {
 
         runMethod.insertAfter("$0." + shutdownMethod.getName() + "();", true);
 
-        if (LegacyFixAgent.isDebug()) {
-            LFLogger.info("deawt", "Injected shutdown method call into run() as finally");
-        }
+        LFLogger.debug("deawt", "Injected shutdown method call into run() as finally");
     }
 
     private boolean doesShutdownFinally(CtMethod runMethod, String shutdownMethodName) throws BadBytecode {
@@ -393,9 +381,7 @@ public class DeAwtPatch extends Patch {
             );
             // @formatter:on
 
-            if (LegacyFixAgent.isDebug()) {
-                LFLogger.info("deawt", "Wrapped setWorld call in a try-catch block in shutdown method");
-            }
+            LFLogger.debug("deawt", "Wrapped setWorld call in a try-catch block in shutdown method");
         }
     }
 
@@ -431,9 +417,7 @@ public class DeAwtPatch extends Patch {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
 
-        if (LegacyFixAgent.isDebug()) {
-            LFLogger.info("deawt", "Erased Classic applet references");
-        }
+        LFLogger.debug("deawt", "Erased Classic applet references");
     }
 
     private void eraseAppletReferencesIndev(CodeIterator codeIterator, ConstPool constPool, int pos) {
@@ -472,8 +456,8 @@ public class DeAwtPatch extends Patch {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
 
-        if (eraseTo != -1 && LegacyFixAgent.isDebug()) {
-            LFLogger.info("deawt", "Erased Indev applet references");
+        if (eraseTo != -1) {
+            LFLogger.debug("deawt", "Erased Indev applet references");
         }
     }
 }

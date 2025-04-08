@@ -238,8 +238,7 @@ public class AssetUtils {
             this.size = size;
             this.path = path;
 
-            if (LegacyFixAgent.isDebug())
-                LFLogger.info("AssetUtils", key + ", " + size + ", " + path);
+            LFLogger.debug("AssetUtils", key + ", " + size + ", " + path);
         }
     }
 }

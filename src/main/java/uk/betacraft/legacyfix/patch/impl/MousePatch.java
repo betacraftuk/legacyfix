@@ -65,8 +65,7 @@ public class MousePatch extends Patch {
 
             // Mouse handling changed sometime during alpha
             boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", "no"));
-            if (LegacyFixAgent.isDebug())
-                LFLogger.info("mouse", "Mouse Y invert: " + invert);
+            LFLogger.debug("mouse", "Mouse Y invert: " + invert);
 
             if (mouseHelperMethods.length == 2) {
                 mouseHelperMethods[1].setBody((invert ? body2invert : body2));
@@ -100,16 +99,14 @@ public class MousePatch extends Patch {
                                         "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
-                                    if (LegacyFixAgent.isDebug())
-                                        LFLogger.info("mouse", "Mouse.getDX() match!");
+                                    LFLogger.debug("mouse", "Mouse.getDX() match!");
 
                                 } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
                                         "getDY".equals(m.getMethodName()) &&
                                         "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
-                                    if (LegacyFixAgent.isDebug())
-                                        LFLogger.info("mouse", "Mouse.getDY() match!");
+                                    LFLogger.debug("mouse", "Mouse.getDY() match!");
                                 }
                             }
                         });

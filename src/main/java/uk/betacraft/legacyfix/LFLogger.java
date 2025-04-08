@@ -52,4 +52,10 @@ public class LFLogger {
             System.out.println("        " + line);
         }
     }
+
+    public static void debug(String... lines) {
+        if (LegacyFixAgent.isDebug()) {
+            log("DEBUG", lines);
+        }
+    }
 }

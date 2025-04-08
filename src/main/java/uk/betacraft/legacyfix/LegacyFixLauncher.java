@@ -4,6 +4,7 @@ import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,16 +12,25 @@ public class LegacyFixLauncher {
     public static List<String> arguments = new LinkedList<String>();
 
     public static void main(String[] args) {
-        for (String arg : args) {
-            if (arguments.contains(arg) && arg.startsWith("--")) {
-                LFLogger.error("LegacyFixLauncher", "Duplicate argument '" + arg + "'!");
+        List<String> parsedArgs = new LinkedList<String>();
+
+        if (args.length > 1 && !args[0].startsWith("--")) {
+            parsedArgs.add("--username");
+            parsedArgs.add(args[0]);
+
+            if (!args[1].startsWith("--")) {
+                parsedArgs.add("--sessionid");
+                parsedArgs.add(args[1]);
             }
 
-            arguments.add(arg);
+            parsedArgs.addAll(Arrays.asList(args).subList(2, args.length));
+        } else {
+            parsedArgs.addAll(Arrays.asList(args));
         }
 
-        URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
+        arguments = parsedArgs;
 
+        URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
         launch();
     }
 
@@ -104,12 +114,15 @@ public class LegacyFixLauncher {
             }
         }
 
+        LFLogger.debug("Using args: " + args);
         return args;
     }
 
     public static String getValue(String key, String alt) {
-        if (!hasKey(key))
+        if (!hasKey(key)) {
+            LFLogger.debug("Key " + key + " not found");
             return alt;
+        }
 
         return arguments.get(arguments.indexOf("--" + key) + 1);
     }

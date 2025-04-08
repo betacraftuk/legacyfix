@@ -27,18 +27,10 @@ public class ResourceIndexHandler extends HandlerBase {
     public InputStream getInputStream() throws IOException {
         String index;
 
-        if (this.isXmlRequest) {
-            index = AssetUtils.generateXmlIndex();
-            if (LegacyFixAgent.isDebug())
-                LFLogger.info("Serving XML resources index");
-        } else {
-            index = AssetUtils.generateTxtIndex();
-            if (LegacyFixAgent.isDebug())
-                LFLogger.info("Serving TXT resources index");
-        }
+        index = this.isXmlRequest ? AssetUtils.generateXmlIndex() : AssetUtils.generateTxtIndex();
+        LFLogger.debug("Serving " + (this.isXmlRequest ? "XML" : "TXT") + " resources index");
 
         this.stream = new ByteArrayInputStream(index.getBytes("UTF-8"));
-
         return this.stream;
     }
 

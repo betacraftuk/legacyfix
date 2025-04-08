@@ -10,18 +10,26 @@ public abstract class Patch {
     private final String id, description;
     private final Object setting;
     private final boolean isDefault;
+    private final boolean isRequired;
     protected static final ClassPool pool = ClassPool.getDefault();
 
     /**
      * @param id          The ID of the patch. Formatted with camelCase.
      * @param description A brief description of the patch.
      * @param isDefault   Whether this patch is enabled by default. Adds a disable option.
+     * @param isRequired  Whether this patch is required for the game to run.
+     *                    The patch cannot be disabled and the game will crash if it fails to apply.
      */
-    public Patch(String id, String description, boolean isDefault) {
+    public Patch(String id, String description, boolean isDefault, boolean isRequired) {
         this.id = id;
         this.description = description;
         this.isDefault = isDefault;
+        this.isRequired = false;
         this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
+    }
+
+    public Patch(String id, String description, boolean isDefault) {
+        this(id, description, isDefault, false);
     }
 
     public String getId() {
@@ -36,6 +44,10 @@ public abstract class Patch {
         return isDefault;
     }
 
+    public boolean isRequired() {
+        return isRequired;
+    }
+
     /**
      * Conditions for the patch to be applied.
      *
@@ -43,7 +55,7 @@ public abstract class Patch {
      */
     @SuppressWarnings("all")
     public boolean shouldApply() {
-        return isDefault ? setting == null : setting != null;
+        return isRequired || (isDefault ? setting == null : setting != null);
     }
 
     /**

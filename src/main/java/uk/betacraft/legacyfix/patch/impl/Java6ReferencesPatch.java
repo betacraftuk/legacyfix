@@ -9,9 +9,11 @@ import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
+import jdk.jfr.internal.JVM;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.util.JvmUtils;
 
 /**
  * Makes certain versions compatible with Java 5, as they were supposed to be
@@ -50,8 +52,7 @@ public class Java6ReferencesPatch extends Patch {
             CtClass affectedBetaClass = pool.getOrNull(className);
 
             if (affectedBetaClass != null) {
-                if (LegacyFixAgent.isDebug())
-                    LFLogger.info("java6refs", "Processing: " + affectedBetaClass.getName());
+                LFLogger.debug("java6refs", "Processing: " + affectedBetaClass.getName());
 
                 affectedBetaClass.instrument(new ExprEditor() {
 
@@ -66,9 +67,13 @@ public class Java6ReferencesPatch extends Patch {
                 });
 
                 inst.redefineClasses(new ClassDefinition(affectedBetaClass.toClass(), affectedBetaClass.toBytecode()));
-                if (LegacyFixAgent.isDebug())
-                    LFLogger.info("java6refs", "Finished processing: " + affectedBetaClass.getName());
+                LFLogger.debug("java6refs", "Finished processing: " + affectedBetaClass.getName());
             }
         }
+    }
+
+    @Override
+    public boolean shouldApply() {
+        return super.shouldApply() && JvmUtils.getJvmVersion() < 6;
     }
 }

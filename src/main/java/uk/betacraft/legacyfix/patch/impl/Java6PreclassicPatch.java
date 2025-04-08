@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javassist.CtClass;
 import javassist.bytecode.ClassFile;
 import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.util.JvmUtils;
 
 /**
  * Declares all Pre-Classic classes compliant with Java 5
@@ -81,6 +82,6 @@ public class Java6PreclassicPatch extends Patch {
 
     @Override
     public boolean shouldApply() {
-        return super.shouldApply() && (pool.getOrNull("com.mojang.minecraft.RubyDung") != null || pool.getOrNull("com.mojang.rubydung.RubyDung") != null);
+        return super.shouldApply() && JvmUtils.getJvmVersion() < 6 && (pool.getOrNull("com.mojang.minecraft.RubyDung") != null || pool.getOrNull("com.mojang.rubydung.RubyDung") != null);
     }
 }

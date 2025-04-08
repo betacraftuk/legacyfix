@@ -14,9 +14,27 @@ import java.util.*;
 
 public class LegacyFixAgent {
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
-    private static final List<Patch> PATCHES = new ArrayList<Patch>();
+    private static final Patch[] PATCHES = new Patch[] {
+            new LauncherPatch(),
+            new DisableControllersPatch(),
+            new TexturePackFolderPatch(),
+            new Java6PreclassicPatch(),
+            new Java6ReferencesPatch(),
+            new SeecretSaturdayPatch(),
+            new LWJGLFramePatch(),
+            new IndevSoundPatch(),
+            new BetaForgePatch(),
+            new ModloaderPatch(),
+            new BitDepthPatch(),
+            new ClassicPatch(),
+            new GameDirPatch(),
+            new IntelPatch(),
+            new DeAwtPatch(),
+            new MousePatch(),
+            new VSyncPatch()
+    };
 
-    private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/releaseInfo.json")))));
+    private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/release_info.json")))));
     public static final String VERSION = RELEASE_INFO.optString("version", "unknown");
 
     private static Boolean debug;
@@ -31,26 +49,6 @@ public class LegacyFixAgent {
             }
         }
 
-        // TODO: inf-0321 patch
-        PATCHES.addAll(Arrays.asList(
-                new DisableControllersPatch(),
-                new TexturePackFolderPatch(),
-                new Java6PreclassicPatch(),
-                new Java6ReferencesPatch(),
-                new SeecretSaturdayPatch(),
-                new LWJGLFramePatch(),
-                new IndevSoundPatch(),
-                new BetaForgePatch(),
-                new ModloaderPatch(),
-                new BitDepthPatch(),
-                new ClassicPatch(),
-                new GameDirPatch(),
-                new IntelPatch(),
-                new DeAwtPatch(),
-                new MousePatch(),
-                new VSyncPatch()
-        ));
-
         List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
             if (!patch.shouldApply()) continue;
@@ -58,18 +56,25 @@ public class LegacyFixAgent {
             try {
                 patch.apply(inst);
                 patchStates.add(patch.getId() + " - Applied");
-            } catch (PatchException e) {
-                patchStates.add(patch.getId() + " - Error: " + e.getMessage());
-            } catch (Exception e) {
-                patchStates.add(patch.getId() + " - Exception, see stacktrace");
-                LFLogger.error(patch, e);
+            } catch (Throwable e) {
+                if (e instanceof PatchException) {
+                    patchStates.add(patch.getId() + " - Error: " + e.getMessage());
+                } else {
+                    patchStates.add(patch.getId() + " - Exception, see stacktrace");
+                    LFLogger.error(patch, e);
+                }
+
+                if (patch.isRequired()) {
+                    LFLogger.error("Patch " + patch.getId() + " is required, but failed to apply. Exiting.");
+                    System.exit(-1);
+                }
             }
         }
 
         if (!patchStates.isEmpty()) {
             LFLogger.logList("Patches:", patchStates);
         } else {
-            LFLogger.log("No patches applied");
+            LFLogger.info("No patches applied");
         }
     }
 

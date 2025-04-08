@@ -102,10 +102,7 @@ public class ClassicPatch extends Patch {
 
         replaceHardcodedPort(setServerMethod);
 
-        if (LegacyFixAgent.isDebug()) {
-            LFLogger.info("classicpatch", "Patched c0.0.15a's init()");
-        }
-
+        LFLogger.debug("classicpatch", "Patched c0.0.15a's init()");
         return true;
     }
 
@@ -181,8 +178,6 @@ public class ClassicPatch extends Patch {
             codeIterator.writeByte(Opcode.NOP, pos + 13 + i);
         }
 
-        if (LegacyFixAgent.isDebug()) {
-            LFLogger.info("classicpatch", "Erased minecraftUri port");
-        }
+        LFLogger.debug("classicpatch", "Erased minecraftUri port");
     }
 }

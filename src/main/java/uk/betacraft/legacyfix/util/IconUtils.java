@@ -15,7 +15,6 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 
 public class IconUtils {
-
     static ByteBuffer pixels16 = null;
     static ByteBuffer pixels32 = null;
 

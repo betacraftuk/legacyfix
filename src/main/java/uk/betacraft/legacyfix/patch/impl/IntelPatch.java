@@ -50,23 +50,19 @@ public class IntelPatch extends Patch {
                                         "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.ARBMultitexture.glClientActiveTextureARB($$); $_ = $proceed($$); }");
-                                    if (LegacyFixAgent.isDebug())
-                                        LFLogger.info("intelpatch", "Matched ARBMultitexture.glActiveTextureARB(I)V");
-
+                                    LFLogger.debug("intelpatch", "Matched ARBMultitexture.glActiveTextureARB(I)V");
                                 } else if ("org.lwjgl.opengl.GL13".equals(m.getClassName()) &&
                                         "glActiveTexture".equals(m.getMethodName()) &&
                                         "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.GL13.glClientActiveTexture($$); $_ = $proceed($$); }");
-                                    if (LegacyFixAgent.isDebug())
-                                        LFLogger.info("intelpatch", "Matched GL13.glActiveTexture(I)V");
+                                    LFLogger.debug("intelpatch", "Matched GL13.glActiveTexture(I)V");
                                 }
                             }
                         });
 
                         if (openGlHelperMatched[0]) {
-                            if (LegacyFixAgent.isDebug())
-                                LFLogger.info("intelpatch", "Found OpenGlHelper and patched it: " + clas.getName());
+                            LFLogger.debug("intelpatch", "Found OpenGlHelper and patched it: " + clas.getName());
 
                             inst.removeTransformer(this); // job is done, don't transform any more classes
                             return clas.toBytecode();
