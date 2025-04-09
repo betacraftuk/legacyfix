@@ -14,7 +14,7 @@ import java.util.*;
 
 public class LegacyFixAgent {
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
-    private static final Patch[] PATCHES = new Patch[] {
+    private static final Patch[] PATCHES = new Patch[]{
             new LauncherPatch(),
             new DisableControllersPatch(),
             new TexturePackFolderPatch(),

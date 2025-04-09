@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class ClassDumper {
-    public static void dumpClasses(String ...classes) {
+    public static void dumpClasses(String... classes) {
         for (String className : classes) {
             dumpClass(className);
         }

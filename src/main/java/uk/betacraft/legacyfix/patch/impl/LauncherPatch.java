@@ -40,12 +40,12 @@ public class LauncherPatch extends Patch {
 
         CtMethod getStringDefault = parametersClass.getDeclaredMethod(
                 "getString",
-                pool.get(new String[] { "java.lang.String", "java.lang.String" })
+                pool.get(new String[]{"java.lang.String", "java.lang.String"})
         );
 
         CtMethod getList = parametersClass.getDeclaredMethod(
                 "getList",
-                pool.get(new String[] { "java.lang.String", "java.util.List" })
+                pool.get(new String[]{"java.lang.String", "java.util.List"})
         );
 
         //@formatter:off
