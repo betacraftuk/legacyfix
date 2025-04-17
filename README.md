@@ -30,5 +30,5 @@
 
 ## Usage
 Use the [BetaCraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2) which includes LF by default,<br>
-or apply the javaagent in the launcher of your choice. Tutorial TBA soon
-
+or apply the javaagent in the launcher of your choice:
+- [Tutorial for Prism Launcher](Prism%20Launcher.md)
