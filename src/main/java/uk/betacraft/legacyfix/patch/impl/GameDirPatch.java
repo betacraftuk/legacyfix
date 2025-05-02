@@ -4,7 +4,6 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
 import java.lang.instrument.ClassDefinition;
@@ -12,10 +11,10 @@ import java.lang.instrument.Instrumentation;
 
 public class GameDirPatch extends Patch {
     public GameDirPatch() {
-        super("gamedirpatch", "Redirects Minecraft to the intended game directory", true);
+        super("gamedir", "Redirects Minecraft to the intended game directory", true);
     }
 
-    public void apply(Instrumentation inst) throws PatchException, Exception {
+    public void apply(Instrumentation inst) throws Exception {
         CtClass fileClass = pool.get("java.io.File");
 
         CtConstructor fileConstructor = fileClass.getDeclaredConstructor(

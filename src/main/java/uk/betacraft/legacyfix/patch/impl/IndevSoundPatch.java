@@ -13,7 +13,7 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
  */
 public class IndevSoundPatch extends Patch {
     public IndevSoundPatch() {
-        super("indevSound", "Fixes sound not playing on early Indev with modern LWJGL versions", true);
+        super("indev-sound", "Fixes sound not playing on early Indev with modern LWJGL versions", true);
     }
 
     @Override

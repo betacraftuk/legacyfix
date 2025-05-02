@@ -7,7 +7,6 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 import uk.betacraft.legacyfix.util.IconUtils;
 
@@ -17,11 +16,11 @@ import java.lang.instrument.Instrumentation;
 public class LWJGLFramePatch extends Patch {
 
     public LWJGLFramePatch() {
-        super("lwjglframepatch", "Patches LWJGL Frame for title and resolution", true);
+        super("lwjgl-framepatch", "Patches LWJGL Frame for title and resolution", true);
     }
 
     @Override
-    public void apply(final Instrumentation inst) throws PatchException, Exception {
+    public void apply(final Instrumentation inst) throws Exception {
         try {
             IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("lf.icon"));
         } catch (Exception e) {

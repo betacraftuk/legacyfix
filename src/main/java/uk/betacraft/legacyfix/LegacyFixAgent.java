@@ -14,26 +14,7 @@ import java.util.*;
 
 public class LegacyFixAgent {
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
-    private static final Patch[] PATCHES = new Patch[]{
-            new LauncherPatch(),
-            new DisableControllersPatch(),
-            new TexturePackFolderPatch(),
-            new Java6PreclassicPatch(),
-            new Java6ReferencesPatch(),
-            new SeecretSaturdayPatch(),
-            new LWJGLFramePatch(),
-            new IndevSoundPatch(),
-            new BetaForgePatch(),
-            new ModloaderPatch(),
-            new BitDepthPatch(),
-            new ClassicPatch(),
-            new ClassicResizePatch(),
-            new GameDirPatch(),
-            new IntelPatch(),
-            new DeAwtPatch(),
-            new MousePatch(),
-            new VSyncPatch()
-    };
+    private static final Patch[] PATCHES;
 
     private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/release_info.json")))));
     public static final String VERSION = RELEASE_INFO.optString("version", "unknown");
@@ -42,13 +23,6 @@ public class LegacyFixAgent {
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         LFLogger.info("Loading build " + VERSION);
-
-        for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
-            String propertyKey = String.valueOf(property.getKey());
-            if (propertyKey.startsWith("lf.") && !SETTINGS.containsKey(propertyKey)) {
-                SETTINGS.put(propertyKey, property.getValue());
-            }
-        }
 
         List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
@@ -92,5 +66,35 @@ public class LegacyFixAgent {
             debug = getSettings().containsKey("lf.debug");
 
         return debug;
+    }
+
+    static {
+        for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
+            String propertyKey = String.valueOf(property.getKey());
+            if (propertyKey.startsWith("lf.") && !SETTINGS.containsKey(propertyKey)) {
+                SETTINGS.put(propertyKey, property.getValue());
+            }
+        }
+
+         PATCHES = new Patch[]{
+                new LauncherPatch(),
+                new DisableControllersPatch(),
+                new TexturePackFolderPatch(),
+                new Java6PreclassicPatch(),
+                new Java6ReferencesPatch(),
+                new SeecretSaturdayPatch(),
+                new LWJGLFramePatch(),
+                new IndevSoundPatch(),
+                new BetaForgePatch(),
+                new ModloaderPatch(),
+                new BitDepthPatch(),
+                new ClassicPatch(),
+                new ClassicResizePatch(),
+                new GameDirPatch(),
+                new IntelPatch(),
+                new DeAwtPatch(),
+                new MousePatch(),
+                new VSyncPatch()
+        };
     }
 }

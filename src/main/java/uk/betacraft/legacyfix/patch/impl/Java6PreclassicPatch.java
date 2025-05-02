@@ -14,7 +14,7 @@ import uk.betacraft.legacyfix.util.JvmUtils;
  */
 public class Java6PreclassicPatch extends Patch {
     public Java6PreclassicPatch() {
-        super("java6preclassic", "Makes Preclassic playable with Java 5", true);
+        super("java6-preclassic", "Makes Preclassic playable with Java 5", true);
     }
 
     @Override

@@ -9,7 +9,6 @@ import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.*;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
@@ -19,7 +18,7 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
  */
 public class ClassicPatch extends Patch {
     public ClassicPatch() {
-        super("classicpatch", "Fixes server joining for c0.0.15a and saving in early Classic", true);
+        super("classic-patch", "Fixes server joining for c0.0.15a and saving in early Classic", true);
     }
 
     @Override

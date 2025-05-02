@@ -9,9 +9,7 @@ import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
-import jdk.jfr.internal.JVM;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
@@ -20,7 +18,7 @@ import uk.betacraft.legacyfix.util.JvmUtils;
  */
 public class Java6ReferencesPatch extends Patch {
     public Java6ReferencesPatch() {
-        super("java6refs", "Makes versions c0.0.15a to c0.0.16a_02 and b1.3 playable with Java 5", true);
+        super("java6-refs", "Makes versions c0.0.15a to c0.0.16a_02 and b1.3 playable with Java 5", true);
     }
 
     @Override

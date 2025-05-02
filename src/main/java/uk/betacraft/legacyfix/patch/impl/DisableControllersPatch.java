@@ -9,7 +9,7 @@ import java.lang.instrument.Instrumentation;
 
 public class DisableControllersPatch extends Patch {
     public DisableControllersPatch() {
-        super("disableControllers", "Disables controller support", true);
+        super("disable-controllers", "Disables controller support", true);
     }
 
     @Override

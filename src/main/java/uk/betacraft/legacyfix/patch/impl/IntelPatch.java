@@ -6,9 +6,7 @@ import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -21,10 +19,10 @@ import java.security.ProtectionDomain;
  */
 public class IntelPatch extends Patch {
     public IntelPatch() {
-        super("intelpatch", "Patches rendering on Intel", true);
+        super("intel", "Patches rendering on Intel", true);
     }
 
-    public void apply(final Instrumentation inst) throws PatchException, Exception {
+    public void apply(final Instrumentation inst) throws Exception {
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
                 CtClass clas = pool.getOrNull(className.replace("/", "."));

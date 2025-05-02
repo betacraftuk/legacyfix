@@ -13,7 +13,7 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
  */
 public class TexturePackFolderPatch extends Patch {
     public TexturePackFolderPatch() {
-        super("texturePackButton", "Fixes the open texture pack folder button", true);
+        super("texture-pack-button", "Fixes the open texture pack folder button", true);
     }
 
     @Override
