@@ -1,5 +1,6 @@
 package uk.betacraft.util;
 
+import org.json.JSONObject;
 import uk.betacraft.legacyfix.LFLogger;
 
 import java.io.ByteArrayOutputStream;
@@ -110,6 +111,26 @@ public class RequestUtil {
             LFLogger.error("performRawGETRequest", t);
             return new WebData(null, -1);
         }
+    }
+
+    public static WebData performJoinServer(String uuid, String sessionId, String serverId) {
+        String accessToken;
+        if (sessionId.contains(":"))
+            accessToken = sessionId.split(":")[1];
+        else
+            accessToken = sessionId;
+
+        return RequestUtil.performRawPOSTRequest(
+                new Request()
+                        .setUrl("https://sessionserver.mojang.com/session/minecraft/join")
+                        .setHeader("Content-Type", "application/json")
+                        .setPayload(
+                                new JSONObject()
+                                        .put("serverId", serverId)
+                                        .put("accessToken", accessToken)
+                                        .put("selectedProfile", uuid)
+                        )
+        );
     }
 
     public static byte[] readInputStream(InputStream in) {

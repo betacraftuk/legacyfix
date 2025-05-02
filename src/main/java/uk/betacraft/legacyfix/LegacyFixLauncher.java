@@ -148,6 +148,14 @@ public class LegacyFixLauncher {
         return arguments.contains("--" + key);
     }
 
+    public static String getUUID() {
+        String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
+        if (uuid.equals("no-uuid"))
+            return MinecraftAPIUtils.getUUID(LegacyFixLauncher.getValue("username", ""));
+
+        return uuid;
+    }
+
     public static String getScreenshotsDir() {
         return getValue("screenshotsDir", new File(getGameDir(), "screenshots").getPath());
     }
