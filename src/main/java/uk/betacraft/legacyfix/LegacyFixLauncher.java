@@ -178,7 +178,7 @@ public class LegacyFixLauncher {
 
         if ("sessionid".equals(key) && levelProxyAuthenticator != null) {
             // wait for it to finish, otherwise it won't be possible to save online
-            while (levelProxyAuthenticator.isAlive());
+            while (levelProxyAuthenticator.isAlive()) ;
         }
 
         return arguments.get(arguments.indexOf("--" + key) + 1);
