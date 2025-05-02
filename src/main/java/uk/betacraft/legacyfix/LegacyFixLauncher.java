@@ -30,6 +30,11 @@ public class LegacyFixLauncher {
 
         arguments = parsedArgs;
 
+        // Classic 0.30
+        if ("false".equals(getValue("demo", "false"))) {
+            setValue("haspaid", "true");
+        }
+
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
         launch();
     }
@@ -155,6 +160,16 @@ public class LegacyFixLauncher {
         }
 
         return arguments.get(arguments.indexOf("--" + key) + 1);
+    }
+
+    public static void setValue(String key, String val) {
+        if (!hasKey(key)) {
+            arguments.add("--" + key);
+            if (val != null)
+                arguments.add(val);
+        }
+
+        arguments.set(arguments.indexOf("--" + key) + 1, val);
     }
 
     public static boolean hasKey(String key) {
