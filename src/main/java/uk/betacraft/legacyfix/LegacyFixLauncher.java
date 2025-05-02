@@ -169,21 +169,25 @@ public class LegacyFixLauncher {
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
+    @SuppressWarnings("unused")
     public static int getWidth() {
         return Integer.parseInt(getValue("width", "854"));
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
+    @SuppressWarnings("unused")
     public static int getHeight() {
         return Integer.parseInt(getValue("height", "480"));
     }
 
     // Used by DeAwtPatch
+    @SuppressWarnings("unused")
     public static boolean getFullscreen() {
         return hasKey("fullscreen");
     }
 
     // Used by LWJGLFramePatch
+    @SuppressWarnings("unused")
     public static String getFrameName() {
         return getValue("frameName", "Minecraft");
     }
