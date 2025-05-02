@@ -76,7 +76,7 @@ public class LegacyFixAgent {
             }
         }
 
-         PATCHES = new Patch[]{
+        PATCHES = new Patch[]{
                 new LauncherPatch(),
                 new DisableControllersPatch(),
                 new TexturePackFolderPatch(),
