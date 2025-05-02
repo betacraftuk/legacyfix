@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
-public class LevelLoadHandler extends HandlerBase {
+public class LevelLoadHandler extends LevelHandlerBase {
     private static final Pattern LEVEL_LOAD_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/level\\/load\\.html\\?id=(.+)?&user=(.+)?)");
 
     public LevelLoadHandler(URL u, Pattern patternUsed) {

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
-public class LevelListHandler extends HandlerBase {
+public class LevelListHandler extends LevelHandlerBase {
     private static final Pattern LEVEL_LIST_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/listmaps\\.jsp\\?user=(.+)?)");
 
     protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelDir", LegacyFixLauncher.getGameDir() + "/levels");

@@ -1,6 +1,9 @@
 package uk.betacraft.legacyfix;
 
 import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
+import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
+import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;
+import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -10,6 +13,9 @@ import java.util.List;
 
 public class LegacyFixLauncher {
     public static List<String> arguments = new LinkedList<String>();
+    private static String sessionId = "-";
+
+    private static LevelProxyAuthenticator levelProxyAuthenticator = null;
 
     public static void main(String[] args) {
         List<String> parsedArgs = new LinkedList<String>();
@@ -21,11 +27,16 @@ public class LegacyFixLauncher {
             if (!args[1].startsWith("--")) {
                 parsedArgs.add("--sessionid");
                 parsedArgs.add(args[1]);
+
+                sessionId = args[1];
             }
 
             parsedArgs.addAll(Arrays.asList(args).subList(2, args.length));
         } else {
             parsedArgs.addAll(Arrays.asList(args));
+
+            if (parsedArgs.contains("--sessionid"))
+                sessionId = parsedArgs.get(parsedArgs.indexOf("--sessionid") + 1);
         }
 
         arguments = parsedArgs;
@@ -36,6 +47,12 @@ public class LegacyFixLauncher {
         }
 
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
+
+        if (LevelHandlerBase.ONLINE_LEVEL_SERVER != null) {
+            levelProxyAuthenticator = new LevelProxyAuthenticator();
+            levelProxyAuthenticator.start();
+        }
+
         launch();
     }
 
@@ -159,6 +176,11 @@ public class LegacyFixLauncher {
             return alt;
         }
 
+        if ("sessionid".equals(key) && levelProxyAuthenticator != null) {
+            // wait for it to finish, otherwise it won't be possible to save online
+            while (levelProxyAuthenticator.isAlive());
+        }
+
         return arguments.get(arguments.indexOf("--" + key) + 1);
     }
 
@@ -182,6 +204,10 @@ public class LegacyFixLauncher {
             return MinecraftAPIUtils.getUUID(LegacyFixLauncher.getValue("username", ""));
 
         return uuid;
+    }
+
+    public static String getSessionId() {
+        return sessionId;
     }
 
     public static String getScreenshotsDir() {

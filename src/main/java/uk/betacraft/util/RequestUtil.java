@@ -3,9 +3,7 @@ package uk.betacraft.util;
 import org.json.JSONObject;
 import uk.betacraft.legacyfix.LFLogger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -131,6 +129,18 @@ public class RequestUtil {
                                         .put("selectedProfile", uuid)
                         )
         );
+    }
+
+    public static String getIPFromAmazon() {
+        try {
+            URL amazonUrl = new URL("http://checkip.amazonaws.com");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(amazonUrl.openStream()));
+            return bufferedReader.readLine();
+        } catch (Throwable t) {
+            LFLogger.error("Failed to get IP from checkip.amazonaws.com, user is probably offline");
+            LFLogger.error("getIPFromAmazon", t);
+        }
+        return null;
     }
 
     public static byte[] readInputStream(InputStream in) {

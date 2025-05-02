@@ -21,4 +21,13 @@ public class WebData {
     public boolean successful() {
         return this.http < 400 && this.http >= 200;
     }
+
+    @Override
+    public String toString() {
+        try {
+            return new String(this.data, "UTF-8");
+        } catch (Throwable t) {
+            return null;
+        }
+    }
 }

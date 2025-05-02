@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("all")
-public class LevelSaveHandler extends HandlerBase {
+public class LevelSaveHandler extends LevelHandlerBase {
     private static final Pattern LEVEL_SAVE_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/level\\/save\\.html)");
 
     public LevelSaveHandler(URL u, Pattern patternUsed) {
