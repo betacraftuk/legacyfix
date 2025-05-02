@@ -35,26 +35,43 @@ public class LegacyFixLauncher {
     }
 
     private static void launch() {
-        String minecraftAppletClassName = getValue("appletClass", "net.minecraft.client.MinecraftApplet");
-        try {
-            Class<?> minecraftAppletClass = ClassLoader.getSystemClassLoader().loadClass(minecraftAppletClassName);
-            Object minecraftApplet = minecraftAppletClass.newInstance();
-            minecraftAppletClass.getDeclaredMethod("init").invoke(minecraftApplet);
-        } catch (ClassNotFoundException ignored) {
-            String mainClassName = getValue("mainClass", "net.minecraft.client.main.Main");
+        String[] classes = {
+                getValue("appletClass", "net.minecraft.client.MinecraftApplet"),
+                getValue("mainClass", "net.minecraft.client.main.Main"),
+                "com.mojang.minecraft.MinecraftApplet"
+        };
+
+        List<String> appletClasses = Arrays.asList(
+                getValue("appletClass", "net.minecraft.client.MinecraftApplet"),
+                "com.mojang.minecraft.MinecraftApplet"
+        );
+
+        StringBuilder classesNotFound = new StringBuilder();
+        for (String className : classes) {
             try {
-                Class<?> minecraftMainClass = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
-                minecraftMainClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{getAcceptableArguments()});
-            } catch (ClassNotFoundException ignored2) {
-                LFLogger.error("Failed to find the main class! Tried \"" + minecraftAppletClassName + "\" and \"" + mainClassName + "\"");
+                Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+
+                if (appletClasses.contains(clazz.getName())) {
+                    Object appletInstance = clazz.newInstance();
+                    clazz.getDeclaredMethod("init").invoke(appletInstance);
+                } else {
+                    clazz.getMethod("main", String[].class).invoke(null, (Object) getAcceptableArguments());
+                }
+
+                return;
+            } catch (ClassNotFoundException ignored) {
+                if (classesNotFound.length() > 0) {
+                    classesNotFound.append(", ");
+                }
+                classesNotFound.append(className);
             } catch (Throwable t) {
                 LFLogger.error("Failed to launch Minecraft");
                 LFLogger.error("launch", t);
+                return;
             }
-        } catch (Throwable t) {
-            LFLogger.error("Failed to launch Minecraft");
-            LFLogger.error("launch", t);
         }
+
+        LFLogger.error("Failed to find any valid main class! Tried: " + classesNotFound);
     }
 
     private static String[] getAcceptableArguments() {
