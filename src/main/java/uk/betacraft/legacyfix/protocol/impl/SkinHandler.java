@@ -51,7 +51,7 @@ public class SkinHandler extends HandlerBase {
         }
 
         if (data != null)
-            this.stream = new ByteArrayInputStream(data);
+            this.inputStream = new ByteArrayInputStream(data);
     }
 
     public static List<Pattern> regexPatterns() {

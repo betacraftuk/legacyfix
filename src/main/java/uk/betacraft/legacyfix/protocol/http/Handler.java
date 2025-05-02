@@ -1,7 +1,6 @@
 package uk.betacraft.legacyfix.protocol.http;
 
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.protocol.URLHandlers;
 
 import java.io.IOException;

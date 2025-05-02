@@ -1,7 +1,6 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.util.AssetUtils;
 
 import java.io.*;
@@ -30,8 +29,8 @@ public class ResourceIndexHandler extends HandlerBase {
         index = this.isXmlRequest ? AssetUtils.generateXmlIndex() : AssetUtils.generateTxtIndex();
         LFLogger.debug("Serving " + (this.isXmlRequest ? "XML" : "TXT") + " resources index");
 
-        this.stream = new ByteArrayInputStream(index.getBytes("UTF-8"));
-        return this.stream;
+        this.inputStream = new ByteArrayInputStream(index.getBytes("UTF-8"));
+        return this.inputStream;
     }
 
     public static List<Pattern> regexPatterns() {

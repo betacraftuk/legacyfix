@@ -1,7 +1,5 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
-import uk.betacraft.legacyfix.LFLogger;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,9 +22,9 @@ public class McoHandler extends HandlerBase {
 
     @Override
     public InputStream getInputStream() {
-        this.stream = new ByteArrayInputStream("false".getBytes());
+        this.inputStream = new ByteArrayInputStream("false".getBytes());
 
-        return this.stream;
+        return this.inputStream;
     }
 
     public static List<Pattern> regexPatterns() {

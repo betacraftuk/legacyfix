@@ -17,9 +17,9 @@ public class SnoopHandler extends HandlerBase {
 
     @Override
     public InputStream getInputStream() {
-        this.stream = new ByteArrayInputStream(new byte[0]);
+        this.inputStream = new ByteArrayInputStream(new byte[0]);
 
-        return this.stream;
+        return this.inputStream;
     }
 
     public static List<Pattern> regexPatterns() {

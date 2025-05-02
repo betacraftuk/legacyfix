@@ -3,8 +3,6 @@ package uk.betacraft.legacyfix.protocol.impl;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +24,7 @@ public class Minecraft1_6AvailableHandler extends HandlerBase {
             response = new byte[0];
         }
 
-        this.stream = new ByteArrayInputStream(response);
+        this.inputStream = new ByteArrayInputStream(response);
     }
 
     public static List<Pattern> regexPatterns() {
