@@ -157,7 +157,8 @@ public class ClassicResizePatch extends Patch {
 
             initMethod.insertBefore("this." + buttonsField.getName() + " = new java.util.ArrayList();");
             inst.redefineClasses(new ClassDefinition(Class.forName(pauseScreen.getName()), pauseScreen.toBytecode()));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private CtField findHudField() {
@@ -226,7 +227,8 @@ public class ClassicResizePatch extends Patch {
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return null;
     }
