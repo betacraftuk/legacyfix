@@ -12,18 +12,15 @@ import java.util.regex.Pattern;
 public class LevelSaveHandler extends HandlerBase {
     private static final Pattern LEVEL_SAVE_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/level\\/save\\.html)");
 
-    ByteArrayOutputStream levelOutput = new ByteArrayOutputStream();
-
     public LevelSaveHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);
     }
 
-    @Override
-    public InputStream getInputStream() throws IOException {
+    private void handleOffline() throws IOException {
         try {
             File levels = new File(LevelListHandler.LEVELS_DIR_PATH);
 
-            byte[] data = levelOutput.toByteArray();
+            byte[] data = this.outputStream.toByteArray();
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
 
             String username = in.readUTF();
@@ -81,14 +78,15 @@ public class LevelSaveHandler extends HandlerBase {
             }
 
             String err = "error\n" + e.getMessage();
-            return new ByteArrayInputStream(err.getBytes());
+            this.inputStream = new ByteArrayInputStream(err.getBytes());
         }
-        return new ByteArrayInputStream("ok".getBytes());
+        this.inputStream = new ByteArrayInputStream("ok".getBytes());
     }
 
     @Override
-    public OutputStream getOutputStream() throws IOException {
-        return levelOutput;
+    public InputStream getInputStream() throws IOException {
+        handleOffline();
+        return this.inputStream;
     }
 
     public static List<Pattern> regexPatterns() {

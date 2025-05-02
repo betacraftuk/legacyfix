@@ -16,10 +16,16 @@ public class LevelLoadHandler extends HandlerBase {
 
     public LevelLoadHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);
+
+        try {
+            this.prepare();
+        } catch (Throwable t) {
+            LFLogger.error("Failed to handle level load request");
+            LFLogger.error("LevelLoadHandler", t);
+        }
     }
 
-    @Override
-    public InputStream getInputStream() throws IOException {
+    private void prepare() throws IOException {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(data);
 
@@ -58,10 +64,10 @@ public class LevelLoadHandler extends HandlerBase {
             errorOutput.writeUTF(e.getMessage());
             errorOutput.close();
 
-            return new ByteArrayInputStream(errorData.toByteArray());
+            this.inputStream = new ByteArrayInputStream(errorData.toByteArray());
         }
 
-        return new ByteArrayInputStream(data.toByteArray());
+        this.inputStream = new ByteArrayInputStream(data.toByteArray());
     }
 
     public static byte[] readStream(InputStream stream) throws IOException {

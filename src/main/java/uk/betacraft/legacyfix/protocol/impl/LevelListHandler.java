@@ -1,5 +1,6 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
+import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 import java.io.*;
@@ -12,15 +13,17 @@ import java.util.regex.Pattern;
 public class LevelListHandler extends HandlerBase {
     private static final Pattern LEVEL_LIST_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/listmaps\\.jsp\\?user=(.+)?)");
 
-    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelsDir", LegacyFixLauncher.getGameDir() + "/levels");
+    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelDir", LegacyFixLauncher.getGameDir() + "/levels");
 
     public static final String EMPTY_LEVEL = "-";
 
     public LevelListHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);
+
+        this.prepare();
     }
 
-    public InputStream getInputStream() throws IOException {
+    private void prepare() {
         String levels = "";
         for (int i = 0; i < 5; i++) {
             levels += EMPTY_LEVEL + ";";
@@ -29,10 +32,16 @@ public class LevelListHandler extends HandlerBase {
         File levelsFolder = new File(LEVELS_DIR_PATH);
         File levelNames = new File(levelsFolder, "levels.txt");
         if (!levelNames.exists()) {
-            return new ByteArrayInputStream(levels.getBytes());
+            this.inputStream = new ByteArrayInputStream(levels.getBytes());
+        } else {
+            // TODO: ignore this exception maybe? does not seem logical to ever occur
+            try {
+                this.inputStream = new FileInputStream(levelNames);
+            } catch (FileNotFoundException e) {
+                LFLogger.error("File not found but exists?");
+                LFLogger.error("LevelListHandler.prepare", e);
+            }
         }
-
-        return new FileInputStream(levelNames);
     }
 
     public static List<Pattern> regexPatterns() {
