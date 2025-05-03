@@ -90,6 +90,7 @@ public class LegacyFixAgent {
                 new BitDepthPatch(),
                 new ClassicPatch(),
                 new ClassicResizePatch(),
+                new ClassicProgressRendererPatch(),
                 new GameDirPatch(),
                 new IntelPatch(),
                 new DeAwtPatch(),
