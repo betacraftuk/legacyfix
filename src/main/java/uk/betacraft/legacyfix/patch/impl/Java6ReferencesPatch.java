@@ -50,7 +50,7 @@ public class Java6ReferencesPatch extends Patch {
             CtClass affectedBetaClass = pool.getOrNull(className);
 
             if (affectedBetaClass != null) {
-                LFLogger.debug("java6refs", "Processing: " + affectedBetaClass.getName());
+                LFLogger.debug("java6-refs", "Processing: " + affectedBetaClass.getName());
 
                 affectedBetaClass.instrument(new ExprEditor() {
 
@@ -65,7 +65,7 @@ public class Java6ReferencesPatch extends Patch {
                 });
 
                 inst.redefineClasses(new ClassDefinition(affectedBetaClass.toClass(), affectedBetaClass.toBytecode()));
-                LFLogger.debug("java6refs", "Finished processing: " + affectedBetaClass.getName());
+                LFLogger.debug("java6-refs", "Finished processing: " + affectedBetaClass.getName());
             }
         }
     }

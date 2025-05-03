@@ -8,7 +8,6 @@ import javassist.bytecode.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;

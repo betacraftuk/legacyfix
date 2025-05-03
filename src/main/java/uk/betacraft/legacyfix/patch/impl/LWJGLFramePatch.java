@@ -16,7 +16,7 @@ import java.lang.instrument.Instrumentation;
 public class LWJGLFramePatch extends Patch {
 
     public LWJGLFramePatch() {
-        super("lwjgl-framepatch", "Patches LWJGL Frame for title and resolution", true);
+        super("lwjgl-frame", "Patches LWJGL Frame for title and resolution", true);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class LWJGLFramePatch extends Patch {
                         break;
                     }
                 } catch (Throwable t) {
-                    LFLogger.error("lwjglframepatch", t);
+                    LFLogger.error("lwjgl-frame", t);
                 }
             }
         });
