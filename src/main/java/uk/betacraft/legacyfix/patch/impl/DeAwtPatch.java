@@ -386,11 +386,70 @@ public class DeAwtPatch extends Patch {
     }
 
     private void eraseAppletReferences(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
-        eraseAppletReferencesClassic(codeIterator, constPool, pos, minecraftAppletClass);
+        eraseAppletReferencesClassic0_24(codeIterator, constPool, pos, minecraftAppletClass);
+        eraseAppletReferencesClassic0_25(codeIterator, constPool, pos, minecraftAppletClass);
+        eraseAppletReferencesClassic0_30(codeIterator, constPool, pos, minecraftAppletClass);
         eraseAppletReferencesIndev(codeIterator, constPool, pos);
     }
 
-    private void eraseAppletReferencesClassic(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+    private void eraseAppletReferencesClassic0_24(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+        // This check always appears at the start of the method
+        if (pos != 0)
+            return;
+
+        if (eraseAppletReferencesClassic0_24And0_25Shared("getDocumentBase", codeIterator, constPool, pos, minecraftAppletClass)) {
+            LFLogger.debug("deawt", "Erased Classic 0.24/0.25 applet references");
+        }
+    }
+
+    private void eraseAppletReferencesClassic0_25(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+        if (pos != 23)
+            return;
+
+        if (eraseAppletReferencesClassic0_24And0_25Shared("getCodeBase", codeIterator, constPool, pos, minecraftAppletClass)) {
+            LFLogger.debug("deawt", "Erased Classic 0.25 applet references");
+        }
+    }
+
+    private boolean eraseAppletReferencesClassic0_24And0_25Shared(String appletMethodCall, CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
+        if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
+                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+                codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 13) != Opcode.LDC ||
+                codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 18) != Opcode.IFNE ||
+                codeIterator.byteAt(pos + 21) != Opcode.ACONST_NULL ||
+                codeIterator.byteAt(pos + 22) != Opcode.ASTORE_1) {
+            return false;
+        }
+
+        String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
+        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType))
+            return false;
+
+        String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 5));
+        if (!appletMethodCall.equals(refName))
+            return false;
+
+        int ldcPos = codeIterator.byteAt(pos + 14);
+        if (!PatchHelper.isString(constPool, ldcPos))
+            return false;
+
+        String host = constPool.getStringInfo(ldcPos);
+        if (!"minecraft.net".equals(host))
+            return false;
+
+        // Erase the check
+        for (int i = 0; i < 23; i++) {
+            codeIterator.writeByte(Opcode.NOP, pos + i);
+        }
+
+        return true;
+    }
+
+    private void eraseAppletReferencesClassic0_30(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         // This check always appears at the start of the method
         if (pos != 0)
             return;
@@ -417,7 +476,7 @@ public class DeAwtPatch extends Patch {
             codeIterator.writeByte(Opcode.NOP, pos + i);
         }
 
-        LFLogger.debug("deawt", "Erased Classic applet references");
+        LFLogger.debug("deawt", "Erased Classic 0.30 applet references");
     }
 
     private void eraseAppletReferencesIndev(CodeIterator codeIterator, ConstPool constPool, int pos) {
