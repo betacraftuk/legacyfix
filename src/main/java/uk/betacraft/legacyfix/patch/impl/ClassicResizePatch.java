@@ -66,11 +66,13 @@ public class ClassicResizePatch extends Patch {
                 if (m.getClassName().equals("org.lwjgl.opengl.Display") && m.getMethodName().equals("isCloseRequested")) {
                     // @formatter:off
                     m.replace(
-                "{ " +
+                        "{ " +
+                        "    int lastWidth = " + thisWidth + ";" +
+                        "    int lastHeight = " + thisHeight + ";" +
                         "    " + thisWidth + " = org.lwjgl.opengl.Display.getWidth();" +
                         "    " + thisHeight + " = org.lwjgl.opengl.Display.getHeight();" +
                         (screenFieldName != null && initMethod != null ?
-                        "    if (" + thisScreen + " != null) {" +
+                        "    if (" + thisScreen + " != null && (" + thisWidth + " != lastWidth || " + thisHeight + " != lastHeight)) {" +
                         "        " + thisScreen + "." + initMethod.getName() + "(this, " + thisWidth + " * 240 /" + thisHeight + ", " + thisHeight + " * 240 /" + thisHeight + ");" +
                         "    }" : ""
                         ) +
