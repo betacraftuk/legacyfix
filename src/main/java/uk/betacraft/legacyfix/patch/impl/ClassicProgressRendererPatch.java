@@ -53,13 +53,13 @@ public class ClassicProgressRendererPatch extends Patch {
 
         method.insertBefore(
                 "long time;" +
-                "if (" + minecraftRunningRef + ") {" +
-                "    if (!((time = System.currentTimeMillis()) - legacyfix.helper.ProgressRendererHelper.lastTime < 0L || time - legacyfix.helper.ProgressRendererHelper.lastTime >= 20L)) {" +
-                "        return;" +
-                "    } else {" +
-                "        legacyfix.helper.ProgressRendererHelper.lastTime = time;" +
-                "    }" +
-                "}"
+                        "if (" + minecraftRunningRef + ") {" +
+                        "    if (!((time = System.currentTimeMillis()) - legacyfix.helper.ProgressRendererHelper.lastTime < 0L || time - legacyfix.helper.ProgressRendererHelper.lastTime >= 20L)) {" +
+                        "        return;" +
+                        "    } else {" +
+                        "        legacyfix.helper.ProgressRendererHelper.lastTime = time;" +
+                        "    }" +
+                        "}"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(progressRendererClass.getName()), progressRendererClass.toBytecode()));
