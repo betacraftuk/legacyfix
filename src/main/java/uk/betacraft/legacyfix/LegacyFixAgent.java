@@ -89,7 +89,7 @@ public class LegacyFixAgent {
                 new ModloaderPatch(),
                 new BitDepthPatch(),
                 new ClassicPatch(),
-                new ClassicResizePatch(),
+                new ClassicIndevResizePatch(),
                 new ClassicProgressRendererPatch(),
                 new GameDirPatch(),
                 new IntelPatch(),

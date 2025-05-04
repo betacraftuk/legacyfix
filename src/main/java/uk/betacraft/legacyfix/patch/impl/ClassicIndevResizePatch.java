@@ -12,14 +12,19 @@ import uk.betacraft.legacyfix.patch.PatchHelper;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
-public class ClassicResizePatch extends Patch {
-    public ClassicResizePatch() {
-        super("classic-resize", "Fixes resizing in Classic versions", true);
+public class ClassicIndevResizePatch extends Patch {
+    public ClassicIndevResizePatch() {
+        super("classic-indev-resize", "Fixes resizing in Classic versions", true);
     }
 
     @Override
     public void apply(Instrumentation inst) throws Exception {
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
+        for (CtMethod method : minecraftClass.getDeclaredMethods()) {
+            if (hasDesktopDisplayModeCall(method))
+                throw new PatchException("Detected version past in-20100110, patch won't be applied");
+        }
+
         CtMethod runMethod = minecraftClass.getDeclaredMethod("run");
 
         CtField[] fields = minecraftClass.getDeclaredFields();
@@ -87,6 +92,31 @@ public class ClassicResizePatch extends Patch {
         patchHud(inst, findHudField(), width, height);
 
         inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+    }
+
+    private boolean hasDesktopDisplayModeCall(CtMethod method) {
+        try {
+            CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
+            CodeIterator codeIterator = codeAttribute.iterator();
+            ConstPool cp = method.getMethodInfo().getConstPool();
+
+            while (codeIterator.hasNext()) {
+                int pos = codeIterator.next();
+
+                if (codeIterator.byteAt(pos) != Opcode.IFEQ ||
+                        codeIterator.byteAt(pos + 3) != Opcode.INVOKESTATIC ||
+                        codeIterator.byteAt(pos + 6) != Opcode.INVOKESTATIC ||
+                        codeIterator.byteAt(pos + 9) != Opcode.ALOAD_0
+                ) continue;
+
+                String refName = cp.getMethodrefName(codeIterator.u16bitAt(pos + 4));
+                if ("getDesktopDisplayMode".equals(refName))
+                    return true;
+            }
+        } catch (Exception ignored) {
+        }
+
+        return false;
     }
 
     private CtField findScreen() {
@@ -316,6 +346,8 @@ public class ClassicResizePatch extends Patch {
 
     @Override
     public boolean shouldApply() {
-        return super.shouldApply() && pool.getOrNull("com.mojang.minecraft.MinecraftApplet") != null;
+        return super.shouldApply() &&
+                (pool.getOrNull("com.mojang.minecraft.MinecraftApplet") != null ||
+                        pool.getOrNull("net.minecraft.client.MinecraftApplet") != null);
     }
 }
