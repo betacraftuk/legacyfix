@@ -7,6 +7,7 @@ import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;
 import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -146,7 +147,7 @@ public class LegacyFixLauncher {
 
         if (hasKey("gameDir")) {
             args.add("--workDir");
-            args.add(getValue("gameDir", "."));
+            args.add(getGameDir());
         }
 
         if (hasKey("server")) {
@@ -225,7 +226,18 @@ public class LegacyFixLauncher {
     }
 
     public static String getGameDir() {
-        return getValue("gameDir", "minecraft");
+        String gameDir = getValue("gameDir", null);
+
+        if (gameDir == null) {
+            try {
+                return new File(".").getCanonicalPath();
+            } catch (Throwable t) {
+                LFLogger.error("LegacyFixLauncher", t);
+                return ".";
+            }
+        }
+
+        return gameDir;
     }
 
     public static String getAssetsDir() {

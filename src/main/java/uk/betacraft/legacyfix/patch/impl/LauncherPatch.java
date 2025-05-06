@@ -54,7 +54,7 @@ public class LauncherPatch extends Patch {
             throw new PatchException("Parameters class not found?");
         }
 
-        patch(inst, parametersClass, "getString", "getList");
+        patch(inst, parametersClass, "getString", "getString", "getList");
     }
 
     private void patchMultiMC(Instrumentation inst) throws Exception {
@@ -63,10 +63,10 @@ public class LauncherPatch extends Patch {
             throw new PatchException("ParamBucket class not found?");
         }
 
-        patch(inst, parametersClass, "firstSafe", "allSafe");
+        patch(inst, parametersClass, "firstSafe", "first", "allSafe");
     }
 
-    private void patch(Instrumentation inst, CtClass parametersClass, String getStringMethodName, String getListMethodName) throws Exception {
+    private void patch(Instrumentation inst, CtClass parametersClass, String getStringMethodName, String getStringUnsafeMethodName, String getListMethodName) throws Exception {
         if (parametersClass.isFrozen()) {
             parametersClass.defrost();
         }
@@ -92,6 +92,9 @@ public class LauncherPatch extends Patch {
             "if ($1.equals(\"traits\")) {" +
             "    $_ = new java.util.ArrayList();" +
             "    $_.add(\"noapplet\");" +
+            "} else if ($1.equals(\"param\") && $_.size() == 0) {" +
+            "    $_.add($0." + getStringUnsafeMethodName + "(\"userName\"));" +
+            "    $_.add($0." + getStringUnsafeMethodName + "(\"sessionId\"));" +
             "}"
         );
         //@formatter:on
@@ -300,6 +303,8 @@ public class LauncherPatch extends Patch {
         netMinecraftJson.put("assetIndex", assetIndex);
 
         try {
+            netMinecraftJsonFile.getParentFile().mkdirs();
+
             FileOutputStream fos = new FileOutputStream(netMinecraftJsonFile);
             fos.write(netMinecraftJson.toString(4).getBytes("UTF-8"));
             fos.close();
@@ -355,6 +360,11 @@ public class LauncherPatch extends Patch {
                     if (setting[0].startsWith("--")) {
                         LegacyFixLauncher.setValue(setting[0].substring(2), setting.length == 2 ? setting[1] : null);
                     } else {
+                        System.setProperty(setting[0], setting.length == 2 ? setting[1] : "");
+
+                        if (LegacyFixAgent.getSettings().containsKey(setting[0]))
+                            LegacyFixAgent.getSettings().remove(setting[0]);
+
                         LegacyFixAgent.getSettings().put(setting[0], setting.length == 2 ? setting[1] : "");
                     }
                 }
