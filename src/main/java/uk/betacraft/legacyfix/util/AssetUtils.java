@@ -5,7 +5,6 @@ import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,10 +16,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AssetUtils {
-    private static final File ASSETS_DIR = new File(LegacyFixLauncher.getAssetsDir());
-    private static final File RESOURCES_DIR = new File(LegacyFixLauncher.getGameDir(), "resources/");
+    private static File ASSETS_DIR = null;
+    private static File RESOURCES_DIR = null;
 
     public static List<AssetObject> assets = new LinkedList<AssetObject>();
+
+    private static File getAssetsDir() {
+        if (ASSETS_DIR == null)
+            ASSETS_DIR = new File(LegacyFixLauncher.getAssetsDir());
+
+        return ASSETS_DIR;
+    }
+
+    private static File getResourcesDir() {
+        if (RESOURCES_DIR == null)
+            RESOURCES_DIR = new File(LegacyFixLauncher.getGameDir(), "resources/");
+
+        return RESOURCES_DIR;
+    }
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
         String assetIndexPath = LegacyFixLauncher.getAssetIndexPath();
@@ -119,7 +132,7 @@ public class AssetUtils {
                 long size;
 
                 // Use local file if it overrides the asset at its path
-                File localAsset = new File(RESOURCES_DIR, key).getCanonicalFile();
+                File localAsset = new File(getResourcesDir(), key).getCanonicalFile();
 
                 localAssetsToSkip.add(localAsset);
 
@@ -129,14 +142,14 @@ public class AssetUtils {
                     path = localAsset.getPath();
                 } else {
                     size = assetObject.getLong("size");
-                    path = new File(ASSETS_DIR, "objects/" + hash.substring(0, 2) + "/" + hash).getPath();
+                    path = new File(getAssetsDir(), "objects/" + hash.substring(0, 2) + "/" + hash).getPath();
                 }
 
                 assets.add(new AssetObject(key, size, path));
             }
 
             // Add the remaining (additional) local asset files
-            List<File> localAssets = recursePaths(RESOURCES_DIR, new LinkedList<File>());
+            List<File> localAssets = recursePaths(getResourcesDir(), new LinkedList<File>());
 
             localAssets.removeAll(localAssetsToSkip);
 
@@ -144,9 +157,9 @@ public class AssetUtils {
                 if (additionalAsset.isDirectory())
                     continue;
 
-                String key = additionalAsset.getCanonicalPath().substring(RESOURCES_DIR.getCanonicalPath().length() + 1).replace("\\", "/");
+                String key = additionalAsset.getCanonicalPath().substring(getResourcesDir().getCanonicalPath().length() + 1).replace("\\", "/");
 
-                if (key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini"))
+                if (key.startsWith("._") || key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini"))
                     continue;
 
                 assets.add(new AssetObject(key, additionalAsset.length(), additionalAsset.getPath()));
@@ -186,7 +199,7 @@ public class AssetUtils {
         if (LegacyFixLauncher.hasKey("usesWorkDir"))
             return new File(LegacyFixLauncher.getGameDir(), "assets");
         else // 13w24a-13w48b
-            return ASSETS_DIR;
+            return getAssetsDir();
     }
 
     // Used by GameDirPatch

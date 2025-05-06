@@ -1,0 +1,205 @@
+{
+    "empty": {
+        "id": "empty",
+        "sha1": "5a48d9fc5877b925eaa65ddef68cb5dbaee9df64",
+        "size": 15,
+        "totalSize": 0,
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/empty.json"
+    },
+    "c0.0.22a_01": {
+        "sha1": "b6a978c44cc93d2d8d9c04e0fd94cdc863fb76b4",
+        "totalSize": 8878067,
+        "size": 3551,
+        "id": "c0.0.22a_01",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/c0.0.22a_01.json"
+    },
+    "20100104": {
+        "sha1": "a905c8ec5a603d47bf21bcacd0c13e6293026204",
+        "totalSize": 6817768,
+        "size": 2546,
+        "id": "20100104",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100104.json"
+    },
+    "20100110": {
+        "sha1": "a795cbadde0aeaaf762b53c990e3ce43ab282303",
+        "totalSize": 6929636,
+        "size": 3663,
+        "id": "20100110",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100110.json"
+    },
+    "20100124": {
+        "sha1": "60375efe73f58fe06d85d1dcecd303612027d750",
+        "totalSize": 6951191,
+        "size": 3999,
+        "id": "20100124",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100124.json"
+    },
+    "20100206": {
+        "sha1": "3631f79aff31f702599c4532d1e8256a33f48b4e",
+        "totalSize": 6986880,
+        "size": 4242,
+        "id": "20100206",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100206.json"
+    },
+    "20100212": {
+        "sha1": "7aba2830766ba9ec8f2c89c416cf0077d38123d7",
+        "totalSize": 7345652,
+        "size": 9363,
+        "id": "20100212",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100212.json"
+    },
+    "20100607": {
+        "sha1": "d53120c37a59b6ae955de96f022e762979f033be",
+        "totalSize": 7365435,
+        "size": 9804,
+        "id": "20100607",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/20100607.json"
+    },
+    "a1.0.3": {
+        "sha1": "2b2a0a33322198186dc267398c7c263dd71d2be4",
+        "totalSize": 8114365,
+        "size": 14866,
+        "id": "a1.0.3",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.0.3.json"
+    },
+    "a1.0.8": {
+        "sha1": "7eae29a6ce647c41834e4ada2cbf1ae138806d7d",
+        "totalSize": 8520004,
+        "size": 16369,
+        "id": "a1.0.8",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.0.8.json"
+    },
+    "a1.0.9": {
+        "sha1": "cb91f7267afde836bdf61c7d10520752cd6bd035",
+        "totalSize": 8189697,
+        "size": 15715,
+        "id": "a1.0.9",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.0.9.json"
+    },
+    "a1.0.12": {
+        "sha1": "0c446877856c0b0a125705a2dfaa9edbacd12a7a",
+        "totalSize": 8232278,
+        "size": 16574,
+        "id": "a1.0.12",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.0.12.json"
+    },
+    "a1.0.14": {
+        "sha1": "5cb41ed1f26c5621a5f561cf46342f8bd9089b22",
+        "totalSize": 29554726,
+        "size": 20398,
+        "id": "a1.0.14",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.0.14.json"
+    },
+    "a1.2.0": {
+        "sha1": "e4021e2b5f56e98fc81f2580e43c88f441521595",
+        "totalSize": 40600243,
+        "size": 24074,
+        "id": "a1.2.0",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/a1.2.0.json"
+    },
+    "b1.2": {
+        "sha1": "21da0b8e414dbd084a9b6bb548991128beed153a",
+        "totalSize": 40635406,
+        "size": 24919,
+        "id": "b1.2",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/b1.2.json"
+    },
+    "b1.4": {
+        "sha1": "c8d4f983fc5d3d44228163c11746a4d896b9f41d",
+        "totalSize": 40778590,
+        "size": 26805,
+        "id": "b1.4",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/b1.4.json"
+    },
+    "b1.5": {
+        "sha1": "1644053562a851fb970d80c280f34201669c2b83",
+        "totalSize": 40910045,
+        "size": 27745,
+        "id": "b1.5",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/b1.5.json"
+    },
+    "b1.7": {
+        "sha1": "2f88626ab214f2d5d4fd05e0700990112e9c3445",
+        "totalSize": 40922004,
+        "size": 27996,
+        "id": "b1.7",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/b1.7.json"
+    },
+    "1.0.0-rc1": {
+        "sha1": "e15ff8a06bfc189cea1952451f2c52ccd8fc241d",
+        "totalSize": 41790336,
+        "size": 36587,
+        "id": "1.0.0-rc1",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/1.0.0-rc1.json"
+    },
+    "1.2": {
+        "sha1": "0f01c0c32f524e80cc57e683e3ce36a1aaee7843",
+        "totalSize": 42166084,
+        "size": 40782,
+        "id": "1.2",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/1.2.json"
+    },
+    "1.4": {
+        "sha1": "5eae14c6678a530507c672a5c8d1eb1ed98d5b12",
+        "totalSize": 47500989,
+        "size": 92710,
+        "id": "1.4",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/1.4.json"
+    },
+    "13w16a": {
+        "sha1": "64c948a6affbf60b0f9f487bc34c05c82a48cfa7",
+        "totalSize": 45019944,
+        "size": 68297,
+        "id": "13w16a",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w16a.json"
+    },
+    "13w18c": {
+        "sha1": "d7de75c92fa12b121627fe656a619ef43035fb26",
+        "totalSize": 44969823,
+        "size": 68307,
+        "id": "13w18c",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w18c.json"
+    },
+    "13w19a": {
+        "sha1": "ec1d35986cce42884b7829a848c77a20f0960895",
+        "totalSize": 45089869,
+        "size": 68033,
+        "id": "13w19a",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w19a.json"
+    },
+    "13w22a": {
+        "sha1": "ecdcf8270f1df16bc0b3aa9d65dbd0d4f99f7b98",
+        "totalSize": 45747910,
+        "size": 77394,
+        "id": "13w22a",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w22a.json"
+    },
+    "13w24a": {
+        "sha1": "1c9b04ffb265eee0afba8d5e890fc86fec6684e6",
+        "totalSize": 46460216,
+        "size": 78553,
+        "id": "13w24a",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w24a.json"
+    },
+    "1.6": {
+        "sha1": "c9afef5a604627517baba6fce405cac881396c04",
+        "totalSize": 46416784,
+        "size": 78339,
+        "id": "1.6",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/1.6.json"
+    },
+    "13w42a": {
+        "sha1": "31f0a6910c88c63bb7ef5a29e8c044cb1a3f0be3",
+        "totalSize": 47003712,
+        "size": 78997,
+        "id": "13w42a",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/13w42a.json"
+    },
+    "1.7.2": {
+        "sha1": "28058b8ea0af98f1ba6d49e8bd135c6d765b47e0",
+        "totalSize": 111273415,
+        "size": 75061,
+        "id": "1.7.2",
+        "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/1.7.2.json"
+    }
+}

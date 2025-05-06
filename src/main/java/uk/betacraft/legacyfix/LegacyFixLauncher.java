@@ -1,5 +1,6 @@
 package uk.betacraft.legacyfix;
 
+import uk.betacraft.legacyfix.patch.impl.LauncherPatch;
 import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
 import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;
@@ -44,6 +45,15 @@ public class LegacyFixLauncher {
         // Classic 0.30
         if ("false".equals(getValue("demo", "false"))) {
             setValue("haspaid", "true");
+        }
+
+        if (!hasKey("gameDir") && hasKey("workDir")) {
+            setValue("gameDir", getValue("workDir", "."));
+        }
+
+        // This needs to run *after* main() initialized 'arguments'
+        if (LauncherPatch.applied) {
+            LauncherPatch.downloadAssetsForPrism();
         }
 
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
@@ -189,9 +199,9 @@ public class LegacyFixLauncher {
             arguments.add("--" + key);
             if (val != null)
                 arguments.add(val);
+        } else {
+            arguments.set(arguments.indexOf("--" + key) + 1, val);
         }
-
-        arguments.set(arguments.indexOf("--" + key) + 1, val);
     }
 
     public static boolean hasKey(String key) {

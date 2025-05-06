@@ -14,5 +14,3 @@ And point the launcher to the `legacyfix-2.0.jar` file you downloaded earlier:
 ![](.github/img/prism/file-picker.webp)
 A new entry should appear in the list:
 ![](.github/img/prism/lf-agent-entry.webp)
-
-## TODO: Fixing inaccurate sounds (versions below release 1.7.3)

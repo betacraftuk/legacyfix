@@ -111,6 +111,28 @@ public class RequestUtil {
         }
     }
 
+    public static boolean download(Request req, File destination) {
+        try {
+            URL url = new URL(req.REQUEST_URL);
+
+            BufferedInputStream bin = new BufferedInputStream(url.openStream());
+            FileOutputStream fos = new FileOutputStream(destination);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = bin.read(buffer, 0, 1024)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+
+            bin.close();
+            fos.close();
+
+            return true;
+        } catch (Throwable t) {
+            LFLogger.error("download", t);
+            return false;
+        }
+    }
+
     public static WebData performJoinServer(String uuid, String sessionId, String serverId) {
         String accessToken;
         if (sessionId.contains(":"))
