@@ -41,6 +41,10 @@ public class LauncherPatch extends Patch {
             LFLogger.info("Prism Launcher detected, patching!");
             patchPrism(inst);
             applied = true;
+        } else if (mainClass.equals("org.multimc.EntryPoint")) {
+            LFLogger.info("MultiMC detected, patching!");
+            patchMultiMC(inst);
+            applied = true;
         }
     }
 
@@ -50,17 +54,30 @@ public class LauncherPatch extends Patch {
             throw new PatchException("Parameters class not found?");
         }
 
+        patch(inst, parametersClass, "getString", "getList");
+    }
+
+    private void patchMultiMC(Instrumentation inst) throws Exception {
+        CtClass parametersClass = pool.getOrNull("org.multimc.ParamBucket");
+        if (parametersClass == null) {
+            throw new PatchException("ParamBucket class not found?");
+        }
+
+        patch(inst, parametersClass, "firstSafe", "allSafe");
+    }
+
+    private void patch(Instrumentation inst, CtClass parametersClass, String getStringMethodName, String getListMethodName) throws Exception {
         if (parametersClass.isFrozen()) {
             parametersClass.defrost();
         }
 
         CtMethod getStringDefault = parametersClass.getDeclaredMethod(
-                "getString",
+                getStringMethodName,
                 pool.get(new String[]{"java.lang.String", "java.lang.String"})
         );
 
         CtMethod getList = parametersClass.getDeclaredMethod(
-                "getList",
+                getListMethodName,
                 pool.get(new String[]{"java.lang.String", "java.util.List"})
         );
 
