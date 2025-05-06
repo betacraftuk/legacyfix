@@ -263,7 +263,7 @@ public class LauncherPatch extends Patch {
             }
         }
 
-        LFLogger.info("launcher", "All assets were downloaded for asset index '" + assetIndex + "'");
+        LFLogger.info("All assets were downloaded for asset index '" + assetIndex + "'");
 
         patchNetMinecraftJson(version, assetIndexesJson.getJSONObject(assetIndex));
 
