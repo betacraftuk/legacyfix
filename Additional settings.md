@@ -12,7 +12,7 @@ Settings of LegacyFix can be altered through Java arguments.
 ```
 -Dlf.vsync
 ```
-## "Minecraft 1.6 is out" notice
+## "Minecraft 1.6 is out" notice in 1.5.2
 ```
 -Dlf.showNotice
 ```
