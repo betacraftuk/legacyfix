@@ -11,7 +11,7 @@ Create a new instance or edit an existing one, then go to the **Version** tab.<b
 On the sidebar, click  **Open .minecraft** button:
 ![](.github/img/multimc/open-dotminecraft.webp)
 And move the `legacyfix-2.0.jar` file you downloaded earlier into the instance directory:
-![](.github/img/multimc/file-picker.webp)
+![](.github/img/multimc/move-to-instance-directory.webp)
 Next, go to the **Settings** tab.<br>
 Enable **Java arguments**, and add `-javaagent:legacyfix-2.0.jar` to it:
 ![](.github/img/multimc/lf-settings-java-args-1.webp)
