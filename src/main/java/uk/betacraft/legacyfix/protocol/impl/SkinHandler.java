@@ -33,7 +33,7 @@ public class SkinHandler extends HandlerBase {
     public void connect() throws IOException {
         Matcher matcher = this.patternUsed.matcher(this.getURLString());
         if (!matcher.find()) {
-            LFLogger.error("JoinServerHandler", "No match for skin URL :(");
+            LFLogger.error("SkinHandler", "No match for skin URL :(");
             return;
         }
 

@@ -194,6 +194,13 @@ public class AssetUtils {
         return getExpectedAssetsDir().getPath().equals(path);
     }
 
+    // Used by GameDirPatch
+    public static File getCacheDirectory() {
+        File file = new File(LegacyFixLauncher.getGameDir(), "cache");
+        file.mkdirs();
+        return file;
+    }
+
     public static File getExpectedAssetsDir() {
         // 13w16a-13w23b
         if (LegacyFixLauncher.hasKey("usesWorkDir"))

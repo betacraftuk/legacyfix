@@ -47,7 +47,7 @@ public class MinecraftAPIUtils {
             return null;
 
         try {
-            URL uuidLookup = new URI(UUID_LOOKUP_URL + name).toURL();
+            URL uuidLookup = RequestUtil.createDirectURL(UUID_LOOKUP_URL + name);
 
             return new JSONObject(new String(RequestUtil.readInputStream(uuidLookup.openStream()), "UTF-8"));
         } catch (Throwable t) {
@@ -68,7 +68,7 @@ public class MinecraftAPIUtils {
 
     public static SkinData fetchSkin(String uuid) {
         try {
-            URL profileLookup = new URI(PROFILE_LOOKUP_URL + uuid).toURL();
+            URL profileLookup = RequestUtil.createDirectURL(PROFILE_LOOKUP_URL + uuid);
 
             JSONObject profile = new JSONObject(new String(RequestUtil.readInputStream(profileLookup.openStream()), "UTF-8"));
             String base64tex = profile.getJSONArray("properties").getJSONObject(0).getString("value");
@@ -76,14 +76,14 @@ public class MinecraftAPIUtils {
             JSONObject textures = new JSONObject(new String(Base64Utils.decode(base64tex), "UTF-8")).getJSONObject("textures");
 
             JSONObject skinObj = textures.getJSONObject("SKIN");
-            URL skinUrl = new URI(skinObj.getString("url")).toURL();
+            URL skinUrl = RequestUtil.createDirectURL(skinObj.getString("url"));
 
             byte[] cape;
             byte[] skin = RequestUtil.readInputStream(skinUrl.openStream());
 
             if (textures.has("CAPE")) {
                 JSONObject capeObj = textures.getJSONObject("CAPE");
-                URL capeUrl = new URL(capeObj.getString("url"));
+                URL capeUrl = RequestUtil.createDirectURL(capeObj.getString("url"));
 
                 cape = RequestUtil.readInputStream(capeUrl.openStream());
             } else {

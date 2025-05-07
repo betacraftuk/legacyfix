@@ -103,8 +103,6 @@ public class LauncherPatch extends Patch {
     }
 
     public static void downloadAssetsForPrism() {
-        if (LegacyFixLauncher.getAssetIndexPath() != null)
-            return;
 
         String customJarName = null;
         File customJarJsonFile = new File("../patches/customjar.json");
@@ -154,8 +152,6 @@ public class LauncherPatch extends Patch {
         JSONArray versionDataJson = new JSONArray(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/version_data.json"))));
         if (customJarName != null) {
             assetIndex = determineAssetIndex(customJarName, assetIndexesJson, versionDataJson);
-        } else {
-            minecraftVersion = version;
         }
 
         if (assetIndex == null) {
@@ -164,63 +160,74 @@ public class LauncherPatch extends Patch {
             minecraftVersion = customJarName;
         }
 
-        downloadServerFor1_3Snapshots();
-
         if (assetIndex == null) {
             LFLogger.info("No matching asset index found for version " + version);
             return;
+        } else {
+            minecraftVersion = version;
         }
 
-        JSONObject assetIndexSnippet = assetIndexesJson.getJSONObject(assetIndex);
+        // don't process asset indexes for versions past 13w48b,
+        // or for configurations where the user has specified the asset index,
+        // as the asset index should have proper assets already.
+        if (LegacyFixLauncher.getAssetIndexPath() != null)
+            return;
+
+        downloadServerFor1_3Snapshots();
 
         File assetIndexFile = new File("../../../assets/indexes/" + assetIndex + ".json");
-        boolean valid = false;
-        checkValid:
-        {
-            if (!assetIndexFile.exists())
-                break checkValid;
-
-            if (assetIndexFile.length() != assetIndexSnippet.getLong("size"))
-                break checkValid;
-
-            String localSha1 = null;
-            try {
-                localSha1 = HashUtils.sha1(new String(RequestUtil.readInputStream(new FileInputStream(assetIndexFile)), "UTF-8"));
-            } catch (Throwable t) {
-                LFLogger.error("launcher", "Could not read asset index " + assetIndex);
-                LFLogger.error("launcher", t);
-                break checkValid;
-            }
-
-            if (!assetIndexSnippet.getString("sha1").equals(localSha1))
-                break checkValid;
-
-            valid = true;
-        }
 
         JSONObject assetIndexJson = null;
-        if (!valid) {
-            Request req = new Request();
-            req.setUrl(assetIndexSnippet.getString("url"));
+        if (assetIndexesJson.has(assetIndex)) {
+            JSONObject assetIndexSnippet = assetIndexesJson.getJSONObject(assetIndex);
 
-            WebData response = RequestUtil.performRawGETRequest(req);
-            if (!response.successful()) {
-                LFLogger.error("launcher", "Failed to download asset index from: " + req.REQUEST_URL);
-                LFLogger.error("launcher", response.toString());
-                return;
+            boolean valid = false;
+            checkValid:
+            {
+                if (!assetIndexFile.exists())
+                    break checkValid;
+
+                if (assetIndexFile.length() != assetIndexSnippet.getLong("size"))
+                    break checkValid;
+
+                String localSha1;
+                try {
+                    localSha1 = HashUtils.sha1(new String(RequestUtil.readInputStream(new FileInputStream(assetIndexFile)), "UTF-8"));
+                } catch (Throwable t) {
+                    LFLogger.error("launcher", "Could not read asset index " + assetIndex);
+                    LFLogger.error("launcher", t);
+                    break checkValid;
+                }
+
+                if (!assetIndexSnippet.getString("sha1").equals(localSha1))
+                    break checkValid;
+
+                valid = true;
             }
 
-            try {
-                FileOutputStream fos = new FileOutputStream(assetIndexFile);
-                fos.write(response.getData());
-                fos.close();
-            } catch (Throwable t) {
-                LFLogger.error("launcher", "Failed to save asset index to: " + assetIndexFile.getAbsolutePath());
-                LFLogger.error("launcher", t);
-                return;
-            }
+            if (!valid) {
+                Request req = new Request();
+                req.setUrl(assetIndexSnippet.getString("url"));
 
-            assetIndexJson = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(response.getData()))));
+                WebData response = RequestUtil.performRawGETRequest(req);
+                if (!response.successful()) {
+                    LFLogger.error("launcher", "Failed to download asset index from: " + req.REQUEST_URL);
+                    LFLogger.error("launcher", response.toString());
+                    return;
+                }
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(assetIndexFile);
+                    fos.write(response.getData());
+                    fos.close();
+                } catch (Throwable t) {
+                    LFLogger.error("launcher", "Failed to save asset index to: " + assetIndexFile.getAbsolutePath());
+                    LFLogger.error("launcher", t);
+                    return;
+                }
+
+                assetIndexJson = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(response.getData()))));
+            }
         }
 
         if (assetIndexJson == null) {
@@ -231,6 +238,8 @@ public class LauncherPatch extends Patch {
                 return;
             }
         }
+
+        LegacyFixLauncher.setValue("assetIndex", assetIndex);
 
         File assetsDir = assetIndexFile.getParentFile().getParentFile();
         try {
@@ -344,12 +353,6 @@ public class LauncherPatch extends Patch {
                 continue;
 
             String assetIndex = versionData.getString("assetIndex");
-            LegacyFixLauncher.setValue("assetIndex", assetIndex);
-
-            if (!assetIndexesJson.has(assetIndex)) {
-                LFLogger.error("launcher", "No '" + assetIndex + "' in asset_indexes.json");
-                return null;
-            }
 
             if (versionData.has("settings")) {
                 JSONArray settings = versionData.getJSONArray("settings");
@@ -368,6 +371,11 @@ public class LauncherPatch extends Patch {
                         LegacyFixAgent.getSettings().put(setting[0], setting.length == 2 ? setting[1] : "");
                     }
                 }
+            }
+
+            if (!assetIndexesJson.has(assetIndex)) {
+                LFLogger.error("launcher", "No '" + assetIndex + "' in asset_indexes.json");
+                return null;
             }
 
             return assetIndex;

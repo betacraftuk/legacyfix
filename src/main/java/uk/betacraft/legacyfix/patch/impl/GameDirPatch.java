@@ -20,6 +20,9 @@ public class GameDirPatch extends Patch {
         CtConstructor fileConstructor = fileClass.getDeclaredConstructor(
                 new CtClass[]{PatchHelper.stringClass, PatchHelper.stringClass});
 
+        CtConstructor fileConstructor2 = fileClass.getDeclaredConstructor(
+                new CtClass[]{fileClass, PatchHelper.stringClass});
+
         // @formatter:off
         fileConstructor.insertBefore(
             "if ($1.equals(System.getenv(\"APPDATA\")) || $1.equals(System.getProperty(\"user.home\"))) {" +
@@ -30,6 +33,18 @@ public class GameDirPatch extends Patch {
             "        $2 = (String) legacyfix.getMethod(\"getGameDir\", null).invoke(null, null);" +
             "    }" +
             "}"
+        );
+
+        // Make skin cache be per-instance to avoid issues related to caching 'fixed' or non-'fixed' skins between versions
+        fileConstructor2.insertBefore(
+            "try {" +
+            "    if ($1.path.contains(\"assets\") && $2.equals(\"skins\")) {" +
+            "        Class assetUtils = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+            "        if (((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$1.path})).booleanValue()) {" +
+            "            $1 = assetUtils.getMethod(\"getCacheDirectory\", null).invoke(null, null);" +
+            "        }" +
+            "    }" +
+            "} catch (Throwable t) { t.printStackTrace(); }"
         );
 
         CtMethod existsMethod = fileClass.getDeclaredMethod("exists");

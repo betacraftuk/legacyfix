@@ -5,7 +5,9 @@ import uk.betacraft.legacyfix.LFLogger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLStreamHandler;
 
 public class RequestUtil {
 
@@ -27,7 +29,7 @@ public class RequestUtil {
 
     public static WebData performRawPOSTRequest(Request req) {
         try {
-            URL url = new URL(req.REQUEST_URL);
+            URL url = RequestUtil.createDirectURL(req.REQUEST_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             con.setRequestMethod("POST");
@@ -76,7 +78,7 @@ public class RequestUtil {
 
     public static WebData performRawGETRequest(Request req) {
         try {
-            URL url = new URL(req.REQUEST_URL);
+            URL url = RequestUtil.createDirectURL(req.REQUEST_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             con.setRequestMethod("GET");
@@ -113,7 +115,7 @@ public class RequestUtil {
 
     public static boolean download(Request req, File destination) {
         try {
-            URL url = new URL(req.REQUEST_URL);
+            URL url = RequestUtil.createDirectURL(req.REQUEST_URL);
 
             BufferedInputStream bin = new BufferedInputStream(url.openStream());
             FileOutputStream fos = new FileOutputStream(destination);
@@ -155,7 +157,7 @@ public class RequestUtil {
 
     public static String getIPFromAmazon() {
         try {
-            URL amazonUrl = new URL("http://checkip.amazonaws.com");
+            URL amazonUrl = RequestUtil.createDirectURL("http://checkip.amazonaws.com");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(amazonUrl.openStream()));
             return bufferedReader.readLine();
         } catch (Throwable t) {
@@ -163,6 +165,20 @@ public class RequestUtil {
             LFLogger.error("getIPFromAmazon", t);
         }
         return null;
+    }
+
+    public static URL createDirectURL(String url) throws MalformedURLException {
+        return new URL(null, url, getProtocolForURL(url));
+    }
+
+    public static URLStreamHandler getProtocolForURL(String url) {
+        if (url.startsWith("https")) {
+            return new sun.net.www.protocol.https.Handler();
+        } else if (url.startsWith("http")) {
+            return new sun.net.www.protocol.http.Handler();
+        } else {
+            return null;
+        }
     }
 
     public static byte[] readInputStream(InputStream in) {

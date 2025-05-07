@@ -11,6 +11,10 @@ public class SkinUtils {
     public static final boolean CONVERT_ALEX_TO_STEVE = System.getProperties().containsKey("lf.CONVERT_ALEX_TO_STEVE");
     public static final boolean SERVE_AS_64x32 = System.getProperties().containsKey("lf.SERVE_AS_64x32");
 
+    public static boolean requiresFixing() {
+        return OVERLAY_OUTER_BODY_TO_BASE || OVERLAY_OUTER_HEAD_LAYER || ROTATE_BOTTOM_TEXTURES || CONVERT_ALEX_TO_STEVE || SERVE_AS_64x32;
+    }
+
     public static byte[] getFixedCape(MinecraftAPIUtils.SkinData skinData) {
         try {
             if (skinData.cape != null) {
@@ -35,11 +39,11 @@ public class SkinUtils {
                 if (OVERLAY_OUTER_HEAD_LAYER)
                     img = overlayHeadLayer(img);
 
-                // before 1.8
+                // before 14w03a
                 if (OVERLAY_OUTER_BODY_TO_BASE && img.getImage().getHeight() == 64)
                     img = overlay64to32(img);
 
-                // before 1.8
+                // before 1.8-pre1
                 if (CONVERT_ALEX_TO_STEVE && skinData.alex)
                     alexToSteve(img);
 
@@ -47,7 +51,7 @@ public class SkinUtils {
                 if (ROTATE_BOTTOM_TEXTURES)
                     rotateBottomTX(img);
 
-                // before 1.8
+                // before 14w03a
                 if (SERVE_AS_64x32)
                     img = img.crop(0, 0, 64, 32);
 
@@ -83,18 +87,46 @@ public class SkinUtils {
     }
 
     public static void alexToSteve(ImageUtils img) {
-        // make space for the left arm 1px texture
+        // base right arm
         img.setArea(48, 20, img.crop(47, 20, 7, 12).getImage());
-        // fill the 1px space in between
         img.setArea(47, 20, img.crop(46, 20, 1, 12).getImage());
-        // fill the 1px space on the right
-        img.setArea(55, 20, img.crop(54, 20, 1, 12).getImage());
+        img.setArea(53, 20, img.crop(52, 20, 3, 12).getImage());
 
-        // bottom hand
+        // base right hand and shoulder
         img.setArea(48, 16, img.crop(47, 16, 3, 4).getImage());
-        // fill the 1px of the shoulder
         img.setArea(47, 16, img.crop(46, 16, 1, 4).getImage());
-        // fill the 1px space on the right
         img.setArea(51, 16, img.crop(50, 16, 1, 4).getImage());
+
+        if (img.getImage().getHeight() == 64) {
+            // overlayed right arm
+            img.setArea(48, 36, img.crop(47, 36, 7, 12).getImage());
+            img.setArea(47, 36, img.crop(46, 36, 1, 12).getImage());
+            img.setArea(53, 36, img.crop(52, 36, 3, 12).getImage());
+
+            // overlayed right hand and shoulder
+            img.setArea(48, 32, img.crop(47, 32, 3, 4).getImage());
+            img.setArea(47, 32, img.crop(46, 32, 1, 4).getImage());
+            img.setArea(51, 32, img.crop(50, 32, 1, 4).getImage());
+
+
+            // overlayed left arm
+            img.setArea(53, 52, img.crop(52, 52, 10, 12).getImage());
+            img.setArea(63, 52, img.crop(62, 52, 1, 12).getImage());
+
+            // overlayed left hand and shoulder
+            img.setArea(57, 48, img.crop(55, 48, 3, 4).getImage());
+            img.setArea(53, 48, img.crop(52, 48, 3, 4).getImage());
+            img.setArea(56, 48, img.crop(57, 48, 1, 4).getImage());
+
+
+            // base left arm
+            img.setArea(37, 52, img.crop(36, 52, 10, 12).getImage());
+            img.setArea(47, 52, img.crop(46, 52, 1, 12).getImage());
+
+            // base left hand and shoulder
+            img.setArea(41, 48, img.crop(39, 48, 3, 4).getImage());
+            img.setArea(37, 48, img.crop(36, 48, 3, 4).getImage());
+            img.setArea(40, 48, img.crop(41, 48, 1, 4).getImage());
+        }
     }
 }

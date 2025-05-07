@@ -22,9 +22,11 @@ public class URLHandlers {
             LevelLoadHandler.class,
             Minecraft1_6AvailableHandler.class,
             SnoopHandler.class,
+            SkinTextureHandler.class,
             // https-only
             BetaAntiPiracyHandler.class,
-            McoHandler.class
+            McoHandler.class,
+            ProfileHandler.class
     );
 
     public static URLConnection matchHandler(URL url) {
