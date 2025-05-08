@@ -389,7 +389,7 @@ public class DeAwtPatch extends Patch {
     }
 
     private void eraseAppletReferencesIndev(CodeIterator codeIterator, ConstPool constPool, int pos) {
-        if (codeIterator.getCodeLength() <= pos + 29)
+        if (codeIterator.getCodeLength() <= pos + 30)
             return;
 
         if (codeIterator.byteAt(pos) != Opcode.NEW ||
@@ -402,7 +402,7 @@ public class DeAwtPatch extends Patch {
         String value;
         if (codeIterator.byteAt(pos + 29) == Opcode.LDC && PatchHelper.isString(constPool, codeIterator.byteAt(pos + 30))) {
             value = constPool.getStringInfo(codeIterator.byteAt(pos + 30));
-        } else if (codeIterator.byteAt(pos + 29) == Opcode.LDC_W && PatchHelper.isUtf8(constPool, codeIterator.u16bitAt(pos + 30))) {
+        } else if (codeIterator.byteAt(pos + 29) == Opcode.LDC_W && PatchHelper.isUtf8(constPool, codeIterator.byteAt(pos + 30))) {
             value = constPool.getStringInfo(codeIterator.u16bitAt(pos + 30));
         } else {
             value = null;
