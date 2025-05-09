@@ -53,7 +53,7 @@ public class ScreenshotPatch extends Patch {
         );
         // @formatter:on
 
-        inst.redefineClasses(new ClassDefinition(screenshotClass.toClass(), screenshotClass.toBytecode()));
+        inst.redefineClasses(new ClassDefinition(Class.forName(screenshotClass.getName()), screenshotClass.toBytecode()));
     }
 
     private CtMethod findScreenshotMethod() {
