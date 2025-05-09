@@ -113,7 +113,7 @@ public class ScreenshotPatch extends Patch {
                         LFLogger.debug("screenshot", "Found Screenshot class: " + refClassName);
                         LFLogger.debug("screenshot", "Found Screenshot.take method: " + refName);
 
-                        return pool.get(refClassName).getDeclaredMethod(refName, new CtClass[] {PatchHelper.fileClass, PatchHelper.intClass, PatchHelper.intClass});
+                        return pool.get(refClassName).getDeclaredMethod(refName, new CtClass[]{PatchHelper.fileClass, PatchHelper.intClass, PatchHelper.intClass});
                     }
                 }
             }
