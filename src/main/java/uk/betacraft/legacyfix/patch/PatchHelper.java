@@ -14,6 +14,7 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 public class PatchHelper {
+    public static final CtClass fileClass = ClassPool.getDefault().getOrNull("java.io.File");
     public static final CtClass stringClass = ClassPool.getDefault().getOrNull("java.lang.String");
     public static final CtClass floatClass = ClassPool.getDefault().getOrNull("float");
     public static final CtClass intClass = ClassPool.getDefault().getOrNull("int");

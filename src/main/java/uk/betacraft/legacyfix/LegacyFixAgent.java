@@ -96,6 +96,7 @@ public class LegacyFixAgent {
                 new ClassicIndevResizePatch(),
                 new ClassicProgressRendererPatch(),
                 new GameDirPatch(),
+                new ScreenshotPatch(),
                 new IntelPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
