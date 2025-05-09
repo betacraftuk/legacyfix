@@ -374,7 +374,7 @@ public class LauncherPatch extends Patch {
             }
 
             if (!assetIndexesJson.has(assetIndex)) {
-                LFLogger.error("launcher", "No '" + assetIndex + "' in asset_indexes.json");
+                LFLogger.debug("launcher", "No '" + assetIndex + "' in asset_indexes.json");
                 return null;
             }
 

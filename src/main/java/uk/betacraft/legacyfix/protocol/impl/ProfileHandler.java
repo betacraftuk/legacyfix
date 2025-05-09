@@ -46,7 +46,7 @@ public class ProfileHandler extends HandlerBase {
 
         Matcher matcher = this.PROFILE_PATTERN.matcher(this.getURLString());
         if (!matcher.find()) {
-            LFLogger.error("ProfileHandler", "No match for skin URL :(");
+            LFLogger.error("ProfileHandler", "No match for profile URL :(");
             return;
         }
 
