@@ -151,12 +151,12 @@ public class LauncherPatch extends Patch {
             return false;
 
         if (customJarName != null) {
-            assetIndex = determineAssetIndex(customJarName, assetIndexesJson, versionDataJson);
+            assetIndex = determineAssetIndex(customJarName);
         }
 
         if (assetIndex == null) {
             minecraftVersion = baseVersion;
-            assetIndex = determineAssetIndex(baseVersion, assetIndexesJson, versionDataJson);
+            assetIndex = determineAssetIndex(baseVersion);
 
             if (assetIndex == null) {
                 LFLogger.info("No matching asset index found for version " + baseVersion);
@@ -348,7 +348,7 @@ public class LauncherPatch extends Patch {
         }
     }
 
-    private static String determineAssetIndex(String version, JSONObject assetIndexesJson, JSONArray versionDataJson) {
+    private static String determineAssetIndex(String version) {
         for (int i = 0; i < versionDataJson.length(); i++) {
             JSONObject versionData = versionDataJson.getJSONObject(i);
             if (!version.matches(versionData.getString("version")))
