@@ -23,7 +23,13 @@ import java.util.Set;
 
 public class LauncherPatch extends Patch {
     public static boolean applied = false;
+
     public static String minecraftVersion = null;
+    public static String baseVersion = null;
+    public static String assetIndex = null;
+
+    public static final JSONObject assetIndexesJson = new JSONObject(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/asset_indexes.json"))));
+    public static final JSONArray versionDataJson = new JSONArray(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/version_data.json"))));
 
     public LauncherPatch() {
         super("launcher", "Patches the main launcher class, instead of having a custom one", true, true);
@@ -40,12 +46,12 @@ public class LauncherPatch extends Patch {
         if (mainClass.equals("org.prismlauncher.EntryPoint")) {
             LFLogger.info("Prism Launcher detected, patching!");
             patchPrism(inst);
-            applied = true;
         } else if (mainClass.equals("org.multimc.EntryPoint")) {
             LFLogger.info("MultiMC detected, patching!");
             patchMultiMC(inst);
-            applied = true;
-        }
+        } else return;
+
+        applied = readMinecraftVersionInfo();
     }
 
     private void patchPrism(Instrumentation inst) throws Exception {
@@ -102,8 +108,7 @@ public class LauncherPatch extends Patch {
         inst.redefineClasses(new ClassDefinition(Class.forName(parametersClass.getName()), parametersClass.toBytecode()));
     }
 
-    public static void downloadAssetsForPrism() {
-
+    public static boolean readMinecraftVersionInfo() {
         String customJarName = null;
         File customJarJsonFile = new File("../patches/customjar.json");
         if (customJarJsonFile.exists()) {
@@ -112,7 +117,7 @@ public class LauncherPatch extends Patch {
                 customJarJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(customJarJsonFile))));
             } catch (FileNotFoundException e) {
                 LFLogger.error("File exists but doesn't?", e);
-                return;
+                return false;
             }
 
             customJarName = customJarJson.getJSONObject("mainJar").getString("MMC-displayname");
@@ -121,7 +126,7 @@ public class LauncherPatch extends Patch {
         File mmcPackJsonFile = new File("../mmc-pack.json");
         if (!mmcPackJsonFile.exists()) {
             LFLogger.error("Could not find mmc-pack.json of this instance, can't download assets");
-            return;
+            return false;
         }
 
         JSONObject mmcPackJson;
@@ -129,44 +134,42 @@ public class LauncherPatch extends Patch {
             mmcPackJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(mmcPackJsonFile))));
         } catch (FileNotFoundException e) {
             LFLogger.error("File exists but doesn't?", e);
-            return;
+            return false;
         }
 
         JSONArray componentsArray = mmcPackJson.getJSONArray("components");
-        String version = null;
         for (int i = 0; i < componentsArray.length(); i++) {
             JSONObject component = componentsArray.getJSONObject(i);
             if (!"net.minecraft".equals(component.getString("uid")))
                 continue;
 
-            version = component.getString("version");
+            baseVersion = component.getString("version");
             break;
         }
 
-        if (version == null)
-            return;
+        if (baseVersion == null)
+            return false;
 
-        JSONObject assetIndexesJson = new JSONObject(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/asset_indexes.json"))));
-
-        String assetIndex = null;
-        JSONArray versionDataJson = new JSONArray(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/version_data.json"))));
         if (customJarName != null) {
             assetIndex = determineAssetIndex(customJarName, assetIndexesJson, versionDataJson);
         }
 
         if (assetIndex == null) {
-            assetIndex = determineAssetIndex(version, assetIndexesJson, versionDataJson);
+            minecraftVersion = baseVersion;
+            assetIndex = determineAssetIndex(baseVersion, assetIndexesJson, versionDataJson);
+
+            if (assetIndex == null) {
+                LFLogger.info("No matching asset index found for version " + baseVersion);
+                return false;
+            }
         } else {
             minecraftVersion = customJarName;
         }
 
-        if (assetIndex == null) {
-            LFLogger.info("No matching asset index found for version " + version);
-            return;
-        } else {
-            minecraftVersion = version;
-        }
+        return true;
+    }
 
+    public static void downloadAssetsForPrism() {
         // don't process asset indexes for versions past 13w48b,
         // or for configurations where the user has specified the asset index,
         // as the asset index should have proper assets already.
@@ -277,14 +280,14 @@ public class LauncherPatch extends Patch {
 
         LFLogger.info("All assets were downloaded for asset index '" + assetIndex + "'");
 
-        patchNetMinecraftJson(version, assetIndexesJson.getJSONObject(assetIndex));
+        patchNetMinecraftJson();
 
         File resourcesDir = new File("resources");
         if (resourcesDir.exists() && !LegacyFixAgent.isSetting("keep-resources", "yes"))
             FileUtils.removeRecursively(resourcesDir, false, false);
     }
 
-    private static void patchNetMinecraftJson(String baseVersion, JSONObject assetIndex) {
+    private static void patchNetMinecraftJson() {
         if (LegacyFixAgent.isSetting("keep-net.minecraft.json", "yes"))
             return;
 
@@ -309,7 +312,7 @@ public class LauncherPatch extends Patch {
         }
 
         netMinecraftJson.remove("assetIndex");
-        netMinecraftJson.put("assetIndex", assetIndex);
+        netMinecraftJson.put("assetIndex", assetIndexesJson.getJSONObject(assetIndex));
 
         try {
             netMinecraftJsonFile.getParentFile().mkdirs();
@@ -320,7 +323,6 @@ public class LauncherPatch extends Patch {
         } catch (Throwable t) {
             LFLogger.error("launcher", "Failed to save MMC version json to: " + netMinecraftJsonFile.getAbsolutePath());
             LFLogger.error("launcher", t);
-            return;
         }
     }
 

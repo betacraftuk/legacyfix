@@ -277,7 +277,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -287,7 +288,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -297,7 +299,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -307,7 +310,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -317,7 +321,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -327,7 +332,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -337,7 +343,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -347,7 +354,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -358,6 +366,7 @@
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
             "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
         ]
@@ -370,6 +379,7 @@
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
             "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
         ]
@@ -382,6 +392,7 @@
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
             "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
         ]
@@ -394,6 +405,7 @@
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
             "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel",
             "--limit13w23a",
             "--usesWorkDir"
         ]
@@ -406,6 +418,7 @@
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
             "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel",
             "--usesWorkDir"
         ]
     },
@@ -416,7 +429,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -426,7 +440,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -436,7 +451,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -446,7 +462,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -456,7 +473,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -466,7 +484,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -476,7 +495,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -486,7 +506,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -496,7 +517,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
@@ -506,12 +528,22 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {
-        "version": "^14w(?:0[3-9]|1[0-9]|2[0-1])[a-z](?:.+)?$",
-        "desc": "14w03a to 14w21b",
+        "version": "^14w0[3-4][a-z](?:.+)?$",
+        "desc": "14w03a to 14w04b",
+        "assetIndex": "1.7.4",
+        "settings": [
+            "lf.CONVERT_ALEX_TO_STEVE",
+            "lf.intel"
+        ]
+    },
+    {
+        "version": "^14w(?:0[5-9]|1[0-9]|2[0-1])[a-z](?:.+)?$",
+        "desc": "14w05a to 14w21b",
         "assetIndex": "1.7.4",
         "settings": [
             "lf.CONVERT_ALEX_TO_STEVE"
@@ -524,7 +556,8 @@
         "settings": [
             "lf.SERVE_AS_64x32",
             "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.intel"
         ]
     },
     {

@@ -8,9 +8,11 @@ import java.lang.instrument.Instrumentation;
 @SuppressWarnings("unused")
 public abstract class Patch {
     private final String id, description;
-    private final Object setting;
     private final boolean isDefault;
     private final boolean isRequired;
+
+    private Object setting;
+
     protected static final ClassPool pool = ClassPool.getDefault();
 
     /**
@@ -25,7 +27,6 @@ public abstract class Patch {
         this.description = description;
         this.isDefault = isDefault;
         this.isRequired = false;
-        this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
     }
 
     public Patch(String id, String description, boolean isDefault) {
@@ -48,6 +49,13 @@ public abstract class Patch {
         return isRequired;
     }
 
+    public Object getSetting() {
+        if (this.setting == null)
+            this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
+
+        return this.setting;
+    }
+
     /**
      * Conditions for the patch to be applied.
      *
@@ -55,7 +63,7 @@ public abstract class Patch {
      */
     @SuppressWarnings("all")
     public boolean shouldApply() {
-        return isRequired || (isDefault ? setting == null : setting != null);
+        return isRequired || (isDefault ? this.getSetting() == null : this.getSetting() != null);
     }
 
     /**

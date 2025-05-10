@@ -43,18 +43,15 @@ public class LegacyFixLauncher {
         arguments = parsedArgs;
 
         // Classic 0.30
-        if ("false".equals(getValue("demo", "false"))) {
+        if ("false".equals(getValue("demo", "false")))
             setValue("haspaid", "true");
-        }
 
-        if (!hasKey("gameDir") && hasKey("workDir")) {
+        if (!hasKey("gameDir") && hasKey("workDir"))
             setValue("gameDir", getValue("workDir", "."));
-        }
 
         // This needs to run *after* main() initialized 'arguments'
-        if (LauncherPatch.applied) {
+        if (LauncherPatch.applied)
             LauncherPatch.downloadAssetsForPrism();
-        }
 
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
 
