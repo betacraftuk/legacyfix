@@ -43,7 +43,7 @@ public class LegacyFixLauncher {
         arguments = parsedArgs;
 
         // Classic 0.30
-        if ("false".equals(getValue("demo", "false")))
+        if (!hasKey("demo"))
             setValue("haspaid", "true");
 
         if (!hasKey("gameDir") && hasKey("workDir"))
