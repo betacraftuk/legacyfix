@@ -459,7 +459,13 @@ public class LauncherPatch extends Patch {
                     String[] setting = settings.getString(j).split("=", 2);
 
                     if (setting[0].startsWith("--")) {
-                        LegacyFixLauncher.setValue(setting[0].substring(2), setting.length == 2 ? setting[1] : null);
+                        String key = setting[0].substring(2);
+
+                        if (setting.length == 2) {
+                            LegacyFixLauncher.setValue(key, setting[1]);
+                        } else {
+                            LegacyFixLauncher.addKey(key);
+                        }
                     } else {
                         System.setProperty(setting[0], setting.length == 2 ? setting[1] : "");
 

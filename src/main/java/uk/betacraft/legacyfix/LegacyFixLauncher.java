@@ -44,7 +44,7 @@ public class LegacyFixLauncher {
 
         // Classic 0.30
         if (!hasKey("demo"))
-            setValue("haspaid", "true");
+            addKey("haspaid");
 
         if (!hasKey("gameDir") && hasKey("workDir"))
             setValue("gameDir", getValue("workDir", "."));
@@ -177,11 +177,27 @@ public class LegacyFixLauncher {
         return args;
     }
 
+    public static boolean hasValue(String key) {
+        if (!hasKey(key)) {
+            LFLogger.debug("Key " + key + " not found");
+            return false;
+        }
+
+        int nextIndex = arguments.indexOf("--" + key) + 1;
+        if (arguments.size() <= nextIndex)
+            return false;
+
+        return !arguments.get(nextIndex).startsWith("--");
+    }
+
     public static String getValue(String key, String alt) {
         if (!hasKey(key)) {
             LFLogger.debug("Key " + key + " not found");
             return alt;
         }
+
+        if (!hasValue(key))
+            return "true";
 
         if ("sessionid".equals(key) && levelProxyAuthenticator != null) {
             // wait for it to finish, otherwise it won't be possible to save online
@@ -199,6 +215,10 @@ public class LegacyFixLauncher {
         } else {
             arguments.set(arguments.indexOf("--" + key) + 1, val);
         }
+    }
+
+    public static void addKey(String key) {
+        arguments.add("--" + key);
     }
 
     public static boolean hasKey(String key) {
