@@ -26,11 +26,11 @@ public class GameDirPatch extends Patch {
         // @formatter:off
         fileConstructor.insertBefore(
             "if ($1.equals(System.getenv(\"APPDATA\")) || $1.equals(System.getProperty(\"user.home\"))) {" +
-            "    if ($2.equals(\".minecraft/\") || $2.equals(\"minecraft/\") || " +
-            "               $2.equals(\"Library/Application Support/minecraft\")) {" +
+            "    if ($2.startsWith(\".minecraft/\") || $2.startsWith(\"minecraft/\") || " +
+            "               $2.startsWith(\"Library/Application Support/minecraft\")) {" +
             "        $1 = null;" +
-            "        Class legacyfix = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
-            "        $2 = (String) legacyfix.getMethod(\"getGameDir\", null).invoke(null, null);" +
+            "        Class assetUtils = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+            "        $2 = (String) assetUtils.getMethod(\"getRelativePathToGameDir\", new Class[] {String.class}).invoke(null, new Object[] {$2});" +
             "    }" +
             "}"
         );

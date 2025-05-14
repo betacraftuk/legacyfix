@@ -172,6 +172,22 @@ public class AssetUtils {
     }
 
     // Used by GameDirPatch
+    // Patch for calls to Minecraft.getWorkingDirectory(String)
+    public static String getRelativePathToGameDir(String path) {
+        if (path.startsWith(".minecraft/"))
+            path = path.substring(".minecraft".length());
+        else if (path.startsWith("minecraft/"))
+            path = path.substring("minecraft".length());
+        else if (path.startsWith("Library/Application Support/minecraft"))
+            path = path.substring("Library/Application Support/minecraft".length());
+
+        if (path.length() == 0 || path.equals("/"))
+            return LegacyFixLauncher.getGameDir();
+
+        return LegacyFixLauncher.getGameDir() + path;
+    }
+
+    // Used by GameDirPatch
     public static String getAssetPathFromExpectedPath(String path) {
         AssetObject asset = getAssetFromExpectedPath(path);
         if (asset != null) {
