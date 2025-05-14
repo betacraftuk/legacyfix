@@ -59,6 +59,9 @@ public class ScreenshotPatch extends Patch {
     private CtMethod findScreenshotMethod() {
         try {
             CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
+            if (minecraftClass.isFrozen())
+                minecraftClass.defrost();
+
             for (CtMethod candidateMethod : minecraftClass.getDeclaredMethods()) {
                 CodeAttribute codeAttribute = candidateMethod.getMethodInfo().getCodeAttribute();
                 if (codeAttribute == null)
