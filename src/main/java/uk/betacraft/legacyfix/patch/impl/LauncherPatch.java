@@ -12,6 +12,7 @@ import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.util.FileUtils;
 import uk.betacraft.legacyfix.util.HashUtils;
+import uk.betacraft.legacyfix.util.OSUtils;
 import uk.betacraft.util.Request;
 import uk.betacraft.util.RequestUtil;
 import uk.betacraft.util.WebData;
@@ -24,8 +25,12 @@ import java.util.Set;
 public class LauncherPatch extends Patch {
     public static boolean applied = false;
 
+    public static boolean isPrism = false;
+    public static boolean isMultiMC = false;
+
     public static String minecraftVersion = null;
     public static String baseVersion = null;
+    public static String lwjglVersion = null;
     public static String assetIndex = null;
 
     public static final JSONObject assetIndexesJson = new JSONObject(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/asset_indexes.json"))));
@@ -44,9 +49,11 @@ public class LauncherPatch extends Patch {
         }
 
         if (mainClass.equals("org.prismlauncher.EntryPoint")) {
+            isPrism = true;
             LFLogger.info("Prism Launcher detected, patching!");
             patchPrism(inst);
         } else if (mainClass.equals("org.multimc.EntryPoint")) {
+            isMultiMC = true;
             LFLogger.info("MultiMC detected, patching!");
             patchMultiMC(inst);
         } else return;
@@ -140,11 +147,12 @@ public class LauncherPatch extends Patch {
         JSONArray componentsArray = mmcPackJson.getJSONArray("components");
         for (int i = 0; i < componentsArray.length(); i++) {
             JSONObject component = componentsArray.getJSONObject(i);
-            if (!"net.minecraft".equals(component.getString("uid")))
-                continue;
+            String uid = component.getString("uid");
 
-            baseVersion = component.getString("version");
-            break;
+            if ("net.minecraft".equals(uid))
+                baseVersion = component.getString("version");
+            else if ("org.lwjgl".equals(uid))
+                lwjglVersion = component.getString("version");
         }
 
         if (baseVersion == null)
@@ -281,47 +289,135 @@ public class LauncherPatch extends Patch {
         LFLogger.info("All assets were downloaded for asset index '" + assetIndex + "'");
 
         patchNetMinecraftJson();
+        patchOrgLwjglJson();
 
         File resourcesDir = new File("resources");
-        if (resourcesDir.exists() && !LegacyFixAgent.isSetting("keep-resources", "yes"))
+        if (resourcesDir.exists() && LegacyFixAgent.getSetting("lf.keep-resources", null) == null)
             FileUtils.removeRecursively(resourcesDir, false, false);
     }
 
     private static void patchNetMinecraftJson() {
-        if (LegacyFixAgent.isSetting("keep-net.minecraft.json", "yes"))
+        if (LegacyFixAgent.getSetting("lf.keep-net.minecraft.json", null) != null)
             return;
 
         File netMinecraftJsonFile = new File("../patches/net.minecraft.json");
-        JSONObject netMinecraftJson;
-        if (!netMinecraftJsonFile.exists()) {
-            File srcNetMinecraftJsonFile = new File("../../../meta/net.minecraft/" + baseVersion + ".json");
-
-            try {
-                netMinecraftJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(srcNetMinecraftJsonFile))));
-            } catch (FileNotFoundException e) {
-                LFLogger.error("Could not read MMC version json", e);
-                return;
-            }
-        } else {
-            try {
-                netMinecraftJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(netMinecraftJsonFile))));
-            } catch (FileNotFoundException e) {
-                LFLogger.error("Could not read MMC version json", e);
-                return;
-            }
-        }
+        JSONObject netMinecraftJson = readMMCJson(netMinecraftJsonFile, new File("../../../meta/net.minecraft/" + baseVersion + ".json"));
+        if (netMinecraftJson == null)
+            return;
 
         netMinecraftJson.remove("assetIndex");
         netMinecraftJson.put("assetIndex", assetIndexesJson.getJSONObject(assetIndex));
 
-        try {
-            netMinecraftJsonFile.getParentFile().mkdirs();
+        saveMMCJson(netMinecraftJsonFile, netMinecraftJson);
 
-            FileOutputStream fos = new FileOutputStream(netMinecraftJsonFile);
-            fos.write(netMinecraftJson.toString(4).getBytes("UTF-8"));
+        LFLogger.debug("Patched net.minecraft.json");
+    }
+
+    private static void patchOrgLwjglJson() {
+        if (!isPrism)
+            return;
+
+        if (LegacyFixAgent.getSetting("lf.keep-org.lwjgl.json", null) != null)
+            return;
+
+        if (lwjglVersion == null)
+            return;
+
+        if (!OSUtils.getPlatform().is(OSUtils.OS.MACOS, OSUtils.Arch.AARCH64))
+            return;
+
+        if (!"2.9.4-nightly-20150209".equals(lwjglVersion)) {
+            LFLogger.error("Could not patch LWJGL2!",
+                    "Required LWJGL 2.9.4-nightly-20150209, got " + lwjglVersion,
+                    "Change your LWJGL2 version if you want to resize your game without crashing."
+            );
+            return;
+        }
+
+        File orgLwjglJsonFile = new File("../patches/org.lwjgl.json");
+        JSONObject orgLwjglJson = readMMCJson(orgLwjglJsonFile, new File("../../../meta/org.lwjgl/" + lwjglVersion + ".json"));
+        if (orgLwjglJson == null)
+            return;
+
+        JSONArray libraries = orgLwjglJson.getJSONArray("libraries");
+        for (int i = 0; i < libraries.length(); i++) {
+            JSONObject library = libraries.getJSONObject(i);
+
+            String libName = library.getString("name");
+            String expectedLibName = "org.lwjgl.lwjgl:lwjgl-platform:" + lwjglVersion;
+            if (!expectedLibName.equals(libName))
+                continue;
+
+            JSONObject downloads = library.getJSONObject("downloads");
+            JSONObject classifiers = downloads.getJSONObject("classifiers");
+            if (!classifiers.has("natives-osx-arm64"))
+                return;
+
+            JSONObject osxArm64Natives = classifiers.getJSONObject("natives-osx-arm64");
+            String brokenNativesUrl = "https://github.com/MinecraftMachina/lwjgl/releases/download/2.9.4-20150209-mmachina.2/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar";
+            // if the natives are already modified by something else than LF, don't overwrite them.
+            if (!brokenNativesUrl.equals(osxArm64Natives.getString("url")))
+                return;
+
+            JSONObject properOSXArm64Natives = new JSONObject();
+            properOSXArm64Natives.put("sha1", "a785c8196d3ef960cf420967de2835bef9e2bbb0");
+            properOSXArm64Natives.put("size", 500663);
+            properOSXArm64Natives.put("url", "https://github.com/Dungeons-Guide/lwjgl/releases/download/2.9.4-20150209-mmachina.2-syeyoung.1/lwjgl-platform-2.9.4-nightly-20150209-natives-osx-arm64.jar");
+
+            classifiers.remove("natives-osx-arm64");
+            classifiers.put("natives-osx-arm64", properOSXArm64Natives);
+
+            downloads.remove("classifiers");
+            downloads.put("classifiers", classifiers);
+
+            library.remove("downloads");
+            library.put("downloads", downloads);
+            library.remove("name");
+            library.put("name", expectedLibName + "-legacyfix.1");
+
+            libraries.remove(i);
+            libraries.put(library);
+
+            orgLwjglJson.remove("libraries");
+            orgLwjglJson.put("libraries", libraries);
+
+            saveMMCJson(orgLwjglJsonFile, orgLwjglJson);
+
+            LFLogger.debug("Patched org.lwjgl.json");
+            return;
+        }
+    }
+
+    private static JSONObject readMMCJson(File mmcJsonFile, File srcMMCJsonFile) {
+        JSONObject mmcJson;
+        if (!mmcJsonFile.exists()) {
+            try {
+                mmcJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(srcMMCJsonFile))));
+            } catch (FileNotFoundException e) {
+                LFLogger.error("Could not read MMC json", e);
+                return null;
+            }
+        } else {
+            try {
+                mmcJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(mmcJsonFile))));
+            } catch (FileNotFoundException e) {
+                LFLogger.error("Could not read MMC json", e);
+                return null;
+            }
+        }
+
+        return mmcJson;
+    }
+
+    private static void saveMMCJson(File mmcJsonFile, JSONObject mmcJson) {
+        try {
+            mmcJsonFile.getParentFile().mkdirs();
+
+            FileOutputStream fos = new FileOutputStream(mmcJsonFile);
+            fos.write(mmcJson.toString(4).getBytes("UTF-8"));
             fos.close();
         } catch (Throwable t) {
-            LFLogger.error("launcher", "Failed to save MMC version json to: " + netMinecraftJsonFile.getAbsolutePath());
+            LFLogger.error("launcher", "Failed to save MMC json to: " + mmcJsonFile.getAbsolutePath());
             LFLogger.error("launcher", t);
         }
     }
