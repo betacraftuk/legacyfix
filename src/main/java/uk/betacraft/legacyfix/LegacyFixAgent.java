@@ -61,13 +61,13 @@ public class LegacyFixAgent {
         return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
     }
 
-    public static boolean isSetting(String key, String expected) {
-        return getSettings().containsKey(key) && expected.equalsIgnoreCase((String) getSettings().get(key));
+    public static boolean hasSetting(String key) {
+        return getSettings().containsKey(key);
     }
 
     public static boolean isDebug() {
         if (debug == null)
-            debug = getSettings().containsKey("lf.debug");
+            debug = hasSetting("lf.debug");
 
         return debug;
     }

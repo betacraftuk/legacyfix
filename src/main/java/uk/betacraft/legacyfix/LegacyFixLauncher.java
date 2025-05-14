@@ -93,7 +93,23 @@ public class LegacyFixLauncher {
         return false;
     }
 
+    private static void launchVisualizer() {
+        String previewAppletClassName = getValue("previewClass", null);
+        if (previewAppletClassName != null && !VisualizerLauncher.launchPreviewApplet(previewAppletClassName)) {
+            LFLogger.error("Failed to find explicitly specified preview applet class: \"" + previewAppletClassName + "\"");
+            return;
+        }
+
+        if (!VisualizerLauncher.launchPreviewApplet("net.minecraft.isom.IsomPreviewApplet"))
+            LFLogger.error("Failed to find the preview applet class");
+    }
+
     private static void launch() {
+        if (LegacyFixAgent.hasSetting("lf.visualizer")) {
+            launchVisualizer();
+            return;
+        }
+
         String minecraftAppletClassName = getValue("appletClass", null);
         String mainClassName = getValue("mainClass", null);
 
@@ -269,13 +285,11 @@ public class LegacyFixLauncher {
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
-    @SuppressWarnings("unused")
     public static int getWidth() {
         return Integer.parseInt(getValue("width", "854"));
     }
 
     // Used by DeAwtPatch & LWJGLFramePatch
-    @SuppressWarnings("unused")
     public static int getHeight() {
         return Integer.parseInt(getValue("height", "480"));
     }

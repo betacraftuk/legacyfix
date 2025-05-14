@@ -12,6 +12,11 @@ Settings of LegacyFix can be altered through Java arguments.
 ```
 -Dlf.vsync
 ```
+## Run Infinite Map Visualizer
+Introduced with inf-20100616, forgotten with a1.2.0, and completely dysfunctional with b1.3, Infinite Map Visualizer lets you look at your worlds from a bird's eye view.
+```
+-Dlf.visualizer
+```
 ## Disable deleting the `resources` folder when using Prism/MultiMC
 Prism Launcher and MultiMC use inferior Mojang asset indexes for versions before 1.7.3.<br>
 They copy the assets into the `resources` directory located in the instance directory each time you launch the game.<br>
