@@ -181,8 +181,8 @@ public class AssetUtils {
         else if (path.startsWith("Library/Application Support/minecraft"))
             path = path.substring("Library/Application Support/minecraft".length());
 
-        if (path.length() == 0 || path.equals("/"))
-            return LegacyFixLauncher.getGameDir();
+        if (path.equals("/"))
+            path = "";
 
         return LegacyFixLauncher.getGameDir() + path;
     }

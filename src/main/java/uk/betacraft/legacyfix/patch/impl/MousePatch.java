@@ -6,10 +6,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
-import javassist.CannotCompileException;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
+import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
@@ -128,21 +125,28 @@ public class MousePatch extends Patch {
 
         // Some versions refer to setNativeCursor within methods of the Minecraft class,
         // we need to account for that too
-        CtClass mouseClass = pool.get("org.lwjgl.input.Mouse");
-        CtClass cursorClass = pool.get("org.lwjgl.input.Cursor");
-        CtMethod setNativeCursorMethod = mouseClass.getDeclaredMethod("setNativeCursor", new CtClass[]{cursorClass});
+        CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
+        if (minecraftClass.isFrozen())
+            minecraftClass.defrost();
 
-        // @formatter:off
-        setNativeCursorMethod.setBody(
-            "{" +
-            "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
-            "    if ($1 == null) {" +
-            "        org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
-            "    }" +
-            "    return null;" + // we don't need this to return anything
-            "}"
-        );
+        minecraftClass.instrument(new ExprEditor() {
+            public void edit(MethodCall mc) throws CannotCompileException {
+                if ("org.lwjgl.input.Mouse".equals(mc.getClassName()) && "setNativeCursor".equals(mc.getMethodName())) {
+                    // @formatter:off
+                    mc.replace(
+                        "{" +
+                        "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
+                        "    if ($1 == null) {" +
+                        "        org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
+                        "    }" +
+                        "    $_ = $proceed($$);" +
+                        "}"
+                    );
+                    // @formatter:on
+                }
+            }
+        });
 
-        inst.redefineClasses(new ClassDefinition(Class.forName("org.lwjgl.input.Mouse"), mouseClass.toBytecode()));
+        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
     }
 }
