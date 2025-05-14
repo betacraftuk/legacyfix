@@ -16,6 +16,9 @@ public class SkinUtils {
     }
 
     public static byte[] getFixedCape(MinecraftAPIUtils.SkinData skinData) {
+        if (skinData == null)
+            return null;
+
         try {
             if (skinData.cape != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(skinData.cape);
@@ -30,6 +33,9 @@ public class SkinUtils {
     }
 
     public static byte[] getFixedSkin(MinecraftAPIUtils.SkinData skinData) {
+        if (skinData == null)
+            return null;
+
         try {
             if (skinData.skin != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(skinData.skin);
