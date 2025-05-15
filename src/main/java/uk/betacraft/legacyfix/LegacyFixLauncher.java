@@ -123,8 +123,8 @@ public class LegacyFixLauncher {
             return;
         }
 
-        if (!launchApplet("net.minecraft.client.MinecraftApplet")) {
-            if (!launchApplet("com.mojang.minecraft.MinecraftApplet")) {
+        if (!launchApplet("com.mojang.minecraft.MinecraftApplet")) {
+            if (!launchApplet("net.minecraft.client.MinecraftApplet")) {
                 if (!launchMain("net.minecraft.client.main.Main")) {
                     LFLogger.error("Failed to find the starting Minecraft class");
                 }
