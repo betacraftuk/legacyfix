@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class Minecraft1_6AvailableHandler extends HandlerBase {
     private static final Pattern FLAG_PATTERN = Pattern.compile("(http:\\/\\/assets\\.minecraft\\.net\\/1_6_has_been_released\\.flag)");
 
-    private static final boolean SHOW_NOTICE = LegacyFixAgent.getSetting("lf.showNotice", null) != null;
+    private static final boolean SHOW_NOTICE = LegacyFixAgent.hasSetting("lf.showNotice");
 
     public Minecraft1_6AvailableHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);

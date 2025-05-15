@@ -292,12 +292,12 @@ public class LauncherPatch extends Patch {
         patchOrgLwjglJson();
 
         File resourcesDir = new File("resources");
-        if (resourcesDir.exists() && LegacyFixAgent.getSetting("lf.keep-resources", null) == null)
+        if (resourcesDir.exists() && !LegacyFixAgent.hasSetting("lf.keep-resources"))
             FileUtils.removeRecursively(resourcesDir, false, false);
     }
 
     private static void patchNetMinecraftJson() {
-        if (LegacyFixAgent.getSetting("lf.keep-net.minecraft.json", null) != null)
+        if (LegacyFixAgent.hasSetting("lf.keep-net.minecraft.json"))
             return;
 
         File netMinecraftJsonFile = new File("../patches/net.minecraft.json");
@@ -317,7 +317,7 @@ public class LauncherPatch extends Patch {
         if (!isPrism)
             return;
 
-        if (LegacyFixAgent.getSetting("lf.keep-org.lwjgl.json", null) != null)
+        if (LegacyFixAgent.hasSetting("lf.keep-org.lwjgl.json"))
             return;
 
         if (lwjglVersion == null)
@@ -469,7 +469,7 @@ public class LauncherPatch extends Patch {
                     } else {
                         System.setProperty(setting[0], setting.length == 2 ? setting[1] : "");
 
-                        if (LegacyFixAgent.getSettings().containsKey(setting[0]))
+                        if (LegacyFixAgent.hasSetting(setting[0]))
                             LegacyFixAgent.getSettings().remove(setting[0]);
 
                         LegacyFixAgent.getSettings().put(setting[0], setting.length == 2 ? setting[1] : "");
