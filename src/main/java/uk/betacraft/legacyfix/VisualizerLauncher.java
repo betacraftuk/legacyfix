@@ -9,11 +9,13 @@ import javassist.expr.MethodCall;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class VisualizerLauncher {
     private static String canvasStartMethodName = null;
+    private static String canvasRunnerClassName = null;
 
     public static boolean launchPreviewApplet(String className) {
         try {
@@ -32,16 +34,23 @@ public class VisualizerLauncher {
                 public void edit(MethodCall m) {
                     if (canvasJavaClass.getName().equals(m.getClassName())) {
                         canvasStartMethodName = m.getMethodName();
+                    } else if ("start".equals(m.getMethodName()) && canvasRunnerClassName == null) {
+                        canvasRunnerClassName = m.getClassName();
                     }
                 }
             });
 
-            if (canvasStartMethodName == null) {
+            Class<?> canvasRunnerClass = null;
+            Method canvasStartMethod = null;
+
+            if (canvasRunnerClassName != null) {
+                canvasRunnerClass = Class.forName(canvasRunnerClassName);
+            } else if (canvasStartMethodName != null) {
+                canvasStartMethod = canvasJavaClass.getDeclaredMethod(canvasStartMethodName);
+            } else {
                 LFLogger.error("Could not find IsomPreviewCanvas.start method");
                 return false;
             }
-
-            Method canvasStartMethod = canvasJavaClass.getDeclaredMethod(canvasStartMethodName);
 
             final Canvas previewCanvasInstance = (Canvas) canvasJavaClass.newInstance();
 
@@ -59,7 +68,15 @@ public class VisualizerLauncher {
                 }
             });
 
-            canvasStartMethod.invoke(previewCanvasInstance);
+            if (canvasStartMethod != null)
+                canvasStartMethod.invoke(previewCanvasInstance);
+            else {
+                Constructor<?> canvasRunnerConstructor = canvasRunnerClass.getDeclaredConstructor(canvasJavaClass);
+                canvasRunnerConstructor.setAccessible(true);
+
+                Thread canvasRunnerInstance = (Thread) canvasRunnerConstructor.newInstance(canvasJavaClass.cast(previewCanvasInstance));
+                canvasRunnerInstance.start();
+            }
 
             return true;
         } catch (ClassNotFoundException ignored) {
