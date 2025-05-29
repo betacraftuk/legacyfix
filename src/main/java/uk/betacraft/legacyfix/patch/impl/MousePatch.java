@@ -21,7 +21,7 @@ public class MousePatch extends Patch {
     private boolean mouseDXYmatched;
 
     public MousePatch() {
-        super("mouse", "Fixes mouse on modern macOS, also required for deAWT", true);
+        super("mouse", "Fixes mouse handling, required for deAWT", true);
     }
 
     @Override
@@ -31,14 +31,18 @@ public class MousePatch extends Patch {
         // @formatter:off
         if (mouseHelperClass != null) {
             String[] deltaXYFieldNames = new String[2];
+            boolean usesRobot = false;
             for (CtField field : mouseHelperClass.getDeclaredFields()) {
-                if (Modifier.isPublic(field.getModifiers()) && field.getType().getName().equals("int")) {
+                if (Modifier.isPublic(field.getModifiers()) && field.getType().getName().equals("int"))
                     deltaXYFieldNames[deltaXYFieldNames[0] == null ? 0 : 1] = field.getName();
-                }
+                else if (field.getType().getName().equals("java.awt.Robot"))
+                    usesRobot = true;
             }
 
+            LFLogger.debug("mouse", "MouseHelper uses AWT Robot: " + usesRobot);
+
             CtMethod[] mouseHelperMethods = mouseHelperClass.getDeclaredMethods();
-            mouseHelperMethods[0].setBody(
+            String lockBody = (
                 "{" +
                 "    org.lwjgl.input.Mouse.setGrabbed(true);" +
                 "    $0." + deltaXYFieldNames[0] + " = 0;" +
@@ -46,34 +50,44 @@ public class MousePatch extends Patch {
                 "}"
             );
 
-            String body2 = (
+            String tickBody = (
                 "{" +
                 "    $0." + deltaXYFieldNames[0] + " = org.lwjgl.input.Mouse.getDX();" +
                 "    $0." + deltaXYFieldNames[1] + " = org.lwjgl.input.Mouse.getDY();" +
                 "}"
             );
 
-            String body2invert = (
+            String tickBodyInvert = (
                 "{" +
                 "    $0." + deltaXYFieldNames[0] + " = org.lwjgl.input.Mouse.getDX();" +
                 "    $0." + deltaXYFieldNames[1] + " = -(org.lwjgl.input.Mouse.getDY());" +
                 "}"
             );
 
-            // Mouse handling changed sometime during alpha
-            boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", "no"));
+            boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", null));
+            if (usesRobot)
+                invert = !invert;
+
             LFLogger.debug("mouse", "Mouse Y invert: " + invert);
 
-            if (mouseHelperMethods.length == 2) {
-                mouseHelperMethods[1].setBody((invert ? body2invert : body2));
-            } else {
+            if (mouseHelperMethods.length == 1) {
+                LFLogger.debug("mouse", "Mouse Helper method size: 1");
+                mouseHelperMethods[0].setBody((invert ? tickBodyInvert : tickBody));
+            } else if (mouseHelperMethods.length == 2) {
+                LFLogger.debug("mouse", "Mouse Helper method size: 2");
+                mouseHelperMethods[0].setBody(lockBody);
+                mouseHelperMethods[1].setBody((invert ? tickBodyInvert : tickBody));
+            } else if (mouseHelperMethods.length >= 3) {
+                LFLogger.debug("mouse", "Mouse Helper method size: " + mouseHelperMethods.length);
+                mouseHelperMethods[0].setBody(lockBody);
+                // unlock
                 mouseHelperMethods[1].setBody(
                     "{" +
                     "    org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
                     "    org.lwjgl.input.Mouse.setGrabbed(false);" +
                     "}"
                 );
-                mouseHelperMethods[2].setBody((invert ? body2invert : body2));
+                mouseHelperMethods[2].setBody((invert ? tickBodyInvert : tickBody));
             }
 
             inst.redefineClasses(new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode()));
@@ -84,11 +98,14 @@ public class MousePatch extends Patch {
             inst.addTransformer(new ClassFileTransformer() {
                 public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
                     CtClass clas = pool.getOrNull(className.replace("/", "."));
-                    if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName()) || clas.isFrozen()) {
+                    if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
                         return null;
                     }
 
                     try {
+                        if (clas.isFrozen())
+                            clas.defrost();
+
                         clas.instrument(new ExprEditor() {
                             public void edit(MethodCall m) throws CannotCompileException {
                                 if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
@@ -135,10 +152,10 @@ public class MousePatch extends Patch {
                     // @formatter:off
                     mc.replace(
                         "{" +
-                        "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
                         "    if ($1 == null) {" +
                         "        org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
                         "    }" +
+                        "    org.lwjgl.input.Mouse.setGrabbed($1 != null);" +
                         "    $_ = $proceed($$);" +
                         "}"
                     );
