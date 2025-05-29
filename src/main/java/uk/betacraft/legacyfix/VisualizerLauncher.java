@@ -76,6 +76,9 @@ public class VisualizerLauncher {
 
                 Thread canvasRunnerInstance = (Thread) canvasRunnerConstructor.newInstance(canvasJavaClass.cast(previewCanvasInstance));
                 canvasRunnerInstance.start();
+
+                Thread canvasThread = new Thread((Runnable) previewCanvasInstance);
+                canvasThread.start();
             }
 
             return true;
