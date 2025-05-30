@@ -92,7 +92,7 @@ public class DeAwtPatch extends Patch {
             "{" +
             "    Class launcherClass = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
             "    java.lang.reflect.Method method = launcherClass.getMethod(\"getValue\", new Class[] {String.class, String.class});" +
-            "    return method.invoke(null, new Object[] {$1, null});" +
+            "    return (String) method.invoke(null, new Object[] {$1, null});" +
             "}"
         );
         // @formatter:on

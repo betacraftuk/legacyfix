@@ -41,7 +41,7 @@ public class GameDirPatch extends Patch {
             "    if ($1.path.contains(\"assets\") && $2.equals(\"skins\")) {" +
             "        Class assetUtils = ClassLoader.getSystemClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
             "        if (((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$1.path})).booleanValue()) {" +
-            "            $1 = assetUtils.getMethod(\"getCacheDirectory\", null).invoke(null, null);" +
+            "            $1 = (java.io.File) assetUtils.getMethod(\"getCacheDirectory\", null).invoke(null, null);" +
             "        }" +
             "    }" +
             "} catch (Throwable t) { t.printStackTrace(); }"
