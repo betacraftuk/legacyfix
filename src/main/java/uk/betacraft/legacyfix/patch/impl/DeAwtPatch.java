@@ -416,6 +416,7 @@ public class DeAwtPatch extends Patch {
         for (int i = 0; i < codeIterator.getCodeLength() - pos; i++) {
             if (codeIterator.byteAt(pos + i) == Opcode.IFEQ) {
                 eraseTo = i + 3;
+                break;
             }
         }
 
