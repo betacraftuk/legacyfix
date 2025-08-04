@@ -100,7 +100,8 @@ public class LegacyFixAgent {
                 new IntelPatch(),
                 new DeAwtPatch(),
                 new MousePatch(),
-                new VSyncPatch()
+                new VSyncPatch(),
+                new RawInputPatch()
         };
     }
 }
