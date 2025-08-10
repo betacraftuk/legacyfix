@@ -36,22 +36,26 @@ public class LegacyFixLauncher {
         } else {
             parsedArgs.addAll(Arrays.asList(args));
 
-            if (parsedArgs.contains("--sessionid"))
+            if (parsedArgs.contains("--sessionid")) {
                 sessionId = parsedArgs.get(parsedArgs.indexOf("--sessionid") + 1);
+            }
         }
 
         arguments = parsedArgs;
 
         // Classic 0.30
-        if (!hasKey("demo"))
+        if (!hasKey("demo")) {
             addKey("haspaid");
+        }
 
-        if (!hasKey("gameDir") && hasKey("workDir"))
+        if (!hasKey("gameDir") && hasKey("workDir")) {
             setValue("gameDir", getValue("workDir", "."));
+        }
 
         // This needs to run *after* main() initialized 'arguments'
-        if (LauncherPatch.applied)
+        if (LauncherPatch.applied) {
             LauncherPatch.downloadAssetsForPrism();
+        }
 
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
 
@@ -135,11 +139,13 @@ public class LegacyFixLauncher {
     private static List<String> limit(boolean is13w23a) {
         List<String> args = new LinkedList<String>();
 
-        if (hasKey("demo"))
+        if (hasKey("demo")) {
             args.add("--demo");
+        }
 
-        if (hasKey("fullscreen"))
+        if (hasKey("fullscreen")) {
             args.add("--fullscreen");
+        }
 
         if (hasKey("gameDir")) {
             args.add("--workDir");
@@ -184,8 +190,9 @@ public class LegacyFixLauncher {
         }
 
         int nextIndex = arguments.indexOf("--" + key) + 1;
-        if (arguments.size() <= nextIndex)
+        if (arguments.size() <= nextIndex) {
             return false;
+        }
 
         return !arguments.get(nextIndex).startsWith("--");
     }
@@ -196,8 +203,9 @@ public class LegacyFixLauncher {
             return alt;
         }
 
-        if (!hasValue(key))
+        if (!hasValue(key)) {
             return "true";
+        }
 
         if ("sessionid".equals(key) && levelProxyAuthenticator != null) {
             // wait for it to finish, otherwise it won't be possible to save online
@@ -210,8 +218,9 @@ public class LegacyFixLauncher {
     public static void setValue(String key, String val) {
         if (!hasKey(key)) {
             arguments.add("--" + key);
-            if (val != null)
+            if (val != null) {
                 arguments.add(val);
+            }
         } else {
             arguments.set(arguments.indexOf("--" + key) + 1, val);
         }
@@ -227,8 +236,9 @@ public class LegacyFixLauncher {
 
     public static String getUUID() {
         String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
-        if (uuid.equals("no-uuid"))
+        if (uuid.equals("no-uuid")) {
             return MinecraftAPI.getUUID(LegacyFixLauncher.getValue("username", ""));
+        }
 
         return uuid;
     }
@@ -262,8 +272,9 @@ public class LegacyFixLauncher {
 
     public static String getAssetIndexPath() {
         String assetIndex = getValue("assetIndex", null);
-        if (assetIndex == null)
+        if (assetIndex == null) {
             return null;
+        }
 
         return new File(getAssetsDir(), "indexes/" + assetIndex + ".json").getAbsolutePath();
     }

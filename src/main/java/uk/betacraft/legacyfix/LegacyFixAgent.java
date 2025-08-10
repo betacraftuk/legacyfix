@@ -26,7 +26,9 @@ public class LegacyFixAgent {
 
         List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
-            if (!patch.shouldApply()) continue;
+            if (!patch.shouldApply()) {
+                continue;
+            }
 
             try {
                 patch.apply(inst);
@@ -66,8 +68,9 @@ public class LegacyFixAgent {
     }
 
     public static boolean isDebug() {
-        if (debug == null)
+        if (debug == null) {
             debug = hasSetting("lf.debug");
+        }
 
         return debug;
     }

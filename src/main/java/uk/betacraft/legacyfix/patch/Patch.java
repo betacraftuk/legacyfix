@@ -55,8 +55,9 @@ public abstract class Patch {
     }
 
     public Object getSetting() {
-        if (this.setting == null)
+        if (this.setting == null) {
             this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
+        }
 
         return this.setting;
     }

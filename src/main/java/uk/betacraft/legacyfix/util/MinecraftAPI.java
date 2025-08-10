@@ -28,7 +28,9 @@ public class MinecraftAPI {
             JSONObject obj = requestUUID(username);
             if (obj != null) {
                 if (obj.isEmpty()) // no uuid assigned to that username
+                {
                     return "no-uuid";
+                }
 
                 String uuid = obj.getString("id");
 
@@ -42,8 +44,9 @@ public class MinecraftAPI {
 
     public static JSONObject requestUUID(String name) {
         // wait for the rate limit to expire
-        if (rateLimitCooldown > System.currentTimeMillis())
+        if (rateLimitCooldown > System.currentTimeMillis()) {
             return null;
+        }
 
         try {
             URL uuidLookup = RequestUtil.createDirectURL(UUID_LOOKUP_URL + name);

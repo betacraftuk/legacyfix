@@ -23,9 +23,10 @@ public class Handler extends URLStreamHandler {
         LFLogger.debug("Redirecting: " + url.toString());
 
         URLConnection lookup = URLHandlers.matchHandler(url);
-        if (lookup != null)
+        if (lookup != null) {
             return lookup;
-        else
+        } else {
             return new URL(null, url.toString(), new sun.net.www.protocol.https.Handler()).openConnection();
+        }
     }
 }

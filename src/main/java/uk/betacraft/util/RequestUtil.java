@@ -137,10 +137,11 @@ public class RequestUtil {
 
     public static WebData performJoinServer(String uuid, String sessionId, String serverId) {
         String accessToken;
-        if (sessionId.contains(":"))
+        if (sessionId.contains(":")) {
             accessToken = sessionId.split(":")[1];
-        else
+        } else {
             accessToken = sessionId;
+        }
 
         return RequestUtil.performRawPOSTRequest(
             new Request()

@@ -27,8 +27,9 @@ public class VisualizerLauncher {
 
             CtClass previewAppletClass = ClassPool.getDefault().get(previewAppletJavaClass.getName());
 
-            if (previewAppletClass.isFrozen())
+            if (previewAppletClass.isFrozen()) {
                 previewAppletClass.defrost();
+            }
 
             CtMethod startMethod = previewAppletClass.getDeclaredMethod("start");
             startMethod.instrument(new ExprEditor() {
@@ -69,9 +70,9 @@ public class VisualizerLauncher {
                 }
             });
 
-            if (canvasStartMethod != null)
+            if (canvasStartMethod != null) {
                 canvasStartMethod.invoke(previewCanvasInstance);
-            else {
+            } else {
                 Constructor<?> canvasRunnerConstructor = canvasRunnerClass.getDeclaredConstructor(canvasJavaClass);
                 canvasRunnerConstructor.setAccessible(true);
 

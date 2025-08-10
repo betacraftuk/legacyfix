@@ -18,7 +18,9 @@ public class JvmUtils {
     }
 
     static String join(String glue, Iterable<String> strings) {
-        if (strings == null) return "";
+        if (strings == null) {
+            return "";
+        }
         StringBuilder buf = new StringBuilder();
         Iterator<String> i = strings.iterator();
         if (i.hasNext()) {

@@ -41,8 +41,9 @@ public class ProfileHandler extends HandlerBase {
 
         this.inputStream = new ByteArrayInputStream(profileData);
 
-        if (!SkinUtils.requiresFixing())
+        if (!SkinUtils.requiresFixing()) {
             return;
+        }
 
         Matcher matcher = this.PROFILE_PATTERN.matcher(this.getURLString());
         if (!matcher.find()) {
@@ -54,15 +55,17 @@ public class ProfileHandler extends HandlerBase {
 
         JSONObject response = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(profileData))));
 
-        if (!response.has("properties"))
+        if (!response.has("properties")) {
             return;
+        }
 
         String base64String = response.getJSONArray("properties").getJSONObject(0).getString("value");
 
         JSONObject texturesJson = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(Base64Utils.decode(base64String)))));
 
-        if (!texturesJson.has("textures"))
+        if (!texturesJson.has("textures")) {
             return;
+        }
 
         JSONObject skinJson = texturesJson.getJSONObject("textures").getJSONObject("SKIN");
         boolean alex = skinJson.has("metadata") && skinJson.getJSONObject("metadata").getString("model").equals("slim");

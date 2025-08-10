@@ -26,8 +26,9 @@ public class SkinHandler extends HandlerBase {
         super(u, patternUsed);
         this.patternUsed = patternUsed;
 
-        if (CAPE_PATTERN.equals(patternUsed))
+        if (CAPE_PATTERN.equals(patternUsed)) {
             this.isCapeRequest = true;
+        }
     }
 
     public void connect() throws IOException {
@@ -50,8 +51,9 @@ public class SkinHandler extends HandlerBase {
             );
         }
 
-        if (data != null)
+        if (data != null) {
             this.inputStream = new ByteArrayInputStream(data);
+        }
     }
 
     public static List<Pattern> regexPatterns() {
