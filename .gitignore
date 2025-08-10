@@ -1,5 +1,6 @@
 # IntellIJ IDEs
-.idea
+.idea/*
+!.idea/codeStyles
 
 # Ignore Gradle project-specific cache directory
 .gradle
