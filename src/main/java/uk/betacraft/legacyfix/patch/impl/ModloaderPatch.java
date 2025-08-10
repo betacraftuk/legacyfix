@@ -8,7 +8,6 @@ import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 /**
@@ -80,7 +79,7 @@ public class ModloaderPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        this.redefineClass(inst, clazz);
 
         clazz = pool.get("java.lang.ClassLoader");
         method = clazz.getDeclaredMethod("loadClass", new CtClass[] {PatchHelper.stringClass});
@@ -90,7 +89,7 @@ public class ModloaderPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        this.redefineClass(inst, clazz);
     }
 
     @Override

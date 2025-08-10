@@ -4,7 +4,6 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 public class VSyncPatch extends Patch {
@@ -26,6 +25,6 @@ public class VSyncPatch extends Patch {
             "setVSyncEnabled(true);"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
+        this.redefineClass(inst, displayClass);
     }
 }

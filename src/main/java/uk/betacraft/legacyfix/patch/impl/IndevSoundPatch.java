@@ -1,12 +1,11 @@
 package uk.betacraft.legacyfix.patch.impl;
 
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
-
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
+
+import java.lang.instrument.Instrumentation;
 
 /**
  * Patches LWJGL to play sound in early Indev
@@ -36,6 +35,6 @@ public class IndevSoundPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(al10Class.getName()), al10Class.toBytecode()));
+        this.redefineClass(inst, al10Class);
     }
 }

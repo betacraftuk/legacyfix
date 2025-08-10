@@ -25,8 +25,9 @@ public class IntelPatch extends Patch {
     public void apply(final Instrumentation inst) throws Exception {
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
-                if (className == null)
+                if (className == null) {
                     return null;
+                }
 
                 CtClass clas = pool.getOrNull(className.replace('/', '.'));
                 if (clas == null || className.startsWith("org/lwjgl") || clas.getDeclaredConstructors().length > 1 || clas.isFrozen()) {

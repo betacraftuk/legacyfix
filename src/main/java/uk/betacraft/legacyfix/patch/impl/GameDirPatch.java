@@ -6,7 +6,6 @@ import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 public class GameDirPatch extends Patch {
@@ -123,10 +122,9 @@ public class GameDirPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(fileClass.getName()), fileClass.toBytecode()));
+        this.redefineClass(inst, fileClass);
 
         CtClass fileInputStreamClass = pool.get("java.io.FileInputStream");
-
         CtConstructor fileInputStreamConstructor = fileInputStreamClass.getDeclaredConstructor(
                 new CtClass[]{fileClass});
 
@@ -144,7 +142,7 @@ public class GameDirPatch extends Patch {
             "} catch (Throwable t) { t.printStackTrace(); }"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(fileInputStreamClass.getName()), fileInputStreamClass.toBytecode()));
+        this.redefineClass(inst, fileInputStreamClass);
 
         CtClass fileOutputStreamClass = pool.get("java.io.FileOutputStream");
         CtConstructor fileOutputStreamConstructor = fileOutputStreamClass.getDeclaredConstructor(
@@ -160,6 +158,6 @@ public class GameDirPatch extends Patch {
             "} catch (Throwable t) { t.printStackTrace(); }"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(fileOutputStreamClass.getName()), fileOutputStreamClass.toBytecode()));
+        this.redefineClass(inst, fileOutputStreamClass);
     }
 }

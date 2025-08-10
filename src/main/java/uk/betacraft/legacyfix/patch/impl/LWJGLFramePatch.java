@@ -37,8 +37,9 @@ public class LWJGLFramePatch extends Patch {
         }
 
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        if (displayClass.isFrozen())
+        if (displayClass.isFrozen()) {
             displayClass.defrost();
+        }
 
         CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{PatchHelper.stringClass});
 
@@ -81,12 +82,13 @@ public class LWJGLFramePatch extends Patch {
         );
         // @formatter:on
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayModeClass.getName()), displayModeClass.toBytecode()));
+        this.redefineClass(inst, displayModeClass);
 
         // Make 13w16a-13w24b honor custom width & height
         CtClass minecraftMainClass = pool.getOrNull(LegacyFixLauncher.getValue("mainClass", "net.minecraft.client.main.Main"));
-        if (minecraftMainClass == null)
+        if (minecraftMainClass == null) {
             return;
+        }
 
         CtMethod mainMethod = minecraftMainClass.getDeclaredMethod("main");
 
@@ -106,8 +108,9 @@ public class LWJGLFramePatch extends Patch {
                         isMinecraft = true;
                     }
 
-                    if (!isMinecraft)
+                    if (!isMinecraft) {
                         return;
+                    }
 
                     for (int i = 0; i < parameterTypes.length; i++) {
                         CtClass intClass = parameterTypes[i];

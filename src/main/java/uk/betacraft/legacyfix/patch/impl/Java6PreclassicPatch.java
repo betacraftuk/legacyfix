@@ -1,13 +1,13 @@
 package uk.betacraft.legacyfix.patch.impl;
 
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-
 import javassist.CtClass;
 import javassist.bytecode.ClassFile;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.util.JvmUtils;
+
+import java.lang.instrument.ClassDefinition;
+import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
 
 /**
  * Declares all Pre-Classic classes compliant with Java 5
@@ -62,7 +62,6 @@ public class Java6PreclassicPatch extends Patch {
         for (String aPackage : packages) {
             for (String className : preclassicClasses) {
                 CtClass pcClass = pool.getOrNull(aPackage + "." + className);
-
                 if (pcClass == null) {
                     continue;
                 }

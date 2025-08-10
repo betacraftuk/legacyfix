@@ -1,18 +1,20 @@
 package uk.betacraft.legacyfix.patch.impl;
 
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Modifier;
-import java.security.ProtectionDomain;
-
-import javassist.*;
+import javassist.CannotCompileException;
+import javassist.CtClass;
+import javassist.CtField;
+import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
+
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Modifier;
+import java.security.ProtectionDomain;
 
 /**
  * Fixes mouse on modern macOS, required for deAWT
@@ -33,10 +35,11 @@ public class MousePatch extends Patch {
             String[] deltaXYFieldNames = new String[2];
             boolean usesRobot = false;
             for (CtField field : mouseHelperClass.getDeclaredFields()) {
-                if (Modifier.isPublic(field.getModifiers()) && field.getType().getName().equals("int"))
+                if (Modifier.isPublic(field.getModifiers()) && field.getType().getName().equals("int")) {
                     deltaXYFieldNames[deltaXYFieldNames[0] == null ? 0 : 1] = field.getName();
-                else if (field.getType().getName().equals("java.awt.Robot"))
+                } else if (field.getType().getName().equals("java.awt.Robot")) {
                     usesRobot = true;
+                }
             }
 
             LFLogger.debug("mouse", "MouseHelper uses AWT Robot: " + usesRobot);
@@ -65,8 +68,7 @@ public class MousePatch extends Patch {
             );
 
             boolean invert = "invert".equals(LegacyFixAgent.getSetting("lf.mouse", null));
-            if (usesRobot)
-                invert = !invert;
+            if (usesRobot) invert = !invert;
 
             LFLogger.debug("mouse", "Mouse Y invert: " + invert);
 
@@ -90,7 +92,7 @@ public class MousePatch extends Patch {
                 mouseHelperMethods[2].setBody((invert ? tickBodyInvert : tickBody));
             }
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(mouseHelperClass.getName()), mouseHelperClass.toBytecode()));
+            this.redefineClass(inst, mouseHelperClass);
 
             // @formatter:on
 
@@ -103,8 +105,9 @@ public class MousePatch extends Patch {
                     }
 
                     try {
-                        if (clas.isFrozen())
+                        if (clas.isFrozen()) {
                             clas.defrost();
+                        }
 
                         clas.instrument(new ExprEditor() {
                             public void edit(MethodCall m) throws CannotCompileException {
@@ -143,8 +146,9 @@ public class MousePatch extends Patch {
         // Some versions refer to setNativeCursor within methods of the Minecraft class,
         // we need to account for that too
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
-        if (minecraftClass.isFrozen())
+        if (minecraftClass.isFrozen()) {
             minecraftClass.defrost();
+        }
 
         minecraftClass.instrument(new ExprEditor() {
             public void edit(MethodCall mc) throws CannotCompileException {
@@ -164,6 +168,6 @@ public class MousePatch extends Patch {
             }
         });
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+        this.redefineClass(inst, minecraftClass);
     }
 }

@@ -18,101 +18,22 @@ import uk.betacraft.util.RequestUtil;
 import uk.betacraft.util.WebData;
 
 import java.io.*;
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.Set;
 
 public class LauncherPatch extends Patch {
+    public static final JSONObject assetIndexesJson = new JSONObject(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/asset_indexes.json"))));
+    public static final JSONArray versionDataJson = new JSONArray(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/version_data.json"))));
     public static boolean applied = false;
-
     public static boolean isPrism = false;
     public static boolean isMultiMC = false;
-
     public static String minecraftVersion = null;
     public static String baseVersion = null;
     public static String lwjglVersion = null;
     public static String assetIndex = null;
 
-    public static final JSONObject assetIndexesJson = new JSONObject(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/asset_indexes.json"))));
-    public static final JSONArray versionDataJson = new JSONArray(new JSONTokener(new InputStreamReader(LauncherPatch.class.getResourceAsStream("/version_data.json"))));
-
     public LauncherPatch() {
         super("launcher", "Patches the main launcher class, instead of having a custom one", true, true);
-    }
-
-    public void apply(Instrumentation inst) throws Exception {
-        String mainClass = System.getProperty("sun.java.command");
-        LFLogger.debug("Main class: ", mainClass);
-
-        if (mainClass == null) {
-            throw new PatchException("Main class not found");
-        }
-
-        if (mainClass.equals("org.prismlauncher.EntryPoint")) {
-            isPrism = true;
-            LFLogger.info("Prism Launcher detected, patching!");
-            patchPrism(inst);
-        } else if (mainClass.equals("org.multimc.EntryPoint")) {
-            isMultiMC = true;
-            LFLogger.info("MultiMC detected, patching!");
-            patchMultiMC(inst);
-        } else return;
-
-        applied = readMinecraftVersionInfo();
-    }
-
-    private void patchPrism(Instrumentation inst) throws Exception {
-        CtClass parametersClass = pool.getOrNull("org.prismlauncher.utils.Parameters");
-        if (parametersClass == null) {
-            throw new PatchException("Parameters class not found?");
-        }
-
-        patch(inst, parametersClass, "getString", "getString", "getList");
-    }
-
-    private void patchMultiMC(Instrumentation inst) throws Exception {
-        CtClass parametersClass = pool.getOrNull("org.multimc.ParamBucket");
-        if (parametersClass == null) {
-            throw new PatchException("ParamBucket class not found?");
-        }
-
-        patch(inst, parametersClass, "firstSafe", "first", "allSafe");
-    }
-
-    private void patch(Instrumentation inst, CtClass parametersClass, String getStringMethodName, String getStringUnsafeMethodName, String getListMethodName) throws Exception {
-        if (parametersClass.isFrozen()) {
-            parametersClass.defrost();
-        }
-
-        CtMethod getStringDefault = parametersClass.getDeclaredMethod(
-            getStringMethodName,
-            pool.get(new String[]{"java.lang.String", "java.lang.String"})
-        );
-
-        CtMethod getList = parametersClass.getDeclaredMethod(
-            getListMethodName,
-            pool.get(new String[]{"java.lang.String", "java.util.List"})
-        );
-
-        //@formatter:off
-        getStringDefault.insertBefore(
-            "if ($1.equals(\"mainClass\")) { " +
-            "    return \"uk.betacraft.legacyfix.LegacyFixLauncher\"; " +
-            "}"
-        );
-
-        getList.insertAfter(
-            "if ($1.equals(\"traits\")) {" +
-            "    $_ = new java.util.ArrayList();" +
-            "    $_.add(\"noapplet\");" +
-            "} else if ($1.equals(\"param\") && $_.size() == 0) {" +
-            "    $_.add($0." + getStringUnsafeMethodName + "(\"userName\"));" +
-            "    $_.add($0." + getStringUnsafeMethodName + "(\"sessionId\"));" +
-            "}"
-        );
-        //@formatter:on
-
-        inst.redefineClasses(new ClassDefinition(Class.forName(parametersClass.getName()), parametersClass.toBytecode()));
     }
 
     public static boolean readMinecraftVersionInfo() {
@@ -149,14 +70,16 @@ public class LauncherPatch extends Patch {
             JSONObject component = componentsArray.getJSONObject(i);
             String uid = component.getString("uid");
 
-            if ("net.minecraft".equals(uid))
+            if ("net.minecraft".equals(uid)) {
                 baseVersion = component.getString("version");
-            else if ("org.lwjgl".equals(uid))
+            } else if ("org.lwjgl".equals(uid)) {
                 lwjglVersion = component.getString("version");
+            }
         }
 
-        if (baseVersion == null)
+        if (baseVersion == null) {
             return false;
+        }
 
         if (customJarName != null) {
             assetIndex = determineAssetIndex(customJarName);
@@ -181,8 +104,9 @@ public class LauncherPatch extends Patch {
         // don't process asset indexes for versions past 13w48b,
         // or for configurations where the user has specified the asset index,
         // as the asset index should have proper assets already.
-        if (LegacyFixLauncher.getAssetIndexPath() != null)
+        if (LegacyFixLauncher.getAssetIndexPath() != null) {
             return;
+        }
 
         downloadServerFor1_3Snapshots();
 
@@ -195,11 +119,13 @@ public class LauncherPatch extends Patch {
             boolean valid = false;
             checkValid:
             {
-                if (!assetIndexFile.exists())
+                if (!assetIndexFile.exists()) {
                     break checkValid;
+                }
 
-                if (assetIndexFile.length() != assetIndexSnippet.getLong("size"))
+                if (assetIndexFile.length() != assetIndexSnippet.getLong("size")) {
                     break checkValid;
+                }
 
                 String localSha1;
                 try {
@@ -210,8 +136,9 @@ public class LauncherPatch extends Patch {
                     break checkValid;
                 }
 
-                if (!assetIndexSnippet.getString("sha1").equals(localSha1))
+                if (!assetIndexSnippet.getString("sha1").equals(localSha1)) {
                     break checkValid;
+                }
 
                 valid = true;
             }
@@ -269,8 +196,9 @@ public class LauncherPatch extends Patch {
             String hashPath = "/" + hash.substring(0, 2) + "/" + hash;
 
             File assetFile = new File(assetsDir, "objects" + hashPath);
-            if (assetFile.exists() && assetFile.length() == asset.getLong("size"))
+            if (assetFile.exists() && assetFile.length() == asset.getLong("size")) {
                 continue;
+            }
 
             Request req = new Request();
             if (asset.has("url")) {
@@ -292,18 +220,21 @@ public class LauncherPatch extends Patch {
         patchOrgLwjglJson();
 
         File resourcesDir = new File("resources");
-        if (resourcesDir.exists() && !LegacyFixAgent.hasSetting("lf.keep-resources"))
+        if (resourcesDir.exists() && !LegacyFixAgent.hasSetting("lf.keep-resources")) {
             FileUtils.removeRecursively(resourcesDir, false, false);
+        }
     }
 
     private static void patchNetMinecraftJson() {
-        if (LegacyFixAgent.hasSetting("lf.keep-net.minecraft.json"))
+        if (LegacyFixAgent.hasSetting("lf.keep-net.minecraft.json")) {
             return;
+        }
 
         File netMinecraftJsonFile = new File("../patches/net.minecraft.json");
         JSONObject netMinecraftJson = readMMCJson(netMinecraftJsonFile, new File("../../../meta/net.minecraft/" + baseVersion + ".json"));
-        if (netMinecraftJson == null)
+        if (netMinecraftJson == null) {
             return;
+        }
 
         netMinecraftJson.remove("assetIndex");
         netMinecraftJson.put("assetIndex", assetIndexesJson.getJSONObject(assetIndex));
@@ -314,17 +245,21 @@ public class LauncherPatch extends Patch {
     }
 
     private static void patchOrgLwjglJson() {
-        if (!isPrism)
+        if (!isPrism) {
             return;
+        }
 
-        if (LegacyFixAgent.hasSetting("lf.keep-org.lwjgl.json"))
+        if (LegacyFixAgent.hasSetting("lf.keep-org.lwjgl.json")) {
             return;
+        }
 
-        if (lwjglVersion == null)
+        if (lwjglVersion == null) {
             return;
+        }
 
-        if (!OSUtils.getPlatform().is(OSUtils.OS.MACOS, OSUtils.Arch.AARCH64))
+        if (!OSUtils.getPlatform().is(OSUtils.OS.MACOS, OSUtils.Arch.AARCH64)) {
             return;
+        }
 
         if (!"2.9.4-nightly-20150209".equals(lwjglVersion)) {
             LFLogger.error("Could not patch LWJGL2!",
@@ -336,8 +271,9 @@ public class LauncherPatch extends Patch {
 
         File orgLwjglJsonFile = new File("../patches/org.lwjgl.json");
         JSONObject orgLwjglJson = readMMCJson(orgLwjglJsonFile, new File("../../../meta/org.lwjgl/" + lwjglVersion + ".json"));
-        if (orgLwjglJson == null)
+        if (orgLwjglJson == null) {
             return;
+        }
 
         JSONArray libraries = orgLwjglJson.getJSONArray("libraries");
         for (int i = 0; i < libraries.length(); i++) {
@@ -345,19 +281,22 @@ public class LauncherPatch extends Patch {
 
             String libName = library.getString("name");
             String expectedLibName = "org.lwjgl.lwjgl:lwjgl-platform:" + lwjglVersion;
-            if (!expectedLibName.equals(libName))
+            if (!expectedLibName.equals(libName)) {
                 continue;
+            }
 
             JSONObject downloads = library.getJSONObject("downloads");
             JSONObject classifiers = downloads.getJSONObject("classifiers");
-            if (!classifiers.has("natives-osx-arm64"))
+            if (!classifiers.has("natives-osx-arm64")) {
                 return;
+            }
 
             JSONObject osxArm64Natives = classifiers.getJSONObject("natives-osx-arm64");
             String brokenNativesUrl = "https://github.com/MinecraftMachina/lwjgl/releases/download/2.9.4-20150209-mmachina.2/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar";
             // if the natives are already modified by something else than LF, don't overwrite them.
-            if (!brokenNativesUrl.equals(osxArm64Natives.getString("url")))
+            if (!brokenNativesUrl.equals(osxArm64Natives.getString("url"))) {
                 return;
+            }
 
             JSONObject properOSXArm64Natives = new JSONObject();
             properOSXArm64Natives.put("sha1", "a785c8196d3ef960cf420967de2835bef9e2bbb0");
@@ -423,8 +362,9 @@ public class LauncherPatch extends Patch {
     }
 
     private static void downloadServerFor1_3Snapshots() {
-        if (!minecraftVersion.startsWith("12w18a") && !minecraftVersion.startsWith("12w19a") && !minecraftVersion.startsWith("12w21a"))
+        if (!minecraftVersion.startsWith("12w18a") && !minecraftVersion.startsWith("12w19a") && !minecraftVersion.startsWith("12w21a")) {
             return;
+        }
 
         String actualVersion = minecraftVersion.substring(0, 6);
 
@@ -447,8 +387,9 @@ public class LauncherPatch extends Patch {
     private static String determineAssetIndex(String version) {
         for (int i = 0; i < versionDataJson.length(); i++) {
             JSONObject versionData = versionDataJson.getJSONObject(i);
-            if (!version.matches(versionData.getString("version")))
+            if (!version.matches(versionData.getString("version"))) {
                 continue;
+            }
 
             String assetIndex = versionData.getString("assetIndex");
 
@@ -469,8 +410,9 @@ public class LauncherPatch extends Patch {
                     } else {
                         System.setProperty(setting[0], setting.length == 2 ? setting[1] : "");
 
-                        if (LegacyFixAgent.hasSetting(setting[0]))
+                        if (LegacyFixAgent.hasSetting(setting[0])) {
                             LegacyFixAgent.getSettings().remove(setting[0]);
+                        }
 
                         LegacyFixAgent.getSettings().put(setting[0], setting.length == 2 ? setting[1] : "");
                     }
@@ -486,5 +428,82 @@ public class LauncherPatch extends Patch {
         }
 
         return null;
+    }
+
+    public void apply(Instrumentation inst) throws Exception {
+        String mainClass = System.getProperty("sun.java.command");
+        LFLogger.debug("Main class: ", mainClass);
+
+        if (mainClass == null) {
+            throw new PatchException("Main class not found");
+        }
+
+        if (mainClass.equals("org.prismlauncher.EntryPoint")) {
+            isPrism = true;
+            LFLogger.info("Prism Launcher detected, patching!");
+            patchPrism(inst);
+        } else if (mainClass.equals("org.multimc.EntryPoint")) {
+            isMultiMC = true;
+            LFLogger.info("MultiMC detected, patching!");
+            patchMultiMC(inst);
+        } else {
+            return;
+        }
+
+        applied = readMinecraftVersionInfo();
+    }
+
+    private void patchPrism(Instrumentation inst) throws Exception {
+        CtClass parametersClass = pool.getOrNull("org.prismlauncher.utils.Parameters");
+        if (parametersClass == null) {
+            throw new PatchException("Parameters class not found?");
+        }
+
+        patch(inst, parametersClass, "getString", "getString", "getList");
+    }
+
+    private void patchMultiMC(Instrumentation inst) throws Exception {
+        CtClass parametersClass = pool.getOrNull("org.multimc.ParamBucket");
+        if (parametersClass == null) {
+            throw new PatchException("ParamBucket class not found?");
+        }
+
+        patch(inst, parametersClass, "firstSafe", "first", "allSafe");
+    }
+
+    private void patch(Instrumentation inst, CtClass parametersClass, String getStringMethodName, String getStringUnsafeMethodName, String getListMethodName) throws Exception {
+        if (parametersClass.isFrozen()) {
+            parametersClass.defrost();
+        }
+
+        CtMethod getStringDefault = parametersClass.getDeclaredMethod(
+            getStringMethodName,
+            pool.get(new String[]{"java.lang.String", "java.lang.String"})
+        );
+
+        CtMethod getList = parametersClass.getDeclaredMethod(
+            getListMethodName,
+            pool.get(new String[]{"java.lang.String", "java.util.List"})
+        );
+
+        //@formatter:off
+        getStringDefault.insertBefore(
+            "if ($1.equals(\"mainClass\")) { " +
+            "    return \"uk.betacraft.legacyfix.LegacyFixLauncher\"; " +
+            "}"
+        );
+
+        getList.insertAfter(
+            "if ($1.equals(\"traits\")) {" +
+            "    $_ = new java.util.ArrayList();" +
+            "    $_.add(\"noapplet\");" +
+            "} else if ($1.equals(\"param\") && $_.size() == 0) {" +
+            "    $_.add($0." + getStringUnsafeMethodName + "(\"userName\"));" +
+            "    $_.add($0." + getStringUnsafeMethodName + "(\"sessionId\"));" +
+            "}"
+        );
+        //@formatter:on
+
+        this.redefineClass(inst, parametersClass);
     }
 }

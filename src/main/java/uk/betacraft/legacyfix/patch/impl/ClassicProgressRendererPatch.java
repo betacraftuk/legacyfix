@@ -1,13 +1,15 @@
 package uk.betacraft.legacyfix.patch.impl;
 
 import javassist.*;
-import javassist.bytecode.*;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.CodeIterator;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 /**
@@ -18,15 +20,52 @@ public class ClassicProgressRendererPatch extends Patch {
         super("classic-performance", "Improves performance in c0.0.13a - c0.29_02", true);
     }
 
+    private static boolean isProgressRendererPercentageMethod(CtMethod method) {
+        try {
+            CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
+            CodeIterator codeIterator = codeAttribute.iterator();
+            ConstPool cp = method.getMethodInfo().getConstPool();
+
+            while (codeIterator.hasNext()) {
+                int pos = codeIterator.next();
+                int opcode = codeIterator.byteAt(pos);
+
+                String dirtPngCandidate;
+                if (opcode == Opcode.LDC) {
+                    if (!PatchHelper.isString(cp, codeIterator.byteAt(pos + 1))) {
+                        continue;
+                    }
+                    dirtPngCandidate = cp.getStringInfo(codeIterator.byteAt(pos + 1));
+                } else if (opcode == Opcode.LDC_W) {
+                    if (!PatchHelper.isUtf8(cp, codeIterator.u16bitAt(pos + 1))) {
+                        continue;
+                    }
+                    dirtPngCandidate = cp.getStringInfo(codeIterator.u16bitAt(pos + 1));
+                } else {
+                    continue;
+                }
+
+                if ("/dirt.png".equals(dirtPngCandidate)) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return false;
+    }
+
     @Override
     public void apply(Instrumentation inst) throws Exception {
         CtMethod method = findProgressRendererPercentageMethod();
-        if (method == null)
+        if (method == null) {
             throw new PatchException("No progressPercentage method found");
+        }
 
         CtClass progressRendererClass = method.getDeclaringClass();
-        if (progressRendererClass.isFrozen())
+        if (progressRendererClass.isFrozen()) {
             progressRendererClass.defrost();
+        }
 
         // check if this is c0.30, if so then no need to apply this patch
         if (!PatchHelper.findMinecraftClass(pool).getName().equals(progressRendererClass.getName())) {
@@ -39,8 +78,9 @@ public class ClassicProgressRendererPatch extends Patch {
 
         // reference to Minecraft.running
         String minecraftRunningRef = getMinecraftRunningField(progressRendererClass);
-        if (minecraftRunningRef == null)
+        if (minecraftRunningRef == null) {
             throw new PatchException("Reference to Minecraft.running could not be made");
+        }
 
         CtClass helperClass = pool.makeClass("legacyfix.helper.ProgressRendererHelper");
         CtField lastTimeField = CtField.make("public static long lastTime = System.currentTimeMillis();", helperClass);
@@ -64,7 +104,7 @@ public class ClassicProgressRendererPatch extends Patch {
         );
         // @formatter:on
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(progressRendererClass.getName()), progressRendererClass.toBytecode()));
+        this.redefineClass(inst, progressRendererClass);
     }
 
     private String getMinecraftRunningField(CtClass progressRendererClass) {
@@ -81,8 +121,9 @@ public class ClassicProgressRendererPatch extends Patch {
                     }
                 }
 
-                if (progressRendererMinecraftField == null)
+                if (progressRendererMinecraftField == null) {
                     throw new PatchException("No ProgressRenderer.minecraft field found");
+                }
 
                 result += "." + progressRendererMinecraftField.getName();
             }
@@ -90,9 +131,13 @@ public class ClassicProgressRendererPatch extends Patch {
             CtField minecraftRunningField = null;
             int count = 0;
             for (CtField candidateField : minecraftClass.getDeclaredFields()) {
-                if (!Modifier.isVolatile(candidateField.getModifiers())) continue;
+                if (!Modifier.isVolatile(candidateField.getModifiers())) {
+                    continue;
+                }
 
-                if (!candidateField.getType().getName().equals("boolean")) continue;
+                if (!candidateField.getType().getName().equals("boolean")) {
+                    continue;
+                }
 
                 count++;
                 if (count == 2) {
@@ -101,8 +146,9 @@ public class ClassicProgressRendererPatch extends Patch {
                 }
             }
 
-            if (minecraftRunningField == null)
+            if (minecraftRunningField == null) {
                 throw new PatchException("No Minecraft.running field found");
+            }
 
             return result + "." + minecraftRunningField.getName();
         } catch (Exception e) {
@@ -124,19 +170,23 @@ public class ClassicProgressRendererPatch extends Patch {
                 CtClass candidateClass = candidateField.getType();
                 for (CtConstructor candidateConstructor : candidateClass.getDeclaredConstructors()) {
                     CtClass[] paramTypes = candidateConstructor.getParameterTypes();
-                    if (paramTypes.length != 1)
+                    if (paramTypes.length != 1) {
                         continue;
+                    }
 
-                    if (!paramTypes[0].getName().equals(minecraftClass.getName()))
+                    if (!paramTypes[0].getName().equals(minecraftClass.getName())) {
                         continue;
+                    }
 
                     for (CtMethod candidateMethod : candidateClass.getDeclaredMethods()) {
                         paramTypes = candidateMethod.getParameterTypes();
-                        if (paramTypes.length != 1)
+                        if (paramTypes.length != 1) {
                             continue;
+                        }
 
-                        if (!paramTypes[0].getName().equals("int"))
+                        if (!paramTypes[0].getName().equals("int")) {
                             continue;
+                        }
 
                         if (isProgressRendererPercentageMethod(candidateMethod)) {
                             LFLogger.debug("classic-performance",
@@ -153,11 +203,13 @@ public class ClassicProgressRendererPatch extends Patch {
             // ProgressRenderer class not found, the method must be in Minecraft class
             for (CtMethod candidateMethod : minecraftClass.getDeclaredMethods()) {
                 CtClass[] paramTypes = candidateMethod.getParameterTypes();
-                if (paramTypes.length != 1)
+                if (paramTypes.length != 1) {
                     continue;
+                }
 
-                if (!paramTypes[0].getName().equals("int"))
+                if (!paramTypes[0].getName().equals("int")) {
                     continue;
+                }
 
                 if (isProgressRendererPercentageMethod(candidateMethod)) {
                     LFLogger.debug("classic-performance",
@@ -174,35 +226,6 @@ public class ClassicProgressRendererPatch extends Patch {
             LFLogger.error("classic-performance", t);
             return null;
         }
-    }
-
-    private static boolean isProgressRendererPercentageMethod(CtMethod method) {
-        try {
-            CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
-            CodeIterator codeIterator = codeAttribute.iterator();
-            ConstPool cp = method.getMethodInfo().getConstPool();
-
-            while (codeIterator.hasNext()) {
-                int pos = codeIterator.next();
-                int opcode = codeIterator.byteAt(pos);
-
-                String dirtPngCandidate;
-                if (opcode == Opcode.LDC) {
-                    if (!PatchHelper.isString(cp, codeIterator.byteAt(pos + 1))) continue;
-                    dirtPngCandidate = cp.getStringInfo(codeIterator.byteAt(pos + 1));
-                } else if (opcode == Opcode.LDC_W) {
-                    if (!PatchHelper.isUtf8(cp, codeIterator.u16bitAt(pos + 1))) continue;
-                    dirtPngCandidate = cp.getStringInfo(codeIterator.u16bitAt(pos + 1));
-                } else continue;
-
-                if ("/dirt.png".equals(dirtPngCandidate)) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
-        return false;
     }
 
     @Override

@@ -1,11 +1,10 @@
 package uk.betacraft.legacyfix.patch.impl;
 
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
-
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
+
+import java.lang.instrument.Instrumentation;
 
 /**
  * Fixes cloud glitches on AMD GPUs
@@ -32,6 +31,6 @@ public class BitDepthPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
+        this.redefineClass(inst, displayClass);
     }
 }

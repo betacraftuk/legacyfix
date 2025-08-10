@@ -4,7 +4,6 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 public class DisableControllersPatch extends Patch {
@@ -20,6 +19,6 @@ public class DisableControllersPatch extends Patch {
             "{ return; }"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        this.redefineClass(inst, clazz);
     }
 }

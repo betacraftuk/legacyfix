@@ -1,7 +1,10 @@
 package uk.betacraft.legacyfix.patch.impl;
 
 import javassist.*;
-import javassist.bytecode.*;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.CodeIterator;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Opcode;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.LFLogger;
@@ -9,7 +12,6 @@ import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 public class ClassicIndevResizePatch extends Patch {
@@ -21,8 +23,9 @@ public class ClassicIndevResizePatch extends Patch {
     public void apply(Instrumentation inst) throws Exception {
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
         for (CtMethod method : minecraftClass.getDeclaredMethods()) {
-            if (hasDesktopDisplayModeCall(method))
+            if (hasDesktopDisplayModeCall(method)) {
                 throw new PatchException("Detected version past in-20100110, patch won't be applied");
+            }
         }
 
         CtMethod runMethod = minecraftClass.getDeclaredMethod("run");
@@ -91,7 +94,7 @@ public class ClassicIndevResizePatch extends Patch {
 
         patchHud(inst, findHudField(), width, height);
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+        this.redefineClass(inst, minecraftClass);
     }
 
     private boolean hasDesktopDisplayModeCall(CtMethod method) {
@@ -107,11 +110,14 @@ public class ClassicIndevResizePatch extends Patch {
                     codeIterator.byteAt(pos + 3) != Opcode.INVOKESTATIC ||
                     codeIterator.byteAt(pos + 6) != Opcode.INVOKESTATIC ||
                     codeIterator.byteAt(pos + 9) != Opcode.ALOAD_0
-                ) continue;
+                ) {
+                    continue;
+                }
 
                 String refName = cp.getMethodrefName(codeIterator.u16bitAt(pos + 4));
-                if ("getDesktopDisplayMode".equals(refName))
+                if ("getDesktopDisplayMode".equals(refName)) {
                     return true;
+                }
             }
         } catch (Exception ignored) {
         }
@@ -134,7 +140,9 @@ public class ClassicIndevResizePatch extends Patch {
 
                 int countMinecraft = 0, countInt = 0;
                 for (CtField field : candidate.getDeclaredFields()) {
-                    if (!Modifier.isProtected(field.getModifiers())) continue;
+                    if (!Modifier.isProtected(field.getModifiers())) {
+                        continue;
+                    }
 
                     if (field.getType().equals(minecraftClass)) {
                         countMinecraft++;
@@ -159,13 +167,17 @@ public class ClassicIndevResizePatch extends Patch {
 
     private CtMethod findInitMethod(CtField screenField) {
         try {
-            if (screenField == null) return null;
+            if (screenField == null) {
+                return null;
+            }
 
             CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
             CtClass screenClass = screenField.getType();
             for (CtMethod method : screenClass.getDeclaredMethods()) {
                 CtClass[] parameters = method.getParameterTypes();
-                if (parameters.length != 3) continue;
+                if (parameters.length != 3) {
+                    continue;
+                }
 
                 if (parameters[0] == minecraftClass && parameters[1] == CtClass.intType && parameters[2] == CtClass.intType) {
                     LFLogger.debug("Found init method: " + method.getName());
@@ -188,7 +200,7 @@ public class ClassicIndevResizePatch extends Patch {
             }
 
             initMethod.insertBefore("this." + buttonsField.getName() + " = new java.util.ArrayList();");
-            inst.redefineClasses(new ClassDefinition(Class.forName(pauseScreen.getName()), pauseScreen.toBytecode()));
+            this.redefineClass(inst, pauseScreen);
         } catch (Exception ignored) {
         }
     }
@@ -205,10 +217,16 @@ public class ClassicIndevResizePatch extends Patch {
                 int pos = codeIterator.next();
                 int opcode = codeIterator.byteAt(pos);
 
-                if (opcode != Opcode.LDC) continue;
+                if (opcode != Opcode.LDC) {
+                    continue;
+                }
                 int ldcIndex = codeIterator.byteAt(pos + 1);
-                if (cp.getTag(ldcIndex) != 8) continue; // non-string LDC
-                if (!"Post startup".equals(cp.getStringInfo(ldcIndex))) continue;
+                if (cp.getTag(ldcIndex) != 8) {
+                    continue; // non-string LDC
+                }
+                if (!"Post startup".equals(cp.getStringInfo(ldcIndex))) {
+                    continue;
+                }
 
                 // INVOKESTATIC
                 int posInvoke = pos + 2;
@@ -266,7 +284,9 @@ public class ClassicIndevResizePatch extends Patch {
     }
 
     private void patchHud(Instrumentation inst, CtField hudField, CtField widthField, CtField heightField) {
-        if (hudField == null) return;
+        if (hudField == null) {
+            return;
+        }
 
         try {
             CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
@@ -301,7 +321,9 @@ public class ClassicIndevResizePatch extends Patch {
                 // @formatter:on
             }
 
-            if (renderMethod == null) return;
+            if (renderMethod == null) {
+                return;
+            }
             LFLogger.debug("Found hud method: " + renderMethod.getSignature());
 
             CtField minecraft = null;
@@ -322,7 +344,9 @@ public class ClassicIndevResizePatch extends Patch {
                 }
             }
 
-            if (minecraft == null || width == null || height == null) return;
+            if (minecraft == null || width == null || height == null) {
+                return;
+            }
 
             if (hudClass.isFrozen()) {
                 hudClass.defrost();
@@ -338,7 +362,7 @@ public class ClassicIndevResizePatch extends Patch {
             );
             // @formatter:on
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(hudClass.getName()), hudClass.toBytecode()));
+            this.redefineClass(inst, hudClass);
         } catch (Exception e) {
             LFLogger.error("patchHud", e);
         }
