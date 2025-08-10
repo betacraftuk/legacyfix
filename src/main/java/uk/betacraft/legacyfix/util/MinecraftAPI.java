@@ -5,12 +5,11 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.util.RequestUtil;
 
 import java.io.FileNotFoundException;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MinecraftAPIUtils {
+public class MinecraftAPI {
     // TODO: add support for the built-in launcher proxy, to make Minecraft able to communicate with APIs from outdated Java versions lacking necessary certs or TLSv1.2
     public static final String UUID_LOOKUP_URL = "https://api.minecraftservices.com/minecraft/profile/lookup/name/";
     public static final String PROFILE_LOOKUP_URL = "https://sessionserver.mojang.com/session/minecraft/profile/";

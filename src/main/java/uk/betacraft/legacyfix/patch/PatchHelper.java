@@ -10,7 +10,6 @@ import javassist.CtField;
 import javassist.NotFoundException;
 import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 public class PatchHelper {
@@ -154,6 +153,7 @@ public class PatchHelper {
     }
 
     // Used by GameDirPatch
+    @SuppressWarnings("unused")
     public static File getIndevMapRenderFromExpectedPath(File file) {
         String fileName = file.getName();
         File expectedFile = new File(new File(System.getProperty("user.home", ".")), fileName).getAbsoluteFile();

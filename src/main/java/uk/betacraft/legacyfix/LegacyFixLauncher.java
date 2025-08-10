@@ -4,7 +4,7 @@ import uk.betacraft.legacyfix.patch.impl.LauncherPatch;
 import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
 import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;
-import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
+import uk.betacraft.legacyfix.util.MinecraftAPI;
 
 import java.io.File;
 import java.net.URL;
@@ -244,7 +244,7 @@ public class LegacyFixLauncher {
     public static String getUUID() {
         String uuid = LegacyFixLauncher.getValue("uuid", "no-uuid");
         if (uuid.equals("no-uuid"))
-            return MinecraftAPIUtils.getUUID(LegacyFixLauncher.getValue("username", ""));
+            return MinecraftAPI.getUUID(LegacyFixLauncher.getValue("username", ""));
 
         return uuid;
     }

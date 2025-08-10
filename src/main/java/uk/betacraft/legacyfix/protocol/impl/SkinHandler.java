@@ -1,7 +1,7 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
+import uk.betacraft.legacyfix.util.MinecraftAPI;
 import uk.betacraft.legacyfix.util.SkinUtils;
 
 import java.io.ByteArrayInputStream;
@@ -42,11 +42,11 @@ public class SkinHandler extends HandlerBase {
         byte[] data;
         if (this.isCapeRequest) {
             data = SkinUtils.getFixedCape(
-                MinecraftAPIUtils.getSkin(username)
+                MinecraftAPI.getSkin(username)
             );
         } else {
             data = SkinUtils.getFixedSkin(
-                MinecraftAPIUtils.getSkin(username)
+                MinecraftAPI.getSkin(username)
             );
         }
 
