@@ -20,9 +20,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /home/runner/work/_temp/_github_workflow/idea-cache
-          key: ${{ runner.os }}-idea-cache-v2
+          key: ${{ runner.os }}-idea-cache
       - name: Run Formatter
-        uses: notdevcody/intellij-format-action@v2
+        uses: notdevcody/intellij-format-action@v3.1
         with:
+          push-type: "commit"
           include-glob: '*.java'
           path: './'
