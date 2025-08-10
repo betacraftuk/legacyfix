@@ -27,8 +27,8 @@ public class MinecraftAPI {
         } else {
             JSONObject obj = requestUUID(username);
             if (obj != null) {
-                if (obj.isEmpty()) // no uuid assigned to that username
-                {
+                if (obj.isEmpty()) {
+                    // no uuid assigned to that username
                     return "no-uuid";
                 }
 
