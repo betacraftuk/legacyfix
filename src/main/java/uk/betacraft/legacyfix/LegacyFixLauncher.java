@@ -93,23 +93,7 @@ public class LegacyFixLauncher {
         return false;
     }
 
-    private static void launchVisualizer() {
-        String previewAppletClassName = getValue("previewClass", null);
-        if (previewAppletClassName != null && !VisualizerLauncher.launchPreviewApplet(previewAppletClassName)) {
-            LFLogger.error("Failed to find explicitly specified preview applet class: \"" + previewAppletClassName + "\"");
-            return;
-        }
-
-        if (!VisualizerLauncher.launchPreviewApplet("net.minecraft.isom.IsomPreviewApplet"))
-            LFLogger.error("Failed to find the preview applet class");
-    }
-
     private static void launch() {
-        if (LegacyFixAgent.hasSetting("lf.visualizer")) {
-            launchVisualizer();
-            return;
-        }
-
         String minecraftAppletClassName = getValue("appletClass", null);
         String mainClassName = getValue("mainClass", null);
 

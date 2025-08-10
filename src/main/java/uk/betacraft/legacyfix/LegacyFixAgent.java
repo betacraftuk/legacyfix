@@ -82,6 +82,7 @@ public class LegacyFixAgent {
 
         PATCHES = new Patch[]{
             new LauncherPatch(),
+            new VisualizerPatch(),
             new DisableControllersPatch(),
             new TexturePackFolderPatch(),
             new Java6PreclassicPatch(),
