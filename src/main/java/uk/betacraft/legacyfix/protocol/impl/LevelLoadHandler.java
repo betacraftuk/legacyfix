@@ -85,7 +85,7 @@ public class LevelLoadHandler extends LevelHandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                LEVEL_LOAD_PATTERN
+            LEVEL_LOAD_PATTERN
         );
     }
 }

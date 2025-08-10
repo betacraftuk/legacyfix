@@ -81,8 +81,8 @@ public class ScreenshotPatch extends Patch {
                     int opcode = codeIterator.byteAt(pos);
 
                     if (opcode != Opcode.BIPUSH &&
-                            codeIterator.byteAt(pos + 2) != Opcode.INVOKESTATIC &&
-                            codeIterator.byteAt(pos + 5) != Opcode.IFEQ
+                        codeIterator.byteAt(pos + 2) != Opcode.INVOKESTATIC &&
+                        codeIterator.byteAt(pos + 5) != Opcode.IFEQ
                     ) continue;
 
                     int keyId = codeIterator.byteAt(pos + 1);

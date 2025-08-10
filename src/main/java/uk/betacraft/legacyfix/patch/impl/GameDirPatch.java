@@ -18,10 +18,10 @@ public class GameDirPatch extends Patch {
         CtClass fileClass = pool.get("java.io.File");
 
         CtConstructor fileConstructor = fileClass.getDeclaredConstructor(
-                new CtClass[]{PatchHelper.stringClass, PatchHelper.stringClass});
+            new CtClass[]{PatchHelper.stringClass, PatchHelper.stringClass});
 
         CtConstructor fileConstructor2 = fileClass.getDeclaredConstructor(
-                new CtClass[]{fileClass, PatchHelper.stringClass});
+            new CtClass[]{fileClass, PatchHelper.stringClass});
 
         // @formatter:off
         fileConstructor.insertBefore(

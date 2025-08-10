@@ -35,8 +35,8 @@ public class ResourceIndexHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                XML_INDEX_PATTERN,
-                TXT_INDEX_PATTERN
+            XML_INDEX_PATTERN,
+            TXT_INDEX_PATTERN
         );
     }
 }

@@ -26,7 +26,7 @@ public class SeecretSaturdayPatch extends Patch {
 
         CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[]{PatchHelper.floatClass, PatchHelper.floatClass, PatchHelper.floatClass});
         theProblemMethod.setBody(
-                "{ return; }"
+            "{ return; }"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));

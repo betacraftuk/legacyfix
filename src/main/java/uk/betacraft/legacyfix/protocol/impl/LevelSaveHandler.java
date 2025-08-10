@@ -91,7 +91,7 @@ public class LevelSaveHandler extends LevelHandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                LEVEL_SAVE_PATTERN
+            LEVEL_SAVE_PATTERN
         );
     }
 }

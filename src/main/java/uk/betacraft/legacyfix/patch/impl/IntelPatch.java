@@ -37,24 +37,24 @@ public class IntelPatch extends Patch {
                     final boolean[] openGlHelperMatched = new boolean[1];
                     for (CtMethod glActiveTextureMethod : clas.getDeclaredMethods()) {
                         if (!Modifier.isPublic(glActiveTextureMethod.getModifiers()) ||
-                                !Modifier.isStatic(glActiveTextureMethod.getModifiers()) ||
-                                !"void".equals(glActiveTextureMethod.getReturnType().getName()) ||
-                                glActiveTextureMethod.getParameterTypes().length != 1 ||
-                                !"int".equals(glActiveTextureMethod.getParameterTypes()[0].getName())) {
+                            !Modifier.isStatic(glActiveTextureMethod.getModifiers()) ||
+                            !"void".equals(glActiveTextureMethod.getReturnType().getName()) ||
+                            glActiveTextureMethod.getParameterTypes().length != 1 ||
+                            !"int".equals(glActiveTextureMethod.getParameterTypes()[0].getName())) {
                             continue;
                         }
 
                         glActiveTextureMethod.instrument(new ExprEditor() {
                             public void edit(MethodCall m) throws CannotCompileException {
                                 if ("org.lwjgl.opengl.ARBMultitexture".equals(m.getClassName()) &&
-                                        "glActiveTextureARB".equals(m.getMethodName()) &&
-                                        "(I)V".equalsIgnoreCase(m.getSignature())) {
+                                    "glActiveTextureARB".equals(m.getMethodName()) &&
+                                    "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.ARBMultitexture.glClientActiveTextureARB($$); $_ = $proceed($$); }");
                                     LFLogger.debug("intel", "Matched ARBMultitexture.glActiveTextureARB(I)V");
                                 } else if ("org.lwjgl.opengl.GL13".equals(m.getClassName()) &&
-                                        "glActiveTexture".equals(m.getMethodName()) &&
-                                        "(I)V".equalsIgnoreCase(m.getSignature())) {
+                                    "glActiveTexture".equals(m.getMethodName()) &&
+                                    "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.GL13.glClientActiveTexture($$); $_ = $proceed($$); }");
                                     LFLogger.debug("intel", "Matched GL13.glActiveTexture(I)V");

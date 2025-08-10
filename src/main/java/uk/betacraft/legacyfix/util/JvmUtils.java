@@ -9,8 +9,8 @@ public class JvmUtils {
     public static String getJvmArguments() {
         String name = System.getProperty("java.vm.name");
         return (contains(name, "Server") ? "-server "
-                : contains(name, "Client") ? "-client " : "")
-                + join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
+            : contains(name, "Client") ? "-client " : "")
+            + join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
     }
 
     static boolean contains(String s, String b) {

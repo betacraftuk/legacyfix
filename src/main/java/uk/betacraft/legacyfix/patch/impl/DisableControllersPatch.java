@@ -17,7 +17,7 @@ public class DisableControllersPatch extends Patch {
         CtClass clazz = pool.get("org.lwjgl.input.Controllers");
         CtMethod method = clazz.getDeclaredMethod("create");
         method.setBody(
-                "{ return; }"
+            "{ return; }"
         );
 
         inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));

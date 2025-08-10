@@ -189,16 +189,16 @@ public class DeAwtPatch extends Patch {
 
     private void eraseCanvasReferences(CodeIterator codeIterator, ConstPool constPool, int pos) {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
-                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+            codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
             return;
         }
 
         final int futurePos = pos + 8;
         // A second ALOAD appears in triggerFullscreen(), IFNE appears in the runGameLoop() method
         if (codeIterator.byteAt(futurePos) != Opcode.ALOAD_0 &&
-                codeIterator.byteAt(futurePos + 3) != Opcode.IFNE) {
+            codeIterator.byteAt(futurePos + 3) != Opcode.IFNE) {
             return;
         }
 
@@ -248,7 +248,7 @@ public class DeAwtPatch extends Patch {
             int pos = codeIterator.next();
 
             if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                    codeIterator.byteAt(pos + 1) != Opcode.INVOKEVIRTUAL) {
+                codeIterator.byteAt(pos + 1) != Opcode.INVOKEVIRTUAL) {
                 continue;
             }
 
@@ -266,11 +266,11 @@ public class DeAwtPatch extends Patch {
     private void addCatchToSetWorld(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool) throws BadBytecode, CannotCompileException {
         for (int pos = 0; pos < codeIterator.getCodeLength(); pos++) {
             if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                    codeIterator.byteAt(pos + 1) != Opcode.ACONST_NULL ||
-                    codeIterator.byteAt(pos + 2) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 1) != Opcode.ACONST_NULL ||
+                codeIterator.byteAt(pos + 2) != Opcode.INVOKEVIRTUAL ||
 
-                    (codeIterator.byteAt(pos + 5) == Opcode.GOTO &&
-                            codeIterator.byteAt(pos + 8) == Opcode.ASTORE_1)
+                (codeIterator.byteAt(pos + 5) == Opcode.GOTO &&
+                    codeIterator.byteAt(pos + 8) == Opcode.ASTORE_1)
             ) {
                 continue;
             }
@@ -322,15 +322,15 @@ public class DeAwtPatch extends Patch {
 
     private boolean eraseAppletReferencesClassic0_24And0_25Shared(String appletMethodCall, CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 13) != Opcode.LDC ||
-                codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 18) != Opcode.IFNE ||
-                codeIterator.byteAt(pos + 21) != Opcode.ACONST_NULL ||
-                codeIterator.byteAt(pos + 22) != Opcode.ASTORE_1) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 13) != Opcode.LDC ||
+            codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 18) != Opcode.IFNE ||
+            codeIterator.byteAt(pos + 21) != Opcode.ACONST_NULL ||
+            codeIterator.byteAt(pos + 22) != Opcode.ASTORE_1) {
             return false;
         }
 
@@ -364,11 +364,11 @@ public class DeAwtPatch extends Patch {
             return;
 
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
-                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 8) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 11) != Opcode.INVOKEVIRTUAL) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+            codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0 ||
+            codeIterator.byteAt(pos + 8) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 11) != Opcode.INVOKEVIRTUAL) {
             return;
         }
 
@@ -393,8 +393,8 @@ public class DeAwtPatch extends Patch {
             return;
 
         if (codeIterator.byteAt(pos) != Opcode.NEW ||
-                (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
-                        codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
+            (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
+                codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
             return;
         }
 

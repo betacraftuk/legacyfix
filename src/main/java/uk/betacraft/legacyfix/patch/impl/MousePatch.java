@@ -109,15 +109,15 @@ public class MousePatch extends Patch {
                         clas.instrument(new ExprEditor() {
                             public void edit(MethodCall m) throws CannotCompileException {
                                 if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                                        "getDX".equals(m.getMethodName()) &&
-                                        "()I".equalsIgnoreCase(m.getSignature())) {
+                                    "getDX".equals(m.getMethodName()) &&
+                                    "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
                                     LFLogger.debug("mouse", "Mouse.getDX() match!");
 
                                 } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                                        "getDY".equals(m.getMethodName()) &&
-                                        "()I".equalsIgnoreCase(m.getSignature())) {
+                                    "getDY".equals(m.getMethodName()) &&
+                                    "()I".equalsIgnoreCase(m.getSignature())) {
                                     mouseDXYmatched = true;
                                     m.replace("$_ = 0;");
                                     LFLogger.debug("mouse", "Mouse.getDY() match!");

@@ -104,9 +104,9 @@ public class ClassicIndevResizePatch extends Patch {
                 int pos = codeIterator.next();
 
                 if (codeIterator.byteAt(pos) != Opcode.IFEQ ||
-                        codeIterator.byteAt(pos + 3) != Opcode.INVOKESTATIC ||
-                        codeIterator.byteAt(pos + 6) != Opcode.INVOKESTATIC ||
-                        codeIterator.byteAt(pos + 9) != Opcode.ALOAD_0
+                    codeIterator.byteAt(pos + 3) != Opcode.INVOKESTATIC ||
+                    codeIterator.byteAt(pos + 6) != Opcode.INVOKESTATIC ||
+                    codeIterator.byteAt(pos + 9) != Opcode.ALOAD_0
                 ) continue;
 
                 String refName = cp.getMethodrefName(codeIterator.u16bitAt(pos + 4));
@@ -347,7 +347,7 @@ public class ClassicIndevResizePatch extends Patch {
     @Override
     public boolean shouldApply() {
         return super.shouldApply() &&
-                (pool.getOrNull("com.mojang.minecraft.MinecraftApplet") != null ||
-                        pool.getOrNull("net.minecraft.client.MinecraftApplet") != null);
+            (pool.getOrNull("com.mojang.minecraft.MinecraftApplet") != null ||
+                pool.getOrNull("net.minecraft.client.MinecraftApplet") != null);
     }
 }

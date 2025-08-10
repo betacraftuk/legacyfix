@@ -143,15 +143,15 @@ public class RequestUtil {
             accessToken = sessionId;
 
         return RequestUtil.performRawPOSTRequest(
-                new Request()
-                        .setUrl("https://sessionserver.mojang.com/session/minecraft/join")
-                        .setHeader("Content-Type", "application/json")
-                        .setPayload(
-                                new JSONObject()
-                                        .put("serverId", serverId)
-                                        .put("accessToken", accessToken)
-                                        .put("selectedProfile", uuid)
-                        )
+            new Request()
+                .setUrl("https://sessionserver.mojang.com/session/minecraft/join")
+                .setHeader("Content-Type", "application/json")
+                .setPayload(
+                    new JSONObject()
+                        .put("serverId", serverId)
+                        .put("accessToken", accessToken)
+                        .put("selectedProfile", uuid)
+                )
         );
     }
 

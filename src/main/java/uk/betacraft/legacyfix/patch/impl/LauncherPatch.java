@@ -85,13 +85,13 @@ public class LauncherPatch extends Patch {
         }
 
         CtMethod getStringDefault = parametersClass.getDeclaredMethod(
-                getStringMethodName,
-                pool.get(new String[]{"java.lang.String", "java.lang.String"})
+            getStringMethodName,
+            pool.get(new String[]{"java.lang.String", "java.lang.String"})
         );
 
         CtMethod getList = parametersClass.getDeclaredMethod(
-                getListMethodName,
-                pool.get(new String[]{"java.lang.String", "java.util.List"})
+            getListMethodName,
+            pool.get(new String[]{"java.lang.String", "java.util.List"})
         );
 
         //@formatter:off
@@ -328,8 +328,8 @@ public class LauncherPatch extends Patch {
 
         if (!"2.9.4-nightly-20150209".equals(lwjglVersion)) {
             LFLogger.error("Could not patch LWJGL2!",
-                    "Required LWJGL 2.9.4-nightly-20150209, got " + lwjglVersion,
-                    "Change your LWJGL2 version if you want to resize your game without crashing."
+                "Required LWJGL 2.9.4-nightly-20150209, got " + lwjglVersion,
+                "Change your LWJGL2 version if you want to resize your game without crashing."
             );
             return;
         }

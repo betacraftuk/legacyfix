@@ -42,11 +42,11 @@ public class SkinHandler extends HandlerBase {
         byte[] data;
         if (this.isCapeRequest) {
             data = SkinUtils.getFixedCape(
-                    MinecraftAPIUtils.getSkin(username)
+                MinecraftAPIUtils.getSkin(username)
             );
         } else {
             data = SkinUtils.getFixedSkin(
-                    MinecraftAPIUtils.getSkin(username)
+                MinecraftAPIUtils.getSkin(username)
             );
         }
 
@@ -56,8 +56,8 @@ public class SkinHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                SKIN_PATTERN,
-                CAPE_PATTERN
+            SKIN_PATTERN,
+            CAPE_PATTERN
         );
     }
 }

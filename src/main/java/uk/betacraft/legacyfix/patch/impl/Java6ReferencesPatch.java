@@ -56,8 +56,8 @@ public class Java6ReferencesPatch extends Patch {
 
                     public void edit(MethodCall m) throws CannotCompileException {
                         if ("java.lang.String".equals(m.getClassName()) &&
-                                "isEmpty".equals(m.getMethodName()) &&
-                                "()V".equalsIgnoreCase(m.getSignature())) {
+                            "isEmpty".equals(m.getMethodName()) &&
+                            "()V".equalsIgnoreCase(m.getSignature())) {
 
                             m.replace("$_ = $0.length() == 0;");
                         }

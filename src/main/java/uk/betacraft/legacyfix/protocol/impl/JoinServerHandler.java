@@ -41,7 +41,7 @@ public class JoinServerHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                JOIN_SERVER_PATTERN
+            JOIN_SERVER_PATTERN
         );
     }
 }

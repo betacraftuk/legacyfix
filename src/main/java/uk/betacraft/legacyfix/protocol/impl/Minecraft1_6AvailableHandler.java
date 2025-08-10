@@ -29,7 +29,7 @@ public class Minecraft1_6AvailableHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                FLAG_PATTERN
+            FLAG_PATTERN
         );
     }
 }

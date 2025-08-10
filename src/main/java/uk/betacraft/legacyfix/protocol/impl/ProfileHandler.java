@@ -81,7 +81,7 @@ public class ProfileHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                PROFILE_PATTERN
+            PROFILE_PATTERN
         );
     }
 }

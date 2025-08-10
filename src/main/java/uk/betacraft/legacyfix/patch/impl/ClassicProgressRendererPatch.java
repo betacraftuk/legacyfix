@@ -140,9 +140,9 @@ public class ClassicProgressRendererPatch extends Patch {
 
                         if (isProgressRendererPercentageMethod(candidateMethod)) {
                             LFLogger.debug("classic-performance",
-                                    "Found ProgressRenderer.progressPercentage method:",
-                                    candidateMethod.getDeclaringClass().getName(),
-                                    candidateMethod.getName()
+                                "Found ProgressRenderer.progressPercentage method:",
+                                candidateMethod.getDeclaringClass().getName(),
+                                candidateMethod.getName()
                             );
                             return candidateMethod;
                         }
@@ -161,9 +161,9 @@ public class ClassicProgressRendererPatch extends Patch {
 
                 if (isProgressRendererPercentageMethod(candidateMethod)) {
                     LFLogger.debug("classic-performance",
-                            "Found Minecraft.progressPercentage method:",
-                            candidateMethod.getDeclaringClass().getName(),
-                            candidateMethod.getName()
+                        "Found Minecraft.progressPercentage method:",
+                        candidateMethod.getDeclaringClass().getName(),
+                        candidateMethod.getName()
                     );
                     return candidateMethod;
                 }

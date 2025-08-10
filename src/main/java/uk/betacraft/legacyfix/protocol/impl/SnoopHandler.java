@@ -24,7 +24,7 @@ public class SnoopHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                SNOOP_PATTERN
+            SNOOP_PATTERN
         );
     }
 }

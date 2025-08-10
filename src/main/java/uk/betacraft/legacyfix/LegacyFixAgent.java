@@ -81,26 +81,26 @@ public class LegacyFixAgent {
         }
 
         PATCHES = new Patch[]{
-                new LauncherPatch(),
-                new DisableControllersPatch(),
-                new TexturePackFolderPatch(),
-                new Java6PreclassicPatch(),
-                new Java6ReferencesPatch(),
-                new SeecretSaturdayPatch(),
-                new LWJGLFramePatch(),
-                new IndevSoundPatch(),
-                new BetaForgePatch(),
-                new ModloaderPatch(),
-                new BitDepthPatch(),
-                new ClassicPatch(),
-                new ClassicIndevResizePatch(),
-                new ClassicProgressRendererPatch(),
-                new GameDirPatch(),
-                new ScreenshotPatch(),
-                new IntelPatch(),
-                new DeAwtPatch(),
-                new MousePatch(),
-                new VSyncPatch()
+            new LauncherPatch(),
+            new DisableControllersPatch(),
+            new TexturePackFolderPatch(),
+            new Java6PreclassicPatch(),
+            new Java6ReferencesPatch(),
+            new SeecretSaturdayPatch(),
+            new LWJGLFramePatch(),
+            new IndevSoundPatch(),
+            new BetaForgePatch(),
+            new ModloaderPatch(),
+            new BitDepthPatch(),
+            new ClassicPatch(),
+            new ClassicIndevResizePatch(),
+            new ClassicProgressRendererPatch(),
+            new GameDirPatch(),
+            new ScreenshotPatch(),
+            new IntelPatch(),
+            new DeAwtPatch(),
+            new MousePatch(),
+            new VSyncPatch()
         };
     }
 }

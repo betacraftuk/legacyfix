@@ -54,10 +54,10 @@ public class ClassicPatch extends Patch {
 
     private boolean patch15aServerJoin(CtMethod initMethod, CodeIterator codeIterator, ConstPool constPool, int pos) throws BadBytecode, CannotCompileException, NotFoundException {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.LDC ||
-                codeIterator.byteAt(pos + 6) != Opcode.SIPUSH ||
-                codeIterator.byteAt(pos + 9) != Opcode.INVOKEVIRTUAL) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.LDC ||
+            codeIterator.byteAt(pos + 6) != Opcode.SIPUSH ||
+            codeIterator.byteAt(pos + 9) != Opcode.INVOKEVIRTUAL) {
             return false;
         }
 
@@ -97,7 +97,7 @@ public class ClassicPatch extends Patch {
 
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
         CtMethod setServerMethod = minecraftClass.getDeclaredMethod(setServerMethodName,
-                new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
+            new CtClass[]{PatchHelper.stringClass, PatchHelper.intClass});
 
         replaceHardcodedPort(setServerMethod);
 
@@ -132,16 +132,16 @@ public class ClassicPatch extends Patch {
      */
     private void patchMinecraftUriPort(CodeIterator codeIterator, ConstPool constPool, int pos) {
         if (codeIterator.byteAt(pos) != Opcode.INVOKESPECIAL ||
-                codeIterator.byteAt(pos + 3) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 13) != Opcode.LDC ||
-                codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 18) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 19) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 22) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 25) != Opcode.INVOKEVIRTUAL) {
+            codeIterator.byteAt(pos + 3) != Opcode.ALOAD_0 ||
+            codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 13) != Opcode.LDC ||
+            codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 18) != Opcode.ALOAD_0 ||
+            codeIterator.byteAt(pos + 19) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 22) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 25) != Opcode.INVOKEVIRTUAL) {
             return;
         }
 
@@ -157,19 +157,19 @@ public class ClassicPatch extends Patch {
         String appendIntType = "(I)Ljava/lang/StringBuilder;";
 
         if (!appendStringType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 11))) ||
-                !appendStringType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 16))) ||
-                !appendIntType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 26))))
+            !appendStringType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 16))) ||
+            !appendIntType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 26))))
             return;
 
         String getDocumentBaseType = "()Ljava/net/URL;";
         if (!getDocumentBaseType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 5))) ||
-                !"getDocumentBase".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 5))) ||
-                !"()Ljava/lang/String;".equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 8))) ||
-                !"getHost".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 8))) ||
-                !getDocumentBaseType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 20))) ||
-                !"getDocumentBase".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 20))) ||
-                !"()I".equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 23))) ||
-                !"getPort".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 23))))
+            !"getDocumentBase".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 5))) ||
+            !"()Ljava/lang/String;".equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 8))) ||
+            !"getHost".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 8))) ||
+            !getDocumentBaseType.equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 20))) ||
+            !"getDocumentBase".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 20))) ||
+            !"()I".equals(constPool.getMethodrefType(codeIterator.u16bitAt(pos + 23))) ||
+            !"getPort".equals(constPool.getMethodrefName(codeIterator.u16bitAt(pos + 23))))
             return;
 
         // Erase the port
