@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.java;
 
 import javassist.CtClass;
 import javassist.bytecode.ClassFile;

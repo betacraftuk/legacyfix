@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.java;
 
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -15,7 +15,7 @@ import java.lang.instrument.Instrumentation;
  */
 public class ModloaderPatch extends Patch {
     public ModloaderPatch() {
-        super("modloader", "Allows Risugami's ModLoader to work on Java 9 and higher", false);
+        super("modloader", "Allows Risugami's ModLoader to work on Java 9 and higher", true);
     }
 
     @Override
@@ -31,10 +31,11 @@ public class ModloaderPatch extends Patch {
                 args.contains("--add-opens=java.base/java.util=ALL-UNNAMED") &&
                 args.contains("--add-opens=java.desktop/java.awt=ALL-UNNAMED") &&
                 args.contains("--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED") &&
+                args.contains("--add-opens=java.base/sun.net.www.protocol.https=ALL-UNNAMED") &&
                 args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge")
             )) {
                 LFLogger.error(
-                    "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
+                    "The ModLoader patch couldn't be applied.\nNote that this fix requires legacyfix to be in the classpath along with specific JVM arguments:",
                     "--add-opens=java.base/java.nio=ALL-UNNAMED " +
                     "--add-opens=java.base/java.net=ALL-UNNAMED " +
                     "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED " +
@@ -42,12 +43,13 @@ public class ModloaderPatch extends Patch {
                     "--add-opens=java.base/java.util=ALL-UNNAMED " +
                     "--add-opens=java.desktop/java.awt=ALL-UNNAMED " +
                     "--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED " +
+                    "--add-opens=java.base/sun.net.www.protocol.https=ALL-UNNAMED " +
                     "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"
                 );
 
                 throw new PatchException("Conditions not met");
             }
-        } else if (!args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.fix.URLClassLoaderBridge")) {
+        } else if (!args.contains("-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge")) {
             LFLogger.error(
                     "The ModLoader patch couldn't be applied. Note that this fix requires legacyfix to be in the classpath along with a JVM argument:",
                     "-Djava.system.class.loader=uk.betacraft.legacyfix.patch.URLClassLoaderBridge"

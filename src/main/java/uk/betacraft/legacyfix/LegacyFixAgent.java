@@ -1,11 +1,17 @@
 package uk.betacraft.legacyfix;
 
+import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
-import uk.betacraft.legacyfix.patch.impl.*;
-
-import org.json.JSONObject;
+import uk.betacraft.legacyfix.patch.impl.classic.*;
+import uk.betacraft.legacyfix.patch.impl.deawt.*;
+import uk.betacraft.legacyfix.patch.impl.game.*;
+import uk.betacraft.legacyfix.patch.impl.java.*;
+import uk.betacraft.legacyfix.patch.impl.launch.*;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
+import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

@@ -1,6 +1,6 @@
 package uk.betacraft.legacyfix;
 
-import uk.betacraft.legacyfix.patch.impl.LauncherPatch;
+import uk.betacraft.legacyfix.patch.impl.launch.LauncherPatch;
 import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
 import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;

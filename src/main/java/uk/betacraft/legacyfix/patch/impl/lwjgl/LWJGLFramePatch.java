@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -55,13 +55,13 @@ public class LWJGLFramePatch extends Patch {
 
             // 16x16 icon
             "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels16\");" +
+            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels16\");" +
             "f16.setAccessible(true);" +
             "java.nio.ByteBuffer pix16 = f16.get(null);" +
 
             // 32x32 icon
             "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels32\");" +
+            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels32\");" +
             "f32.setAccessible(true);" +
             "java.nio.ByteBuffer pix32 = f32.get(null);" +
 

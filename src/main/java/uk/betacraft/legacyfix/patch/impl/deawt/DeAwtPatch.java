@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.deawt;
 
 import javassist.*;
 import javassist.bytecode.*;
