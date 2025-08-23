@@ -26,18 +26,14 @@ public class LauncherPatch extends Patch {
         if (mainClass.equals("org.prismlauncher.EntryPoint")) {
             launcherType = LauncherType.PRISM;
             new PrismPatch().apply(inst);
-        }
-        else if (mainClass.equals("org.multimc.EntryPoint")) {
+        } else if (mainClass.equals("org.multimc.EntryPoint")) {
             launcherType = LauncherType.MULTIMC;
             new MultiMCPatch().apply(inst);
-        }
-        else if (mainClass.equals("uk.betacraft.legacyfix.LegacyFixLauncher")) {
+        } else if (mainClass.equals("uk.betacraft.legacyfix.LegacyFixLauncher")) {
             launcherType = LauncherType.LEGACYFIX;
-        }
-        else if (mainClass.contains("net.minecraft.launchwrapper.Launch")) {
+        } else if (mainClass.contains("net.minecraft.launchwrapper.Launch")) {
             launcherType = LauncherType.LAUNCHWRAPPER;
-        }
-        else {
+        } else {
             throw new PatchException("Unknown main launch class: " + mainClass);
         }
     }
