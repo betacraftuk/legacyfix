@@ -69,6 +69,10 @@ public class MinecraftAPI {
     }
 
     public static SkinData fetchSkin(String uuid) {
+        if ("no-uuid".equals(uuid)) {
+            return null;
+        }
+
         try {
             URL profileLookup = RequestUtil.createDirectURL(PROFILE_LOOKUP_URL + uuid);
 
@@ -99,7 +103,7 @@ public class MinecraftAPI {
             String message = t.getMessage();
 
             if (message.contains("400")) {
-                System.err.print("Invalid uuid while fetching skin: " + uuid);
+                LFLogger.error("Invalid uuid while fetching skin: " + uuid);
             } else {
                 System.err.println("Failed to fetch skin:");
                 LFLogger.error("fetchSkin", t);
