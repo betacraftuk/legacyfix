@@ -14,22 +14,22 @@ public class LevelProxyAuthenticator extends Thread {
         String uuid = LegacyFixLauncher.getUUID();
 
         WebData joinServerResponse = RequestUtil.performJoinServer(
-                uuid,
-                LegacyFixLauncher.getSessionId(),
-                HashUtils.sha1(RequestUtil.getIPFromAmazon())
+            uuid,
+            LegacyFixLauncher.getSessionId(),
+            HashUtils.sha1(RequestUtil.getIPFromAmazon())
         );
 
         if (!joinServerResponse.successful()) {
             LFLogger.error("Failed to authenticate with Mojang for online level saving");
             LFLogger.error("LevelProxyAuthenticator",
-                    "" + joinServerResponse.getResponseCode(),
-                    joinServerResponse.toString()
+                "" + joinServerResponse.getResponseCode(),
+                joinServerResponse.toString()
             );
             return;
         }
 
         String protocol = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http") ?
-                "" : "https://";
+            "" : "https://";
 
         Request sessionRequest = new Request();
         sessionRequest.setUrl(protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/api/proxy_token?player=" + uuid);
@@ -38,8 +38,8 @@ public class LevelProxyAuthenticator extends Thread {
         if (!proxyAuthResponse.successful()) {
             LFLogger.error("Failed to authenticate with the proxy server for online level saving");
             LFLogger.error("LevelProxyAuthenticator",
-                    "" + proxyAuthResponse.getResponseCode(),
-                    proxyAuthResponse.toString()
+                "" + proxyAuthResponse.getResponseCode(),
+                proxyAuthResponse.toString()
             );
             return;
         }

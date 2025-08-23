@@ -1,11 +1,17 @@
 package uk.betacraft.legacyfix;
 
+import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
-import uk.betacraft.legacyfix.patch.impl.*;
-
-import org.json.JSONObject;
+import uk.betacraft.legacyfix.patch.impl.classic.*;
+import uk.betacraft.legacyfix.patch.impl.deawt.*;
+import uk.betacraft.legacyfix.patch.impl.game.*;
+import uk.betacraft.legacyfix.patch.impl.java.*;
+import uk.betacraft.legacyfix.patch.impl.launch.*;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
+import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -26,7 +32,9 @@ public class LegacyFixAgent {
 
         List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
-            if (!patch.shouldApply()) continue;
+            if (!patch.shouldApply()) {
+                continue;
+            }
 
             try {
                 patch.apply(inst);
@@ -66,8 +74,9 @@ public class LegacyFixAgent {
     }
 
     public static boolean isDebug() {
-        if (debug == null)
+        if (debug == null) {
             debug = hasSetting("lf.debug");
+        }
 
         return debug;
     }
@@ -81,27 +90,28 @@ public class LegacyFixAgent {
         }
 
         PATCHES = new Patch[]{
-                new LauncherPatch(),
-                new DisableControllersPatch(),
-                new TexturePackFolderPatch(),
-                new Java6PreclassicPatch(),
-                new Java6ReferencesPatch(),
-                new SeecretSaturdayPatch(),
-                new LWJGLFramePatch(),
-                new IndevSoundPatch(),
-                new BetaForgePatch(),
-                new ModloaderPatch(),
-                new BitDepthPatch(),
-                new ClassicPatch(),
-                new ClassicIndevResizePatch(),
-                new ClassicProgressRendererPatch(),
-                new GameDirPatch(),
-                new ScreenshotPatch(),
-                new IntelPatch(),
-                new DeAwtPatch(),
-                new MousePatch(),
-                new VSyncPatch(),
-                new RawInputPatch()
+            new LauncherPatch(),
+            new VisualizerPatch(),
+            new DisableControllersPatch(),
+            new TexturePackFolderPatch(),
+            new Java6PreclassicPatch(),
+            new Java6ReferencesPatch(),
+            new SeecretSaturdayPatch(),
+            new LWJGLFramePatch(),
+            new IndevSoundPatch(),
+            new BetaForgePatch(),
+            new ModloaderPatch(),
+            new BitDepthPatch(),
+            new ClassicPatch(),
+            new ClassicIndevResizePatch(),
+            new ClassicProgressRendererPatch(),
+            new GameDirPatch(),
+            new ScreenshotPatch(),
+            new IntelPatch(),
+            new DeAwtPatch(),
+            new MousePatch(),
+            new VSyncPatch(),
+            new RawInputPatch()
         };
     }
 }

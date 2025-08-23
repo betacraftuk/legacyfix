@@ -20,13 +20,13 @@ public class IndevAntiPiracyHandler extends HandlerBase {
 
     public InputStream getInputStream() throws IOException {
         return new ByteArrayInputStream(
-                (LegacyFixLauncher.hasKey("demo") ? "no" : "42069").getBytes()
+            (LegacyFixLauncher.hasKey("demo") ? "no" : "42069").getBytes()
         );
     }
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                INDEV_ANTIPIRACY_PATTERN
+            INDEV_ANTIPIRACY_PATTERN
         );
     }
 }

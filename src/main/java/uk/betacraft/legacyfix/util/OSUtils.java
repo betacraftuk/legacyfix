@@ -43,26 +43,28 @@ public class OSUtils {
 
     public static OS getOS() {
         String os_name = System.getProperty("os.name").toLowerCase();
-        if (os_name.contains("windows"))
+        if (os_name.contains("windows")) {
             return OS.WINDOWS;
-        else if (os_name.contains("linux"))
+        } else if (os_name.contains("linux")) {
             return OS.LINUX;
-        else if (os_name.contains("mac"))
+        } else if (os_name.contains("mac")) {
             return OS.MACOS;
-        else
+        } else {
             return OS.OTHER;
+        }
     }
 
     public static Arch getArch() {
         // for our usage, this way of checking architecture is enough
         String os_arch = System.getProperty("os.arch").toLowerCase();
-        if (os_arch.equals("amd64"))
+        if (os_arch.equals("amd64")) {
             return Arch.X86_64;
-        else if (os_arch.equals("x86"))
+        } else if (os_arch.equals("x86")) {
             return Arch.X86_32;
-        else if (os_arch.equals("aarch64"))
+        } else if (os_arch.equals("aarch64")) {
             return Arch.AARCH64;
-        else
+        } else {
             return Arch.OTHER;
+        }
     }
 }

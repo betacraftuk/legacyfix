@@ -22,23 +22,26 @@ public class AssetUtils {
     public static List<AssetObject> assets = new LinkedList<AssetObject>();
 
     private static File getAssetsDir() {
-        if (ASSETS_DIR == null)
+        if (ASSETS_DIR == null) {
             ASSETS_DIR = new File(LegacyFixLauncher.getAssetsDir());
+        }
 
         return ASSETS_DIR;
     }
 
     private static File getResourcesDir() {
-        if (RESOURCES_DIR == null)
+        if (RESOURCES_DIR == null) {
             RESOURCES_DIR = new File(LegacyFixLauncher.getGameDir(), "resources/");
+        }
 
         return RESOURCES_DIR;
     }
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
         String assetIndexPath = LegacyFixLauncher.getAssetIndexPath();
-        if (assetIndexPath == null)
+        if (assetIndexPath == null) {
             return new JSONObject();
+        }
 
         return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))).getJSONObject("objects");
     }
@@ -103,8 +106,9 @@ public class AssetUtils {
 
     public static List<File> recursePaths(File startingDir, List<File> list) {
         File[] files = startingDir.listFiles();
-        if (files == null)
+        if (files == null) {
             return list;
+        }
 
         for (File localAsset : files) {
             try {
@@ -113,8 +117,9 @@ public class AssetUtils {
                 LFLogger.error("recursePaths", e);
             }
 
-            if (localAsset.isDirectory())
+            if (localAsset.isDirectory()) {
                 recursePaths(localAsset, list);
+            }
         }
 
         return list;
@@ -154,13 +159,15 @@ public class AssetUtils {
             localAssets.removeAll(localAssetsToSkip);
 
             for (File additionalAsset : localAssets) {
-                if (additionalAsset.isDirectory())
+                if (additionalAsset.isDirectory()) {
                     continue;
+                }
 
                 String key = additionalAsset.getCanonicalPath().substring(getResourcesDir().getCanonicalPath().length() + 1).replace("\\", "/");
 
-                if (key.startsWith("._") || key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini"))
+                if (key.startsWith("._") || key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini")) {
                     continue;
+                }
 
                 assets.add(new AssetObject(key, additionalAsset.length(), additionalAsset.getPath()));
             }
@@ -174,15 +181,17 @@ public class AssetUtils {
     // Used by GameDirPatch
     // Patch for calls to Minecraft.getWorkingDirectory(String)
     public static String getRelativePathToGameDir(String path) {
-        if (path.startsWith(".minecraft/"))
+        if (path.startsWith(".minecraft/")) {
             path = path.substring(".minecraft".length());
-        else if (path.startsWith("minecraft/"))
+        } else if (path.startsWith("minecraft/")) {
             path = path.substring("minecraft".length());
-        else if (path.startsWith("Library/Application Support/minecraft"))
+        } else if (path.startsWith("Library/Application Support/minecraft")) {
             path = path.substring("Library/Application Support/minecraft".length());
+        }
 
-        if (path.equals("/"))
+        if (path.equals("/")) {
             path = "";
+        }
 
         return LegacyFixLauncher.getGameDir() + path;
     }
@@ -219,10 +228,12 @@ public class AssetUtils {
 
     public static File getExpectedAssetsDir() {
         // 13w16a-13w23b
-        if (LegacyFixLauncher.hasKey("usesWorkDir"))
+        if (LegacyFixLauncher.hasKey("usesWorkDir")) {
             return new File(LegacyFixLauncher.getGameDir(), "assets");
-        else // 13w24a-13w48b
+        } else // 13w24a-13w48b
+        {
             return getAssetsDir();
+        }
     }
 
     // Used by GameDirPatch

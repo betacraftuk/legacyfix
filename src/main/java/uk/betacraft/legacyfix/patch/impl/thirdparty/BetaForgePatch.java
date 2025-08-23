@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.thirdparty;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
@@ -7,7 +7,6 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
 /**
@@ -33,6 +32,6 @@ public class BetaForgePatch extends Patch {
             }
         });
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+        this.redefineClass(inst, clazz);
     }
 }

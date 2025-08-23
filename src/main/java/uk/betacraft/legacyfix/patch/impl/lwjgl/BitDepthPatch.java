@@ -1,15 +1,17 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 
-import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 
-public class VSyncPatch extends Patch {
-    public VSyncPatch() {
-        super("vsync", "Enables VSync", false);
+/**
+ * Fixes cloud glitches on AMD GPUs
+ */
+public class BitDepthPatch extends Patch {
+    public BitDepthPatch() {
+        super("bitdepth", "Fixes torn clouds on AMD GPUs", true);
     }
 
     @Override
@@ -22,10 +24,13 @@ public class VSyncPatch extends Patch {
 
         CtMethod createMethod = displayClass.getDeclaredMethod("create");
         // @formatter:off
-        createMethod.insertBefore(
-            "setVSyncEnabled(true);"
+        createMethod.setBody(
+            "{" + 
+            "   org.lwjgl.opengl.PixelFormat pixelformat = new org.lwjgl.opengl.PixelFormat();" +
+            "   create(pixelformat.withDepthBits(24));" + 
+            "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
+        this.redefineClass(inst, displayClass);
     }
 }

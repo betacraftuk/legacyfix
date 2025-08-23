@@ -4,7 +4,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.util.Base64Utils;
-import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
+import uk.betacraft.legacyfix.util.MinecraftAPI;
 import uk.betacraft.legacyfix.util.SkinUtils;
 import uk.betacraft.util.Request;
 import uk.betacraft.util.RequestUtil;
@@ -41,8 +41,9 @@ public class ProfileHandler extends HandlerBase {
 
         this.inputStream = new ByteArrayInputStream(profileData);
 
-        if (!SkinUtils.requiresFixing())
+        if (!SkinUtils.requiresFixing()) {
             return;
+        }
 
         Matcher matcher = this.PROFILE_PATTERN.matcher(this.getURLString());
         if (!matcher.find()) {
@@ -54,15 +55,17 @@ public class ProfileHandler extends HandlerBase {
 
         JSONObject response = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(profileData))));
 
-        if (!response.has("properties"))
+        if (!response.has("properties")) {
             return;
+        }
 
         String base64String = response.getJSONArray("properties").getJSONObject(0).getString("value");
 
         JSONObject texturesJson = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(Base64Utils.decode(base64String)))));
 
-        if (!texturesJson.has("textures"))
+        if (!texturesJson.has("textures")) {
             return;
+        }
 
         JSONObject skinJson = texturesJson.getJSONObject("textures").getJSONObject("SKIN");
         boolean alex = skinJson.has("metadata") && skinJson.getJSONObject("metadata").getString("model").equals("slim");
@@ -72,7 +75,7 @@ public class ProfileHandler extends HandlerBase {
         req.setUrl(skinUrl);
         WebData data = RequestUtil.performRawGETRequest(req);
 
-        MinecraftAPIUtils.SkinData skinData = new MinecraftAPIUtils.SkinData(data.getData(), null, alex);
+        MinecraftAPI.SkinData skinData = new MinecraftAPI.SkinData(data.getData(), null, alex);
 
         byte[] fixed = SkinUtils.getFixedSkin(skinData);
 
@@ -81,7 +84,7 @@ public class ProfileHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                PROFILE_PATTERN
+            PROFILE_PATTERN
         );
     }
 }

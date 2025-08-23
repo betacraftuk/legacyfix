@@ -1,7 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
-
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
+package uk.betacraft.legacyfix.patch.impl.java;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
@@ -12,6 +9,8 @@ import javassist.expr.NewExpr;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.util.JvmUtils;
+
+import java.lang.instrument.Instrumentation;
 
 /**
  * Makes certain versions compatible with Java 5, as they were supposed to be
@@ -42,31 +41,32 @@ public class Java6ReferencesPatch extends Patch {
                 }
             });
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(affectedClassicClass.getName()), affectedClassicClass.toBytecode()));
+            this.redefineClass(inst, affectedClassicClass);
         }
 
         String[] affectedBetaClassNames = new String[]{"dz", "fp", "jn", "nr"};
         for (String className : affectedBetaClassNames) {
             CtClass affectedBetaClass = pool.getOrNull(className);
-
-            if (affectedBetaClass != null) {
-                LFLogger.debug("java6-refs", "Processing: " + affectedBetaClass.getName());
-
-                affectedBetaClass.instrument(new ExprEditor() {
-
-                    public void edit(MethodCall m) throws CannotCompileException {
-                        if ("java.lang.String".equals(m.getClassName()) &&
-                                "isEmpty".equals(m.getMethodName()) &&
-                                "()V".equalsIgnoreCase(m.getSignature())) {
-
-                            m.replace("$_ = $0.length() == 0;");
-                        }
-                    }
-                });
-
-                inst.redefineClasses(new ClassDefinition(affectedBetaClass.toClass(), affectedBetaClass.toBytecode()));
-                LFLogger.debug("java6-refs", "Finished processing: " + affectedBetaClass.getName());
+            if (affectedBetaClass == null) {
+                continue;
             }
+
+            LFLogger.debug("java6-refs", "Processing: " + affectedBetaClass.getName());
+
+            affectedBetaClass.instrument(new ExprEditor() {
+
+                public void edit(MethodCall m) throws CannotCompileException {
+                    if ("java.lang.String".equals(m.getClassName()) &&
+                        "isEmpty".equals(m.getMethodName()) &&
+                        "()V".equalsIgnoreCase(m.getSignature())) {
+
+                        m.replace("$_ = $0.length() == 0;");
+                    }
+                }
+            });
+
+            this.redefineClass(inst, affectedBetaClass);
+            LFLogger.debug("java6-refs", "Finished processing: " + affectedBetaClass.getName());
         }
     }
 

@@ -29,7 +29,7 @@ public class McoHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                MCO_PATTERN
+            MCO_PATTERN
         );
     }
 }

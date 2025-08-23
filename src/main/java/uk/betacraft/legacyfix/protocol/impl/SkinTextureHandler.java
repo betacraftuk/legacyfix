@@ -19,11 +19,13 @@ public class SkinTextureHandler extends HandlerBase {
     }
 
     public static void addSkin(String skinUrl, byte[] data) {
-        if (!texturePatterns.contains(skinUrl))
+        if (!texturePatterns.contains(skinUrl)) {
             texturePatterns.add(Pattern.compile(skinUrl));
+        }
 
-        if (skinData.containsKey(skinUrl))
+        if (skinData.containsKey(skinUrl)) {
             skinData.remove(skinUrl);
+        }
 
         skinData.put(skinUrl, data);
 

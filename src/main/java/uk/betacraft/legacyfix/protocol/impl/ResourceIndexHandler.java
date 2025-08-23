@@ -19,8 +19,9 @@ public class ResourceIndexHandler extends HandlerBase {
     public ResourceIndexHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);
 
-        if (XML_INDEX_PATTERN.equals(patternUsed))
+        if (XML_INDEX_PATTERN.equals(patternUsed)) {
             this.isXmlRequest = true;
+        }
     }
 
     public InputStream getInputStream() throws IOException {
@@ -35,8 +36,8 @@ public class ResourceIndexHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                XML_INDEX_PATTERN,
-                TXT_INDEX_PATTERN
+            XML_INDEX_PATTERN,
+            TXT_INDEX_PATTERN
         );
     }
 }

@@ -1,6 +1,8 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
-import javassist.*;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.NewExpr;
 import uk.betacraft.legacyfix.LFLogger;
@@ -8,13 +10,20 @@ import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
-import uk.betacraft.legacyfix.util.IconUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
+import java.nio.ByteBuffer;
 
 public class LWJGLFramePatch extends Patch {
-
     public LWJGLFramePatch() {
         super("lwjgl-frame", "Patches LWJGL Frame for title and resolution", true);
     }
@@ -22,14 +31,15 @@ public class LWJGLFramePatch extends Patch {
     @Override
     public void apply(final Instrumentation inst) throws Exception {
         try {
-            IconUtils.loadIcons((String) LegacyFixAgent.getSettings().get("lf.icon"));
+            Icons.loadIcons((String) LegacyFixAgent.getSettings().get("lf.icon"));
         } catch (Exception e) {
             LFLogger.error(this, e);
         }
 
         CtClass displayClass = pool.get("org.lwjgl.opengl.Display");
-        if (displayClass.isFrozen())
+        if (displayClass.isFrozen()) {
             displayClass.defrost();
+        }
 
         CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{PatchHelper.stringClass});
 
@@ -45,13 +55,13 @@ public class LWJGLFramePatch extends Patch {
 
             // 16x16 icon
             "java.lang.reflect.Field f16 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels16\");" +
+            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels16\");" +
             "f16.setAccessible(true);" +
             "java.nio.ByteBuffer pix16 = f16.get(null);" +
 
             // 32x32 icon
             "java.lang.reflect.Field f32 = java.lang.ClassLoader.getSystemClassLoader()" +
-            "   .loadClass(\"uk.betacraft.legacyfix.util.IconUtils\").getDeclaredField(\"pixels32\");" +
+            "   .loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.LWJGLFramePatch$Icons\").getDeclaredField(\"pixels32\");" +
             "f32.setAccessible(true);" +
             "java.nio.ByteBuffer pix32 = f32.get(null);" +
 
@@ -72,12 +82,13 @@ public class LWJGLFramePatch extends Patch {
         );
         // @formatter:on
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayModeClass.getName()), displayModeClass.toBytecode()));
+        this.redefineClass(inst, displayModeClass);
 
         // Make 13w16a-13w24b honor custom width & height
         CtClass minecraftMainClass = pool.getOrNull(LegacyFixLauncher.getValue("mainClass", "net.minecraft.client.main.Main"));
-        if (minecraftMainClass == null)
+        if (minecraftMainClass == null) {
             return;
+        }
 
         CtMethod mainMethod = minecraftMainClass.getDeclaredMethod("main");
 
@@ -97,8 +108,9 @@ public class LWJGLFramePatch extends Patch {
                         isMinecraft = true;
                     }
 
-                    if (!isMinecraft)
+                    if (!isMinecraft) {
                         return;
+                    }
 
                     for (int i = 0; i < parameterTypes.length; i++) {
                         CtClass intClass = parameterTypes[i];
@@ -123,5 +135,49 @@ public class LWJGLFramePatch extends Patch {
                 }
             }
         });
+    }
+
+    public static class Icons {
+        static ByteBuffer pixels16 = null;
+        static ByteBuffer pixels32 = null;
+
+        public static void loadIcons(String iconPath) throws IOException {
+            if (iconPath != null) {
+                File iconFile = new File(iconPath);
+
+                if (iconFile.exists() && iconFile.isFile()) {
+                    pixels32 = getIconForLWJGL(new FileInputStream(iconFile), 32);
+                    pixels16 = getIconForLWJGL(new FileInputStream(iconFile), 16);
+                } else {
+                    LFLogger.error("No icon found at given path: " + iconPath);
+
+                    pixels16 = getIconForLWJGL(LegacyFixAgent.class.getResourceAsStream("/favicon.png"), 16);
+                    pixels32 = getIconForLWJGL(LegacyFixAgent.class.getResourceAsStream("/favicon.png"), 32);
+                }
+            } else {
+                pixels16 = getIconForLWJGL(LegacyFixAgent.class.getResourceAsStream("/favicon.png"), 16);
+                pixels32 = getIconForLWJGL(LegacyFixAgent.class.getResourceAsStream("/favicon.png"), 32);
+            }
+        }
+
+        private static ByteBuffer getIconForLWJGL(InputStream stream, int resolution) throws IOException {
+            final Image read = ImageIO.read(stream).getScaledInstance(resolution, resolution, Image.SCALE_SMOOTH);
+
+            BufferedImage bufImg = new BufferedImage(resolution, resolution, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics g = bufImg.getGraphics();
+            g.drawImage(read, 0, 0, null);
+            g.dispose();
+
+            final int[] rgb = bufImg.getRGB(0, 0, resolution, resolution, null, 0, resolution);
+            final ByteBuffer allocate = ByteBuffer.allocate(4 * rgb.length);
+
+            for (final int n : rgb) {
+                allocate.putInt(n << 8 | (n >> 24 & 0xFF));
+            }
+
+            allocate.flip();
+            return allocate;
+        }
     }
 }

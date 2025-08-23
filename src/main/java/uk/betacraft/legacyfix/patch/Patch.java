@@ -1,9 +1,14 @@
 package uk.betacraft.legacyfix.patch;
 
+import javassist.CannotCompileException;
 import javassist.ClassPool;
+import javassist.CtClass;
 import uk.betacraft.legacyfix.LegacyFixAgent;
 
+import java.io.IOException;
+import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 
 @SuppressWarnings("unused")
 public abstract class Patch {
@@ -50,8 +55,9 @@ public abstract class Patch {
     }
 
     public Object getSetting() {
-        if (this.setting == null)
+        if (this.setting == null) {
             this.setting = LegacyFixAgent.getSettings().get("lf." + getId() + (isDefault ? ".disable" : ""));
+        }
 
         return this.setting;
     }
@@ -73,4 +79,8 @@ public abstract class Patch {
      * @throws Exception      Other exceptions, usually related to class patching
      */
     public abstract void apply(final Instrumentation inst) throws PatchException, Exception;
+
+    protected void redefineClass(final Instrumentation inst, final CtClass clazz) throws IOException, CannotCompileException, ClassNotFoundException, UnmodifiableClassException {
+        inst.redefineClasses(new ClassDefinition(Class.forName(clazz.getName()), clazz.toBytecode()));
+    }
 }

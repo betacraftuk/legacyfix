@@ -15,9 +15,10 @@ public class SkinUtils {
         return OVERLAY_OUTER_BODY_TO_BASE || OVERLAY_OUTER_HEAD_LAYER || ROTATE_BOTTOM_TEXTURES || CONVERT_ALEX_TO_STEVE || SERVE_AS_64x32;
     }
 
-    public static byte[] getFixedCape(MinecraftAPIUtils.SkinData skinData) {
-        if (skinData == null)
+    public static byte[] getFixedCape(MinecraftAPI.SkinData skinData) {
+        if (skinData == null) {
             return null;
+        }
 
         try {
             if (skinData.cape != null) {
@@ -32,9 +33,10 @@ public class SkinUtils {
         return null;
     }
 
-    public static byte[] getFixedSkin(MinecraftAPIUtils.SkinData skinData) {
-        if (skinData == null)
+    public static byte[] getFixedSkin(MinecraftAPI.SkinData skinData) {
+        if (skinData == null) {
             return null;
+        }
 
         try {
             if (skinData.skin != null) {
@@ -42,24 +44,29 @@ public class SkinUtils {
                 ImageUtils img = new ImageUtils(bis);
 
                 // classic before 0.24
-                if (OVERLAY_OUTER_HEAD_LAYER)
+                if (OVERLAY_OUTER_HEAD_LAYER) {
                     img = overlayHeadLayer(img);
+                }
 
                 // before 14w03a
-                if (OVERLAY_OUTER_BODY_TO_BASE && img.getImage().getHeight() == 64)
+                if (OVERLAY_OUTER_BODY_TO_BASE && img.getImage().getHeight() == 64) {
                     img = overlay64to32(img);
+                }
 
                 // before 1.8-pre1
-                if (CONVERT_ALEX_TO_STEVE && skinData.alex)
+                if (CONVERT_ALEX_TO_STEVE && skinData.alex) {
                     alexToSteve(img);
+                }
 
                 // before b1.9-pre1
-                if (ROTATE_BOTTOM_TEXTURES)
+                if (ROTATE_BOTTOM_TEXTURES) {
                     rotateBottomTX(img);
+                }
 
                 // before 14w03a
-                if (SERVE_AS_64x32)
+                if (SERVE_AS_64x32) {
                     img = img.crop(0, 0, 64, 32);
+                }
 
                 return img.getInByteForm();
             }

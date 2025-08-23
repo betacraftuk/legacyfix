@@ -21,7 +21,7 @@ public class BetaAntiPiracyHandler extends HandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                BETA_ANTIPIRACY_PATTERN
+            BETA_ANTIPIRACY_PATTERN
         );
     }
 }

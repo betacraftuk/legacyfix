@@ -13,6 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+@SuppressWarnings("unused")
 public class VisualizerLauncher {
     private static String canvasStartMethodName = null;
     private static String canvasRunnerClassName = null;
@@ -26,8 +27,9 @@ public class VisualizerLauncher {
 
             CtClass previewAppletClass = ClassPool.getDefault().get(previewAppletJavaClass.getName());
 
-            if (previewAppletClass.isFrozen())
+            if (previewAppletClass.isFrozen()) {
                 previewAppletClass.defrost();
+            }
 
             CtMethod startMethod = previewAppletClass.getDeclaredMethod("start");
             startMethod.instrument(new ExprEditor() {
@@ -68,9 +70,9 @@ public class VisualizerLauncher {
                 }
             });
 
-            if (canvasStartMethod != null)
+            if (canvasStartMethod != null) {
                 canvasStartMethod.invoke(previewCanvasInstance);
-            else {
+            } else {
                 Constructor<?> canvasRunnerConstructor = canvasRunnerClass.getDeclaredConstructor(canvasJavaClass);
                 canvasRunnerConstructor.setAccessible(true);
 

@@ -4,13 +4,15 @@ import java.io.File;
 
 public class FileUtils {
     public static void removeRecursively(File dir, boolean deleteFolderItself, boolean deleteOnlyFiles) {
-        if (!dir.exists())
+        if (!dir.exists()) {
             return;
+        }
 
         String[] entries = dir.list();
         if (entries == null) {
-            if (deleteFolderItself)
+            if (deleteFolderItself) {
                 dir.delete();
+            }
 
             return;
         }
@@ -24,7 +26,8 @@ public class FileUtils {
             }
         }
 
-        if (deleteFolderItself)
+        if (deleteFolderItself) {
             dir.delete();
+        }
     }
 }

@@ -1,12 +1,11 @@
-package uk.betacraft.legacyfix.patch.impl;
-
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
+package uk.betacraft.legacyfix.patch.impl.game;
 
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
+
+import java.lang.instrument.Instrumentation;
 
 /**
  * Patch for the unresponsive "Open texture pack folder" button in versions before 1.2-pre on Linux and macOS
@@ -39,6 +38,6 @@ public class TexturePackFolderPatch extends Patch {
             "}"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(sysClass.getName()), sysClass.toBytecode()));
+        this.redefineClass(inst, sysClass);
     }
 }

@@ -1,7 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
-
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
+package uk.betacraft.legacyfix.patch.impl.deawt;
 
 import javassist.*;
 import javassist.bytecode.*;
@@ -11,6 +8,8 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.PatchHelper;
+
+import java.lang.instrument.Instrumentation;
 
 public class DeAwtPatch extends Patch {
     private Exception thrown;
@@ -26,8 +25,9 @@ public class DeAwtPatch extends Patch {
             throw new PatchException("No applet class could be found");
         }
 
-        if (minecraftAppletClass.isFrozen())
+        if (minecraftAppletClass.isFrozen()) {
             minecraftAppletClass.defrost();
+        }
 
         CtField minecraftField = PatchHelper.findMinecraftField(pool);
         CtClass minecraftClass = PatchHelper.findMinecraftClass(pool);
@@ -82,7 +82,7 @@ public class DeAwtPatch extends Patch {
             throw this.thrown;
         }
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftAppletClass.getName()), minecraftAppletClass.toBytecode()));
+        this.redefineClass(inst, minecraftAppletClass);
 
         CtClass javaAppletClass = pool.get("java.applet.Applet");
         CtMethod getParameterMethod = javaAppletClass.getDeclaredMethod("getParameter");
@@ -105,7 +105,7 @@ public class DeAwtPatch extends Patch {
         );
         // @formatter:on
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(javaAppletClass.getName()), javaAppletClass.toBytecode()));
+        this.redefineClass(inst, javaAppletClass);
 
         // deAWT main Minecraft class
         if (minecraftClass.isFrozen()) {
@@ -170,8 +170,9 @@ public class DeAwtPatch extends Patch {
             ConstPool runConstPool = aMinecraftMethod.getMethodInfo().getConstPool();
 
             CodeAttribute codeAttribute = aMinecraftMethod.getMethodInfo().getCodeAttribute();
-            if (codeAttribute == null)
+            if (codeAttribute == null) {
                 continue;
+            }
 
             CodeIterator codeIterator = codeAttribute.iterator();
 
@@ -184,27 +185,29 @@ public class DeAwtPatch extends Patch {
             }
         }
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(minecraftClass.getName()), minecraftClass.toBytecode()));
+        this.redefineClass(inst, minecraftClass);
     }
 
     private void eraseCanvasReferences(CodeIterator codeIterator, ConstPool constPool, int pos) {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
-                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+            codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0) {
             return;
         }
 
         final int futurePos = pos + 8;
         // A second ALOAD appears in triggerFullscreen(), IFNE appears in the runGameLoop() method
         if (codeIterator.byteAt(futurePos) != Opcode.ALOAD_0 &&
-                codeIterator.byteAt(futurePos + 3) != Opcode.IFNE) {
+            codeIterator.byteAt(futurePos + 3) != Opcode.IFNE
+        ) {
             return;
         }
 
         String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
-        if (!"Ljava/awt/Canvas;".equals(refType))
+        if (!"Ljava/awt/Canvas;".equals(refType)) {
             return;
+        }
 
         // Erase the check
         for (int i = 0; i < 7; i++) {
@@ -221,16 +224,19 @@ public class DeAwtPatch extends Patch {
 
         String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 1));
         String refClassName = constPool.getMethodrefClassName(codeIterator.u16bitAt(pos + 1));
-        if (!"destroy".equals(refName))
+        if (!"destroy".equals(refName)) {
             return;
+        }
 
-        if (!"org.lwjgl.input.Keyboard".equals(refClassName))
+        if (!"org.lwjgl.input.Keyboard".equals(refClassName)) {
             return;
+        }
 
         CtMethod runMethod = minecraftClass.getDeclaredMethod("run");
 
-        if (doesShutdownFinally(runMethod, shutdownMethod.getName()))
+        if (doesShutdownFinally(runMethod, shutdownMethod.getName())) {
             return;
+        }
 
         addCatchToSetWorld(shutdownMethod, codeIterator, constPool);
 
@@ -248,14 +254,15 @@ public class DeAwtPatch extends Patch {
             int pos = codeIterator.next();
 
             if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                    codeIterator.byteAt(pos + 1) != Opcode.INVOKEVIRTUAL) {
+                codeIterator.byteAt(pos + 1) != Opcode.INVOKEVIRTUAL) {
                 continue;
             }
 
             String methodName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 2));
             String methodSign = constPool.getMethodrefType(codeIterator.u16bitAt(pos + 2));
-            if (!methodName.equals(shutdownMethodName) || !"()V".equals(methodSign))
+            if (!methodName.equals(shutdownMethodName) || !"()V".equals(methodSign)) {
                 continue;
+            }
 
             return true;
         }
@@ -263,14 +270,14 @@ public class DeAwtPatch extends Patch {
         return false;
     }
 
-    private void addCatchToSetWorld(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool) throws BadBytecode, CannotCompileException {
+    private void addCatchToSetWorld(CtMethod shutdownMethod, CodeIterator codeIterator, ConstPool constPool) throws CannotCompileException {
         for (int pos = 0; pos < codeIterator.getCodeLength(); pos++) {
             if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                    codeIterator.byteAt(pos + 1) != Opcode.ACONST_NULL ||
-                    codeIterator.byteAt(pos + 2) != Opcode.INVOKEVIRTUAL ||
+                codeIterator.byteAt(pos + 1) != Opcode.ACONST_NULL ||
+                codeIterator.byteAt(pos + 2) != Opcode.INVOKEVIRTUAL ||
 
-                    (codeIterator.byteAt(pos + 5) == Opcode.GOTO &&
-                            codeIterator.byteAt(pos + 8) == Opcode.ASTORE_1)
+                (codeIterator.byteAt(pos + 5) == Opcode.GOTO &&
+                    codeIterator.byteAt(pos + 8) == Opcode.ASTORE_1)
             ) {
                 continue;
             }
@@ -303,8 +310,9 @@ public class DeAwtPatch extends Patch {
 
     private void eraseAppletReferencesClassic0_24(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         // This check always appears at the start of the method
-        if (pos != 0)
+        if (pos != 0) {
             return;
+        }
 
         if (eraseAppletReferencesClassic0_24And0_25Shared("getDocumentBase", codeIterator, constPool, pos, minecraftAppletClass)) {
             LFLogger.debug("deawt", "Erased Classic 0.24/0.25 applet references");
@@ -312,8 +320,9 @@ public class DeAwtPatch extends Patch {
     }
 
     private void eraseAppletReferencesClassic0_25(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
-        if (pos != 23)
+        if (pos != 23) {
             return;
+        }
 
         if (eraseAppletReferencesClassic0_24And0_25Shared("getCodeBase", codeIterator, constPool, pos, minecraftAppletClass)) {
             LFLogger.debug("deawt", "Erased Classic 0.25 applet references");
@@ -322,33 +331,37 @@ public class DeAwtPatch extends Patch {
 
     private boolean eraseAppletReferencesClassic0_24And0_25Shared(String appletMethodCall, CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 13) != Opcode.LDC ||
-                codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
-                codeIterator.byteAt(pos + 18) != Opcode.IFNE ||
-                codeIterator.byteAt(pos + 21) != Opcode.ACONST_NULL ||
-                codeIterator.byteAt(pos + 22) != Opcode.ASTORE_1) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 7) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 10) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 13) != Opcode.LDC ||
+            codeIterator.byteAt(pos + 15) != Opcode.INVOKEVIRTUAL ||
+            codeIterator.byteAt(pos + 18) != Opcode.IFNE ||
+            codeIterator.byteAt(pos + 21) != Opcode.ACONST_NULL ||
+            codeIterator.byteAt(pos + 22) != Opcode.ASTORE_1) {
             return false;
         }
 
         String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
-        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType))
+        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType)) {
             return false;
+        }
 
         String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 5));
-        if (!appletMethodCall.equals(refName))
+        if (!appletMethodCall.equals(refName)) {
             return false;
+        }
 
         int ldcPos = codeIterator.byteAt(pos + 14);
-        if (!PatchHelper.isString(constPool, ldcPos))
+        if (!PatchHelper.isString(constPool, ldcPos)) {
             return false;
+        }
 
         String host = constPool.getStringInfo(ldcPos);
-        if (!"minecraft.net".equals(host))
+        if (!"minecraft.net".equals(host)) {
             return false;
+        }
 
         // Erase the check
         for (int i = 0; i < 23; i++) {
@@ -360,25 +373,28 @@ public class DeAwtPatch extends Patch {
 
     private void eraseAppletReferencesClassic0_30(CodeIterator codeIterator, ConstPool constPool, int pos, CtClass minecraftAppletClass) {
         // This check always appears at the start of the method
-        if (pos != 0)
+        if (pos != 0) {
             return;
+        }
 
         if (codeIterator.byteAt(pos) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
-                codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0 ||
-                codeIterator.byteAt(pos + 8) != Opcode.GETFIELD ||
-                codeIterator.byteAt(pos + 11) != Opcode.INVOKEVIRTUAL) {
+            codeIterator.byteAt(pos + 1) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 4) != Opcode.IFNULL ||
+            codeIterator.byteAt(pos + 7) != Opcode.ALOAD_0 ||
+            codeIterator.byteAt(pos + 8) != Opcode.GETFIELD ||
+            codeIterator.byteAt(pos + 11) != Opcode.INVOKEVIRTUAL) {
             return;
         }
 
         String refType = constPool.getFieldrefType(codeIterator.u16bitAt(pos + 2));
-        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType))
+        if (!("L" + minecraftAppletClass.getName().replace('.', '/') + ";").equals(refType)) {
             return;
+        }
 
         String refName = constPool.getMethodrefName(codeIterator.u16bitAt(pos + 12));
-        if (!"getDocumentBase".equals(refName))
+        if (!"getDocumentBase".equals(refName)) {
             return;
+        }
 
         // Erase the check
         for (int i = 0; i < 81; i++) {
@@ -389,12 +405,13 @@ public class DeAwtPatch extends Patch {
     }
 
     private void eraseAppletReferencesIndev(CodeIterator codeIterator, ConstPool constPool, int pos) {
-        if (codeIterator.getCodeLength() <= pos + 30)
+        if (codeIterator.getCodeLength() <= pos + 30) {
             return;
+        }
 
         if (codeIterator.byteAt(pos) != Opcode.NEW ||
-                (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
-                        codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
+            (codeIterator.byteAt(pos + 29) != Opcode.LDC &&
+                codeIterator.byteAt(pos + 29) != Opcode.LDC_W)) {
             return;
         }
 
@@ -408,8 +425,9 @@ public class DeAwtPatch extends Patch {
             value = null;
         }
 
-        if (!"?n=".equals(value))
+        if (!"?n=".equals(value)) {
             return;
+        }
 
         // Determine how far to erase
         int eraseTo = -1;

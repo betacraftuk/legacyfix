@@ -13,20 +13,20 @@ import java.util.regex.Pattern;
 
 public class URLHandlers {
     private static final List<Class<? extends HandlerBase>> handlers = Arrays.asList(
-            SkinHandler.class,
-            ResourceIndexHandler.class,
-            JoinServerHandler.class,
-            IndevAntiPiracyHandler.class,
-            LevelListHandler.class,
-            LevelSaveHandler.class,
-            LevelLoadHandler.class,
-            Minecraft1_6AvailableHandler.class,
-            SnoopHandler.class,
-            SkinTextureHandler.class,
-            // https-only
-            BetaAntiPiracyHandler.class,
-            McoHandler.class,
-            ProfileHandler.class
+        SkinHandler.class,
+        ResourceIndexHandler.class,
+        JoinServerHandler.class,
+        IndevAntiPiracyHandler.class,
+        LevelListHandler.class,
+        LevelSaveHandler.class,
+        LevelLoadHandler.class,
+        Minecraft1_6AvailableHandler.class,
+        SnoopHandler.class,
+        SkinTextureHandler.class,
+        // https-only
+        BetaAntiPiracyHandler.class,
+        McoHandler.class,
+        ProfileHandler.class
     );
 
     public static URLConnection matchHandler(URL url) {
@@ -46,15 +46,15 @@ public class URLHandlers {
                         String query = url.getQuery() != null ? "?" + url.getQuery() : "";
 
                         URLStreamHandler protocolHandler = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http:") ?
-                                new sun.net.www.protocol.http.Handler() : new sun.net.www.protocol.https.Handler();
+                            new sun.net.www.protocol.http.Handler() : new sun.net.www.protocol.https.Handler();
 
                         String protocol = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http") ?
-                                "" : "https://";
+                            "" : "https://";
 
                         return new URL(
-                                null,
-                                protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/proxy" + url.getPath() + query,
-                                protocolHandler
+                            null,
+                            protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/proxy" + url.getPath() + query,
+                            protocolHandler
                         ).openConnection();
                     }
 

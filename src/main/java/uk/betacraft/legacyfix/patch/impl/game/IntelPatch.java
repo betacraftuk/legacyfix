@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.game;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
@@ -25,8 +25,9 @@ public class IntelPatch extends Patch {
     public void apply(final Instrumentation inst) throws Exception {
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classRedefined, ProtectionDomain domain, byte[] classfileBuffer) {
-                if (className == null)
+                if (className == null) {
                     return null;
+                }
 
                 CtClass clas = pool.getOrNull(className.replace('/', '.'));
                 if (clas == null || className.startsWith("org/lwjgl") || clas.getDeclaredConstructors().length > 1 || clas.isFrozen()) {
@@ -37,24 +38,24 @@ public class IntelPatch extends Patch {
                     final boolean[] openGlHelperMatched = new boolean[1];
                     for (CtMethod glActiveTextureMethod : clas.getDeclaredMethods()) {
                         if (!Modifier.isPublic(glActiveTextureMethod.getModifiers()) ||
-                                !Modifier.isStatic(glActiveTextureMethod.getModifiers()) ||
-                                !"void".equals(glActiveTextureMethod.getReturnType().getName()) ||
-                                glActiveTextureMethod.getParameterTypes().length != 1 ||
-                                !"int".equals(glActiveTextureMethod.getParameterTypes()[0].getName())) {
+                            !Modifier.isStatic(glActiveTextureMethod.getModifiers()) ||
+                            !"void".equals(glActiveTextureMethod.getReturnType().getName()) ||
+                            glActiveTextureMethod.getParameterTypes().length != 1 ||
+                            !"int".equals(glActiveTextureMethod.getParameterTypes()[0].getName())) {
                             continue;
                         }
 
                         glActiveTextureMethod.instrument(new ExprEditor() {
                             public void edit(MethodCall m) throws CannotCompileException {
                                 if ("org.lwjgl.opengl.ARBMultitexture".equals(m.getClassName()) &&
-                                        "glActiveTextureARB".equals(m.getMethodName()) &&
-                                        "(I)V".equalsIgnoreCase(m.getSignature())) {
+                                    "glActiveTextureARB".equals(m.getMethodName()) &&
+                                    "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.ARBMultitexture.glClientActiveTextureARB($$); $_ = $proceed($$); }");
                                     LFLogger.debug("intel", "Matched ARBMultitexture.glActiveTextureARB(I)V");
                                 } else if ("org.lwjgl.opengl.GL13".equals(m.getClassName()) &&
-                                        "glActiveTexture".equals(m.getMethodName()) &&
-                                        "(I)V".equalsIgnoreCase(m.getSignature())) {
+                                    "glActiveTexture".equals(m.getMethodName()) &&
+                                    "(I)V".equalsIgnoreCase(m.getSignature())) {
                                     openGlHelperMatched[0] = true;
                                     m.replace("{ org.lwjgl.opengl.GL13.glClientActiveTexture($$); $_ = $proceed($$); }");
                                     LFLogger.debug("intel", "Matched GL13.glActiveTexture(I)V");

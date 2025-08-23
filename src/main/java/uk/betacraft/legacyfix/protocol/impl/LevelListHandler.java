@@ -46,7 +46,7 @@ public class LevelListHandler extends LevelHandlerBase {
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                LEVEL_LIST_PATTERN
+            LEVEL_LIST_PATTERN
         );
     }
 }

@@ -1,12 +1,11 @@
-package uk.betacraft.legacyfix.patch.impl;
-
-import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.Instrumentation;
+package uk.betacraft.legacyfix.patch.impl.game;
 
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchHelper;
+
+import java.lang.instrument.Instrumentation;
 
 /**
  * Fixes a1.1.1's gray screen
@@ -26,9 +25,9 @@ public class SeecretSaturdayPatch extends Patch {
 
         CtMethod theProblemMethod = displayClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[]{PatchHelper.floatClass, PatchHelper.floatClass, PatchHelper.floatClass});
         theProblemMethod.setBody(
-                "{ return; }"
+            "{ return; }"
         );
 
-        inst.redefineClasses(new ClassDefinition(Class.forName(displayClass.getName()), displayClass.toBytecode()));
+        this.redefineClass(inst, displayClass);
     }
 }

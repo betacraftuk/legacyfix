@@ -10,7 +10,6 @@ import javassist.CtField;
 import javassist.NotFoundException;
 import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 
 public class PatchHelper {
@@ -57,8 +56,8 @@ public class PatchHelper {
                 String className = field.getType().getName();
 
                 if (!className.equals("java.awt.Canvas") &&
-                        !className.equals("java.lang.Thread") &&
-                        !className.equals("long")) {
+                    !className.equals("java.lang.Thread") &&
+                    !className.equals("long")) {
 
                     minecraftClass = field.getType();
                     LFLogger.debug("Found Minecraft class: " + minecraftClass.getName());
@@ -83,8 +82,8 @@ public class PatchHelper {
             String className = field.getType().getName();
 
             if (!className.equals("java.awt.Canvas") &&
-                    !className.equals("java.lang.Thread") &&
-                    !className.equals("long")) {
+                !className.equals("java.lang.Thread") &&
+                !className.equals("long")) {
 
                 minecraftField = field;
                 LFLogger.debug("Found Minecraft field: " + field.getName());
@@ -140,8 +139,8 @@ public class PatchHelper {
                 CtClass[] constrParams = constr.getParameterTypes();
 
                 if (constrParams.length >= 1 &&
-                        constrParams[0].getName().equals("java.awt.Component") &&
-                        !field.getType().getName().equals(minecraftClass.getName())) {
+                    constrParams[0].getName().equals("java.awt.Component") &&
+                    !field.getType().getName().equals(minecraftClass.getName())) {
                     mouseHelperClass = field.getType();
 
                     LFLogger.debug("Found match for MouseHelper class: " + mouseHelperClass.getName());
@@ -154,13 +153,14 @@ public class PatchHelper {
     }
 
     // Used by GameDirPatch
+    @SuppressWarnings("unused")
     public static File getIndevMapRenderFromExpectedPath(File file) {
         String fileName = file.getName();
         File expectedFile = new File(new File(System.getProperty("user.home", ".")), fileName).getAbsoluteFile();
 
         if (!fileName.startsWith("mc_map_") ||
-                !fileName.endsWith(".png") ||
-                !expectedFile.getPath().equals(file.getAbsoluteFile().getPath())) {
+            !fileName.endsWith(".png") ||
+            !expectedFile.getPath().equals(file.getAbsoluteFile().getPath())) {
             return null;
         }
 

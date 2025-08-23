@@ -1,7 +1,7 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.legacyfix.util.MinecraftAPIUtils;
+import uk.betacraft.legacyfix.util.MinecraftAPI;
 import uk.betacraft.legacyfix.util.SkinUtils;
 
 import java.io.ByteArrayInputStream;
@@ -26,8 +26,9 @@ public class SkinHandler extends HandlerBase {
         super(u, patternUsed);
         this.patternUsed = patternUsed;
 
-        if (CAPE_PATTERN.equals(patternUsed))
+        if (CAPE_PATTERN.equals(patternUsed)) {
             this.isCapeRequest = true;
+        }
     }
 
     public void connect() throws IOException {
@@ -42,22 +43,23 @@ public class SkinHandler extends HandlerBase {
         byte[] data;
         if (this.isCapeRequest) {
             data = SkinUtils.getFixedCape(
-                    MinecraftAPIUtils.getSkin(username)
+                MinecraftAPI.getSkin(username)
             );
         } else {
             data = SkinUtils.getFixedSkin(
-                    MinecraftAPIUtils.getSkin(username)
+                MinecraftAPI.getSkin(username)
             );
         }
 
-        if (data != null)
+        if (data != null) {
             this.inputStream = new ByteArrayInputStream(data);
+        }
     }
 
     public static List<Pattern> regexPatterns() {
         return Arrays.asList(
-                SKIN_PATTERN,
-                CAPE_PATTERN
+            SKIN_PATTERN,
+            CAPE_PATTERN
         );
     }
 }
