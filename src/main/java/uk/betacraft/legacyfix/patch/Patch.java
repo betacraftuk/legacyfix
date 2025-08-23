@@ -38,6 +38,10 @@ public abstract class Patch {
         this(id, description, isDefault, false);
     }
 
+    public Patch() {
+        this(null, null, false);
+    }
+
     public String getId() {
         return id;
     }
