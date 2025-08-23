@@ -18,7 +18,7 @@ public class LFLogger {
         String[] stackTraceStrings = new String[stackTraceElements.length + 2];
 
         stackTraceStrings[0] = component;
-        stackTraceStrings[1] = t.getMessage();
+        stackTraceStrings[1] = t.toString();
 
         for (int i = 0; i < stackTraceElements.length; i++) {
             stackTraceStrings[i + 2] = stackTraceElements[i].toString();
