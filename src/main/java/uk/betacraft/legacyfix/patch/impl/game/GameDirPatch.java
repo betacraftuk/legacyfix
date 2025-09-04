@@ -10,7 +10,7 @@ import java.lang.instrument.Instrumentation;
 
 public class GameDirPatch extends Patch {
     public GameDirPatch() {
-        super("gamedir", "Redirects Minecraft to the intended game directory", true);
+        super("gamedir", "Redirects Minecraft to the intended game directory", true, true);
     }
 
     public void apply(Instrumentation inst) throws Exception {
