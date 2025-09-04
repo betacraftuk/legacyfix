@@ -114,7 +114,9 @@ public class LegacyFixLauncher {
             boolean success = launchEntry(candidate);
             LFLogger.debug("Main candidate: " + candidate + ": " + success);
 
-            if (success) return;
+            if (success) {
+                return;
+            }
         }
 
         LFLogger.error("Failed to find the starting Minecraft class!");
