@@ -15,10 +15,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class LegacyFixLauncher {
-    public static List<String> arguments = new LinkedList<String>();
-    private static String sessionId = "-";
+    private static final String[] MAIN_CLASS_CANDIDATES = {
+        "net.minecraft.client.main.Main",
+        "net.minecraft.client.MinecraftApplet",
+        "com.mojang.minecraft.MinecraftApplet"
+    };
 
+    public static List<String> arguments = new LinkedList<String>();
     private static LevelProxyAuthenticator levelProxyAuthenticator = null;
+    private static String sessionId = "-";
 
     public static void main(String[] args) {
         List<String> parsedArgs = new LinkedList<String>();
@@ -69,30 +74,22 @@ public class LegacyFixLauncher {
         launch();
     }
 
-    private static boolean launchApplet(String minecraftAppletClassName) {
+    private static boolean launchEntry(String className) {
         try {
-            Class<?> minecraftAppletClass = ClassLoader.getSystemClassLoader().loadClass(minecraftAppletClassName);
-            Object minecraftApplet = minecraftAppletClass.newInstance();
-            minecraftAppletClass.getDeclaredMethod("init").invoke(minecraftApplet);
+            Class<?> entryClass = ClassLoader.getSystemClassLoader().loadClass(className);
+            Class<?> superclass = entryClass.getSuperclass();
+
+            Object instance = entryClass.newInstance();
+            if (superclass != null && superclass.getName().equals("java.applet.Applet")) {
+                entryClass.getDeclaredMethod("init").invoke(instance);
+            } else {
+                entryClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{getAcceptableArguments()});
+            }
+
             return true;
         } catch (ClassNotFoundException ignored) {
         } catch (Throwable t) {
-            LFLogger.error("Failed attempt to find applet class! Tried \"" + minecraftAppletClassName + "\"");
-            LFLogger.error("launchApplet", t);
-        }
-
-        return false;
-    }
-
-    private static boolean launchMain(String mainClassName) {
-        try {
-            Class<?> minecraftMainClass = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
-            minecraftMainClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{getAcceptableArguments()});
-            return true;
-        } catch (ClassNotFoundException ignored2) {
-        } catch (Throwable t) {
-            LFLogger.error("Failed attempt to find the main class! Tried \"" + mainClassName + "\"");
-            LFLogger.error("Failed to launch Minecraft");
+            LFLogger.error("Failed launch main class! Tried \"" + className + "\"");
             LFLogger.error("launchMain", t);
         }
 
@@ -103,23 +100,24 @@ public class LegacyFixLauncher {
         String minecraftAppletClassName = getValue("appletClass", null);
         String mainClassName = getValue("mainClass", null);
 
-        if (minecraftAppletClassName != null && !launchApplet(minecraftAppletClassName)) {
+        if (minecraftAppletClassName != null && !launchEntry(minecraftAppletClassName)) {
             LFLogger.error("Failed to find explicitly specified applet class: \"" + minecraftAppletClassName + "\"");
             return;
         }
 
-        if (mainClassName != null && !launchMain(mainClassName)) {
+        if (mainClassName != null && !launchEntry(mainClassName)) {
             LFLogger.error("Failed to find explicitly specified main class: \"" + mainClassName + "\"");
             return;
         }
 
-        if (!launchApplet("com.mojang.minecraft.MinecraftApplet")) {
-            if (!launchApplet("net.minecraft.client.MinecraftApplet")) {
-                if (!launchMain("net.minecraft.client.main.Main")) {
-                    LFLogger.error("Failed to find the starting Minecraft class");
-                }
-            }
+        for (String candidate : MAIN_CLASS_CANDIDATES) {
+            boolean success = launchEntry(candidate);
+            LFLogger.debug("Main candidate: " + candidate + ": " + success);
+
+            if (success) return;
         }
+
+        LFLogger.error("Failed to find the starting Minecraft class!");
     }
 
     private static String[] getAcceptableArguments() {

@@ -27,7 +27,7 @@ public class PrismPatch extends MultiMCPatch {
             throw new PatchException("Parameters class not found?");
         }
 
-        patch(inst, parametersClass, "getString", "getString", "getList");
+        this.patch(inst, parametersClass, "getString", "getString", "getList");
         if (!readMinecraftVersionInfo()) {
             throw new PatchException("Failed to read minecraft version info");
         }
