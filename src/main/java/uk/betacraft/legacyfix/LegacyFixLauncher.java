@@ -77,10 +77,10 @@ public class LegacyFixLauncher {
     private static boolean launchEntry(String className) {
         try {
             Class<?> entryClass = ClassLoader.getSystemClassLoader().loadClass(className);
-            Class<?> superclass = entryClass.getSuperclass();
+            Class<?> superClass = entryClass.getSuperclass();
 
             Object instance = entryClass.newInstance();
-            if (superclass != null && superclass.getName().equals("java.applet.Applet")) {
+            if (superClass != null && "java.applet.Applet".equals(superClass.getName())) {
                 entryClass.getDeclaredMethod("init").invoke(instance);
             } else {
                 entryClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{getAcceptableArguments()});
