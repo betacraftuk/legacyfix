@@ -3,9 +3,9 @@ package uk.betacraft.legacyfix.util;
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
-import uk.betacraft.util.Request;
-import uk.betacraft.util.RequestUtil;
-import uk.betacraft.util.WebData;
+import uk.betacraft.legacyfix.util.web.Request;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
+import uk.betacraft.legacyfix.util.web.WebData;
 
 public class LevelProxyAuthenticator extends Thread {
 

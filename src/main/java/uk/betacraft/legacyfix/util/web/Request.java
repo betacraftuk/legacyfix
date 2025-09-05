@@ -1,4 +1,4 @@
-package uk.betacraft.util;
+package uk.betacraft.legacyfix.util.web;
 
 import org.json.JSONObject;
 

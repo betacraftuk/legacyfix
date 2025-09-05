@@ -11,9 +11,9 @@ import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.util.FileUtils;
 import uk.betacraft.legacyfix.util.HashUtils;
 import uk.betacraft.legacyfix.util.OSUtils;
-import uk.betacraft.util.Request;
-import uk.betacraft.util.RequestUtil;
-import uk.betacraft.util.WebData;
+import uk.betacraft.legacyfix.util.web.Request;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
+import uk.betacraft.legacyfix.util.web.WebData;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;

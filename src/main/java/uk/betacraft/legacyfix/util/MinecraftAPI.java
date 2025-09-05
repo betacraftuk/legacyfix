@@ -2,7 +2,7 @@ package uk.betacraft.legacyfix.util;
 
 import org.json.JSONObject;
 import uk.betacraft.legacyfix.LFLogger;
-import uk.betacraft.util.RequestUtil;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.io.FileNotFoundException;
 import java.net.URL;

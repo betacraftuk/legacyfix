@@ -2,8 +2,8 @@ package uk.betacraft.legacyfix.protocol.impl;
 
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.LegacyFixLauncher;
-import uk.betacraft.util.RequestUtil;
-import uk.betacraft.util.WebData;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
+import uk.betacraft.legacyfix.util.web.WebData;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

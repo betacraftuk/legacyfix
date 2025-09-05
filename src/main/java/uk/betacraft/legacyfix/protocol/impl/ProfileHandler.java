@@ -6,9 +6,9 @@ import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.util.Base64Utils;
 import uk.betacraft.legacyfix.util.MinecraftAPI;
 import uk.betacraft.legacyfix.util.SkinUtils;
-import uk.betacraft.util.Request;
-import uk.betacraft.util.RequestUtil;
-import uk.betacraft.util.WebData;
+import uk.betacraft.legacyfix.util.web.Request;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
+import uk.betacraft.legacyfix.util.web.WebData;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
