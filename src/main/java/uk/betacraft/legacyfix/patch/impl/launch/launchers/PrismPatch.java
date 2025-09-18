@@ -31,6 +31,8 @@ public class PrismPatch extends MultiMCPatch {
         if (!readMinecraftVersionInfo()) {
             throw new PatchException("Failed to read minecraft version info");
         }
+
+        patchOrgLwjglJson();
     }
 
     public static void downloadAssets() {
@@ -150,7 +152,6 @@ public class PrismPatch extends MultiMCPatch {
         LFLogger.info("All assets were downloaded for asset index '" + assetIndex + "'");
 
         patchNetMinecraftJson();
-        patchOrgLwjglJson();
 
         File resourcesDir = new File("resources");
         if (resourcesDir.exists() && !LegacyFixAgent.hasSetting("lf.keep-resources")) {
