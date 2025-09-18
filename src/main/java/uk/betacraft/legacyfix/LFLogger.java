@@ -15,13 +15,14 @@ public class LFLogger {
 
     public static void error(String component, Throwable t) {
         StackTraceElement[] stackTraceElements = t.getStackTrace();
-        String[] stackTraceStrings = new String[stackTraceElements.length + 2];
+        String[] stackTraceStrings = new String[stackTraceElements.length + 3];
 
         stackTraceStrings[0] = component;
-        stackTraceStrings[1] = t.toString();
+        stackTraceStrings[1] = t.getClass().getName();
+        stackTraceStrings[2] = t.getMessage();
 
         for (int i = 0; i < stackTraceElements.length; i++) {
-            stackTraceStrings[i + 2] = stackTraceElements[i].toString();
+            stackTraceStrings[i + 3] = stackTraceElements[i].toString();
         }
 
         error(stackTraceStrings);
