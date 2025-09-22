@@ -7,6 +7,11 @@ in it should be a file called `legacyfix-2.0.jar`.
 Note: Downloading artifacts requires a GitHub account, though you can use [nightly.link](https://nightly.link/) to download the latest build without one.
 
 ## Add LegacyFix to Prism Launcher
+> [!IMPORTANT]
+> Make sure `Enable online fixes` is disabled in the instance settings, as LegacyFix does not work with it.
+> 
+> You can do this by editing the instance, go to `Settings` -> `Miscellaneous`, and then you will see a section called `Legacy settings`, and there you can turn off `Enable online fixes (experimental)`.
+
 Create a new instance or edit an existing one, then go to the **Version** tab.<br>
 On the sidebar, click the **Add Agents** button:
 ![](.github/img/prism/add-agents.webp)
