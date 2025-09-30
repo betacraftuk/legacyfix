@@ -5,6 +5,7 @@ Then, scroll down to the **Artifacts** section and download the `artifact.zip` f
 in it should be a file called `legacyfix-2.0.jar`.
 
 Note: Downloading artifacts requires a GitHub account, though you can use [nightly.link](https://nightly.link/) to download the latest build without one.
+By clicking [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/develop/artifact.zip) you can download the latest build via nightly.link.
 
 ## Add LegacyFix to Prism Launcher
 Create a new instance or edit an existing one, then go to the **Version** tab.<br>
