@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix.protocol.impl;
 
 import uk.betacraft.legacyfix.LFLogger;
+import uk.betacraft.legacyfix.LegacyFixAgent;
 import uk.betacraft.legacyfix.util.MinecraftAPI;
 import uk.betacraft.legacyfix.util.SkinUtils;
 
@@ -8,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +59,9 @@ public class SkinHandler extends HandlerBase {
     }
 
     public static List<Pattern> regexPatterns() {
+        if (LegacyFixAgent.hasSetting("lf.skin.disable"))
+            return Collections.emptyList();
+
         return Arrays.asList(
             SKIN_PATTERN,
             CAPE_PATTERN

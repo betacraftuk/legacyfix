@@ -58,6 +58,15 @@ Has the same effect as **Invert mouse: ON** in game options
 ```
 -Dlf.beta-forge
 ```
+## Disable skin handling
+You may want to do that if LegacyFix conflicts with some skin mods
+```
+-Dlf.skin.disable
+```
+Some skin mods might get skins from Mojang's skin API, so disabling profile handling might also be necessary:
+```
+-Dlf.profile.disable
+```
 ## Disable default patches
 ```
 -Dlf.<patch-id>.disable
