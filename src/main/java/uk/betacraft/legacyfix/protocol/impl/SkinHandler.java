@@ -59,8 +59,9 @@ public class SkinHandler extends HandlerBase {
     }
 
     public static List<Pattern> regexPatterns() {
-        if (LegacyFixAgent.hasSetting("lf.skin.disable"))
+        if (LegacyFixAgent.hasSetting("lf.skin.disable")) {
             return Collections.emptyList();
+        }
 
         return Arrays.asList(
             SKIN_PATTERN,

@@ -85,8 +85,9 @@ public class ProfileHandler extends HandlerBase {
     }
 
     public static List<Pattern> regexPatterns() {
-        if (LegacyFixAgent.hasSetting("lf.profile.disable"))
+        if (LegacyFixAgent.hasSetting("lf.profile.disable")) {
             return Collections.emptyList();
+        }
 
         return Arrays.asList(
             PROFILE_PATTERN
