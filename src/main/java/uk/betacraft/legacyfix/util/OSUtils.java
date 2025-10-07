@@ -74,7 +74,7 @@ public class OSUtils {
 
     public static boolean isVeryOldWindows() {
         String osName = getOSName();
-        return osName.equals("windows 95") || osName.equals("windows 98")  || osName.equals("windows me") ||
+        return osName.equals("windows 95") || osName.equals("windows 98") || osName.equals("windows me") ||
             osName.startsWith("windows 9x") || osName.equals("windows nt") || osName.equals("windows 2000");
     }
 }

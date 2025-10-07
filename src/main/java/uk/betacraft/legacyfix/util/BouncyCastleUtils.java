@@ -18,8 +18,8 @@ public class BouncyCastleUtils {
 
         System.setProperty("org.bouncycastle.jsse.client.assumeOriginalHostName", "true");
         Security.setProperty("ssl.SocketFactory.provider", "org.bouncycastle.jsse.provider.SSLSocketFactoryImpl");
-        Security.insertProviderAt(new BouncyCastleProvider(),1);
-        Security.insertProviderAt(new BouncyCastleJsseProvider(),2);
+        Security.insertProviderAt(new BouncyCastleProvider(), 1);
+        Security.insertProviderAt(new BouncyCastleJsseProvider(), 2);
 
         LFLogger.debug("Initialized Bouncy Castle.");
 

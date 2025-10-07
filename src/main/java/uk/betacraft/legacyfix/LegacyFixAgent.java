@@ -80,6 +80,7 @@ public class LegacyFixAgent {
     }
 
     private static Boolean hasBouncyCastle;
+
     public static boolean hasBouncyCastle() {
         if (hasBouncyCastle != null) {
             return hasBouncyCastle;
