@@ -2,6 +2,7 @@ package uk.betacraft.legacyfix.protocol.http;
 
 import uk.betacraft.legacyfix.LFLogger;
 import uk.betacraft.legacyfix.protocol.URLHandlers;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -26,7 +27,7 @@ public class Handler extends URLStreamHandler {
         if (lookup != null) {
             return lookup;
         } else {
-            return new URL(null, url.toString(), new sun.net.www.protocol.http.Handler()).openConnection();
+            return RequestUtil.createDirectURL(url.toString()).openConnection();
         }
     }
 }

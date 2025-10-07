@@ -32,7 +32,7 @@
 ## Usage
 Use the [Betacraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2) which includes LF by default,<br>
 or apply the javaagent in the launcher of your choice:
-- [Tutorial for Prism Launcher](Prism%20Launcher.md)
-- [Tutorial for MultiMC](MultiMC.md)
+- [Tutorial for Prism Launcher](docs/Prism%20Launcher.md)
+- [Tutorial for MultiMC](docs/MultiMC.md)
 
-Information about additional settings can be found [here](Additional%20settings.md).
+Information about additional settings can be found [here](docs/Additional%20settings.md).

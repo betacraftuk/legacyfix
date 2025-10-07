@@ -67,6 +67,15 @@ Some skin mods might get skins from Mojang's skin API, so disabling profile hand
 ```
 -Dlf.profile.disable
 ```
+## Enable/disable usage of Bouncy Castle
+Force enable Bouncy Castle (requires `bcprov`, `bcutil` and `bctls` in classpath):
+```
+-Dlf.bouncycastle
+```
+Force disable Bouncy Castle (when it gets enabled by default):
+```
+-Dlf.bouncycastle.disable
+```
 ## Disable default patches
 ```
 -Dlf.<patch-id>.disable

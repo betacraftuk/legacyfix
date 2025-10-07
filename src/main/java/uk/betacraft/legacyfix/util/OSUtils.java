@@ -42,7 +42,7 @@ public class OSUtils {
     }
 
     public static OS getOS() {
-        String os_name = System.getProperty("os.name").toLowerCase();
+        String os_name = getOSName();
         if (os_name.contains("windows")) {
             return OS.WINDOWS;
         } else if (os_name.contains("linux")) {
@@ -66,5 +66,15 @@ public class OSUtils {
         } else {
             return Arch.OTHER;
         }
+    }
+
+    public static String getOSName() {
+        return System.getProperty("os.name", "").toLowerCase();
+    }
+
+    public static boolean isVeryOldWindows() {
+        String osName = getOSName();
+        return osName.equals("windows 95") || osName.equals("windows 98")  || osName.equals("windows me") ||
+            osName.startsWith("windows 9x") || osName.equals("windows nt") || osName.equals("windows 2000");
     }
 }

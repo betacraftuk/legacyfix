@@ -15,9 +15,25 @@ By clicking [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/d
 
 Create a new instance or edit an existing one, then go to the **Version** tab.<br>
 On the sidebar, click the **Add Agents** button:
-![](.github/img/prism/add-agents.webp)
+![](../.github/img/prism/add-agents.webp)
 And point the launcher to the `legacyfix-2.0.jar` file you downloaded earlier:
-![](.github/img/prism/file-picker.webp)
+![](../.github/img/prism/file-picker.webp)
 A new entry should appear in the list:
-![](.github/img/prism/lf-agent-entry.webp)
+![](../.github/img/prism/lf-agent-entry.webp)
+
+#### For LegacyFix to function properly, you should also make your instance use up-to-date Java.
+Prism Launcher defaults to outdated Java 8u51 from 2015.
+<br>If you're using Windows 10/11 with Intel HD Graphics and <u>*you know*</u> that you need to be using Java 8u51 for Minecraft to run, read [this document](Modern%20TLS%20on%20old%20Java.md).
+<br>*Otherwise*, follow these steps to get a recent build of Java 8:
+
+Edit your instance, go to the **Settings** tab, then select the "Java installation" checkbox:
+![](../.github/img/prism/java-instance-settings.webp)
+
+Next, click on the **Download Java** button, pick Adoptium or Azul Zulu (we recommend Azul Zulu), and select the most recent release of Java 8.
+![](../.github/img/prism/java-instance-download.webp)
+Then click on **Download** and wait for it to finish.
+
+Next, click the **Auto-detect** button and select the Java installation you've just downloaded and click **Ok**.
+![](../.github/img/prism/java-instance-select.webp)
 And it's done! You're ready to play Minecraft with LegacyFix.
+

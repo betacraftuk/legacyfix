@@ -20,6 +20,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     library files('libs/javassist-java5.jar')
     library files('libs/json-java5-20240303-SNAPSHOT2.jar')
+    implementation("org.bouncycastle:bctls-jdk15to18:1.82")
 }
 
 processResources {

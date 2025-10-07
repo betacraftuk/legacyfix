@@ -12,6 +12,8 @@ import uk.betacraft.legacyfix.patch.impl.java.*;
 import uk.betacraft.legacyfix.patch.impl.launch.*;
 import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
 import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
+import uk.betacraft.legacyfix.util.BouncyCastleUtils;
+import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -29,6 +31,10 @@ public class LegacyFixAgent {
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         LFLogger.info("Loading build " + VERSION);
+
+        if (LegacyFixAgent.shouldUseBouncyCastle()) {
+            BouncyCastleUtils.init();
+        }
 
         List<String> patchStates = new ArrayList<String>();
         for (Patch patch : PATCHES) {
@@ -71,6 +77,47 @@ public class LegacyFixAgent {
 
     public static boolean hasSetting(String key) {
         return getSettings().containsKey(key);
+    }
+
+    private static Boolean hasBouncyCastle;
+    public static boolean hasBouncyCastle() {
+        if (hasBouncyCastle != null) {
+            return hasBouncyCastle;
+        }
+
+        try {
+            Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider"); // prov
+            Class.forName("org.bouncycastle.oer.BitBuilder"); // util
+            Class.forName("org.bouncycastle.jsse.provider.BouncyCastleJsseProvider"); // tls
+            return hasBouncyCastle = true;
+        } catch (LinkageError ignored) {
+            return hasBouncyCastle = false;
+        } catch (ClassNotFoundException ignored) {
+            return hasBouncyCastle = false;
+        }
+    }
+
+    public static boolean shouldUseBouncyCastle() {
+        if (hasSetting("lf.bouncycastle")) {
+            if (!hasBouncyCastle()) {
+                LFLogger.error("Cannot use Bouncy Castle for TLS -- no Bouncy Castle libraries in classpath");
+                return false;
+            }
+            return true;
+        }
+
+        if (hasSetting("lf.bouncycastle.disable")) {
+            return false;
+        }
+
+        if (!JvmUtils.canThisDoModernTLS()) {
+            if (hasBouncyCastle()) {
+                return true;
+            }
+
+            JvmUtils.printTLSWarning();
+        }
+        return false;
     }
 
     public static boolean isDebug() {
