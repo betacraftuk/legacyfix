@@ -22,9 +22,9 @@ A new entry should appear in the list:
 ![](../.github/img/prism/lf-agent-entry.webp)
 
 #### For LegacyFix to function properly, you should also make your instance use up-to-date Java.
-Prism Launcher defaults to outdated Java 8u51 from 2015.
-<br>If you're using Windows 10/11 with Intel HD Graphics and <u>*you know*</u> that you need to be using Java 8u51 for Minecraft to run, read [this document](Modern%20TLS%20on%20old%20Java.md).
-<br>*Otherwise*, follow these steps to get a recent build of Java 8:
+Prism Launcher defaults to outdated Java 8u51 (from July 2015) on Windows, 8u202 (from January 2019) on Linux, and 8u74 (from February 2016) on Intel macOS.
+<br>If you're using Windows 10/11 with Intel HD Graphics and <ins>*you know*</ins> that you need to be using Java 8u51 for Minecraft to run, read [this document](Modern%20TLS%20on%20old%20Java.md).
+<br>Otherwise, follow these steps to get a recent build of Java 8:
 
 Edit your instance, go to the **Settings** tab, then select the "Java installation" checkbox:
 ![](../.github/img/prism/java-instance-settings.webp)
