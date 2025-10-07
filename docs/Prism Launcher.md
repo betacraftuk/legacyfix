@@ -10,7 +10,7 @@ By clicking [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/d
 ## Add LegacyFix to Prism Launcher
 > [!IMPORTANT]
 > Make sure `Enable online fixes` is disabled in the instance settings, as LegacyFix does not work with it.
-> 
+>
 > You can do this by editing the instance, go to `Settings` -> `Miscellaneous`, and then you will see a section called `Legacy settings`, and there you can turn off `Enable online fixes (experimental)`.
 
 Create a new instance or edit an existing one, then go to the **Version** tab.<br>
@@ -29,11 +29,13 @@ Prism Launcher defaults to outdated Java 8u51 from 2015.
 Edit your instance, go to the **Settings** tab, then select the "Java installation" checkbox:
 ![](../.github/img/prism/java-instance-settings.webp)
 
-Next, click on the **Download Java** button, pick Adoptium or Azul Zulu (we recommend Azul Zulu), and select the most recent release of Java 8.
+Next, click on the **Download Java** button, pick Adoptium or Azul Zulu (we recommend Azul Zulu), and select the most recent release of Java 8:
+
 ![](../.github/img/prism/java-instance-download.webp)
+
 Then click on **Download** and wait for it to finish.
 
-Next, click the **Auto-detect** button and select the Java installation you've just downloaded and click **Ok**.
+Next, click the **Auto-detect** button and select the Java installation you've just downloaded and click **Ok**:
 ![](../.github/img/prism/java-instance-select.webp)
-And it's done! You're ready to play Minecraft with LegacyFix.
 
+And it's done! You're ready to play Minecraft with LegacyFix.

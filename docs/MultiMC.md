@@ -31,7 +31,7 @@ Download and install the latest Java 8 update from a vendor of your choice. We r
 Once you've installed it, open up MultiMC, edit your instance, go to the **Settings** tab, and then select the "Java installation" checkbox:
 ![](../.github/img/multimc/java-instance-settings-mmc.webp)
 
-Next, click the **Auto-detect** button and click the **Refresh** button.
+Next, click the **Auto-detect** button and click the **Refresh** button:
 ![](../.github/img/multimc/java-instance-select-mmc.webp)
 Now select the Java installation you've just installed and click **OK**.
 
