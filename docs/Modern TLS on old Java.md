@@ -11,7 +11,7 @@ You want to install the TLS library:
   - Windows 95, 98, Me, NT 4.0, 2000, XP, Server 2003, Vista, Server 2008
   - Mac OS X 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12
 ## Installing the Bouncy Castle TLS library in MultiMC and Prism Launcher
-1. Download [bcprov-jdk15to18-1.82.jar](https://downloads.bouncycastle.org/java/bcprov-jdk15to18-1.82.jar), [bcutil-jdk15to18-1.82.jar](https://downloads.bouncycastle.org/java/bcutil-jdk15to18-1.82.jar) and [bctls-jdk15to18-1.82.jar](https://downloads.bouncycastle.org/java/bctls-jdk15to18-1.82.jar)
+1. Download [bcprov-jdk15to18-1.82.jar](https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk15to18/1.82/bcprov-jdk15to18-1.82.jar), [bcutil-jdk15to18-1.82.jar](https://repo1.maven.org/maven2/org/bouncycastle/bcutil-jdk15to18/1.82/bcutil-jdk15to18-1.82.jar) and [bctls-jdk15to18-1.82.jar](https://repo1.maven.org/maven2/org/bouncycastle/bctls-jdk15to18/1.82/bctls-jdk15to18-1.82.jar)
 2. Edit your instance in MultiMC/Prism, go to the **Version** tab and click on `Add to minecraft.jar`
 3. Select all three jars you have downloaded in step 1 and confirm adding them. Once that's done LegacyFix will automatically start using the library when you run the game.
 
