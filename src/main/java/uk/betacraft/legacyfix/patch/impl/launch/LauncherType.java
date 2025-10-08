@@ -5,5 +5,9 @@ public enum LauncherType {
     MULTIMC,
     LEGACYFIX,
     LAUNCHWRAPPER,
-    UNKNOWN
+    UNKNOWN;
+
+    public boolean isMMCBased() {
+        return this == MULTIMC || this == PRISM;
+    }
 }

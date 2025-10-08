@@ -1,8 +1,7 @@
 package uk.betacraft.legacyfix;
 
-import uk.betacraft.legacyfix.patch.impl.launch.LauncherType;
 import uk.betacraft.legacyfix.patch.impl.launch.LauncherPatch;
-import uk.betacraft.legacyfix.patch.impl.launch.launchers.PrismPatch;
+import uk.betacraft.legacyfix.patch.impl.launch.launchers.MultiMCPatch;
 import uk.betacraft.legacyfix.protocol.LegacyURLStreamHandlerFactory;
 import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.LevelProxyAuthenticator;
@@ -60,8 +59,8 @@ public class LegacyFixLauncher {
         }
 
         // This needs to run *after* main() initialized 'arguments'
-        if (LauncherPatch.getLauncherType() == LauncherType.PRISM) {
-            PrismPatch.downloadAssets();
+        if (LauncherPatch.getLauncherType().isMMCBased()) {
+            MultiMCPatch.downloadAssets();
         }
 
         URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
