@@ -12,6 +12,7 @@ import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.util.FileUtils;
 import uk.betacraft.legacyfix.util.HashUtils;
+import uk.betacraft.legacyfix.util.OSUtils;
 import uk.betacraft.legacyfix.util.web.Request;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 import uk.betacraft.legacyfix.util.web.WebData;
@@ -345,8 +346,16 @@ public class MultiMCPatch extends Patch {
             return;
         }
 
+        JSONObject assetIndexJson = assetIndexesJson.getJSONObject(assetIndex);
+
+        // MultiMC on Windows XP is unable to download from our server via HTTPS, refusing to launch (*sigh*)
+        if (OSUtils.getOSName().equals("windows xp") || OSUtils.isVeryOldWindows()) {
+            String httpUrl = assetIndexJson.getString("url").replace("https://", "http://");
+            assetIndexJson.put("url", httpUrl);
+        }
+
         netMinecraftJson.remove("assetIndex");
-        netMinecraftJson.put("assetIndex", assetIndexesJson.getJSONObject(assetIndex));
+        netMinecraftJson.put("assetIndex", assetIndexJson);
 
         saveMMCJson(netMinecraftJsonFile, netMinecraftJson);
 
