@@ -1,8 +1,5 @@
 package uk.betacraft.legacyfix;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 import uk.betacraft.legacyfix.patch.Patch;
 import uk.betacraft.legacyfix.patch.PatchException;
 import uk.betacraft.legacyfix.patch.impl.classic.*;
@@ -21,11 +18,9 @@ import java.lang.instrument.Instrumentation;
 import java.util.*;
 
 public class LegacyFixAgent {
+    public static final String VERSION;
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
     private static final Patch[] PATCHES;
-
-    private static final JSONObject RELEASE_INFO = new JSONObject(new JSONTokener(new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/release_info.json")))));
-    public static final String VERSION = RELEASE_INFO.optString("version", "unknown");
 
     private static Boolean debug;
 
@@ -130,6 +125,14 @@ public class LegacyFixAgent {
     }
 
     static {
+        String version;
+        try {
+            version = new BufferedReader(new InputStreamReader(LegacyFixAgent.class.getResourceAsStream("/version.txt"))).readLine();
+        } catch (Throwable ignored) {
+            version = "unknown";
+        }
+        VERSION = version;
+
         for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
             String propertyKey = String.valueOf(property.getKey());
             if (propertyKey.startsWith("lf.") && !SETTINGS.containsKey(propertyKey)) {

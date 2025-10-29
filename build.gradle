@@ -20,16 +20,22 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     library files('libs/javassist-java5.jar')
     library files('libs/json-java5-20240303-SNAPSHOT2.jar')
+    library(project(":fabric"))
+
     implementation("org.bouncycastle:bctls-jdk15to18:1.82")
 }
 
+
 processResources {
-    filesMatching("release_info.json") {
-        expand version: "${project.version}-${new Date().format('yyyyMMdd')}"
+    def tokens = [version: "${project.version}-${new Date().format('yyyyMMdd')}"]
+    filesMatching('*.mod.json') { expand tokens }
+    filesMatching('version.txt') {
+        expand tokens
     }
 }
 
 jar {
+    dependsOn(":fabric:jar")
     from {
         configurations.library.collect {
             it.isDirectory() ? it : zipTree(it)
@@ -38,10 +44,10 @@ jar {
 
     manifest {
         attributes(
-                'Main-Class': 'uk.betacraft.legacyfix.LegacyFixLauncher',
-                'Premain-Class': 'uk.betacraft.legacyfix.LegacyFixAgent',
-                'Can-Redefine-Classes': 'true',
-                'Can-Retransform-Classes': 'true'
+            'Main-Class': 'uk.betacraft.legacyfix.LegacyFixLauncher',
+            'Premain-Class': 'uk.betacraft.legacyfix.LegacyFixAgent',
+            'Can-Redefine-Classes': 'true',
+            'Can-Retransform-Classes': 'true'
         )
     }
 }
