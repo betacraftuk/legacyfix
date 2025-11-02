@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "id": "legacyfix",
-  "version": "${version}",
-  "entrypoints": {
-    "preLaunch": ["uk.betacraft.legacyfix.fabric.LFMod"]
-  }
-}

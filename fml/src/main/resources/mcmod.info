@@ -1,0 +1,14 @@
+[{
+  "modid": "mod_LegacyFix",
+  "name": "LegacyFix",
+  "description": "A mod that fixes legacy Minecraft versions.",
+  "version": "${version}",
+  "mcversion": "*",
+  "url": "https://github.com/betacraftuk/legacyfix",
+  "authors": [ "devcody", "Moresteck" ],
+  "credits": "",
+  "logoFile": "/assets/legacyfix/icon-64x.png",
+  "parent": "",
+  "screenshots": [],
+  "dependencies": []
+}]

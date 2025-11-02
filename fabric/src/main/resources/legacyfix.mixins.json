@@ -1,0 +1,5 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "uk.betacraft.legacyfix.fabric.LFDummyMixinPlugin"
+}

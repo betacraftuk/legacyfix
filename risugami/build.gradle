@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+targetCompatibility = 5
+sourceCompatibility = 5
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    api {
+        java {
+            srcDir 'src/api/java'
+        }
+    }
+}
+
+dependencies {
+    implementation project(':common')
+    compileOnly sourceSets.api.output
+}

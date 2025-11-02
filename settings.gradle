@@ -1,2 +1,2 @@
 rootProject.name = 'legacyfix'
-include('fabric')
+include 'common', 'fabric', 'fml', 'risugami'

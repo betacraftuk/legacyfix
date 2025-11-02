@@ -2,19 +2,20 @@ plugins {
     id 'java'
 }
 
-group 'uk.betacraft'
-version '2.0'
+targetCompatibility = 6
+sourceCompatibility = 6
 
 repositories {
     mavenCentral()
     maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://repo.spongepowered.org/maven/' }
 }
 
 dependencies {
-    compileOnly("net.fabricmc:fabric-loader:0.15.3")
-}
+    implementation project(':common')
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    compileOnly files('../libs/javassist-java5.jar')
+    compileOnly('net.fabricmc:fabric-loader:0.15.3')
+    compileOnly('org.spongepowered:mixin:0.8.5')
+    compileOnly('org.ow2.asm:asm-tree:9.5')
 }

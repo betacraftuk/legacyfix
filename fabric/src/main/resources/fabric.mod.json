@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "legacyfix",
+  "version": "${version}",
+  "name": "LegacyFix",
+  "description": "A mod that fixes legacy Minecraft versions.",
+  "icon": "icon.png",
+  "authors": ["devcody", "Moresteck"],
+  "contact": {
+    "homepage": "https://github.com/betacraftuk/legacyfix",
+    "issues": "https://github.com/betacraftuk/legacyfix/issues"
+  },
+  "license": "GPL-3.0",
+  "environment": "client",
+  "mixins": ["legacyfix.mixins.json"]
+}

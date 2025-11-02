@@ -1,0 +1,50 @@
+package uk.betacraft.legacyfix.util;
+
+import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
+import uk.betacraft.legacyfix.util.web.Request;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
+import uk.betacraft.legacyfix.util.web.WebData;
+
+public class LevelProxyAuthenticator extends Thread {
+
+    @Override
+    public void run() {
+        String uuid = LegacyFixLauncher.getUUID();
+
+        WebData joinServerResponse = RequestUtil.performJoinServer(
+            uuid,
+            LegacyFixLauncher.getSessionId(),
+            HashUtils.sha1(RequestUtil.getIPFromAmazon())
+        );
+
+        if (!joinServerResponse.successful()) {
+            Logger.error("Failed to authenticate with Mojang for online level saving");
+            Logger.error("LevelProxyAuthenticator",
+                "" + joinServerResponse.getResponseCode(),
+                joinServerResponse.toString()
+            );
+            return;
+        }
+
+        String protocol = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http") ?
+            "" : "https://";
+
+        Request sessionRequest = new Request();
+        sessionRequest.setUrl(protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/api/proxy_token?player=" + uuid);
+
+        WebData proxyAuthResponse = RequestUtil.performRawGETRequest(sessionRequest);
+        if (!proxyAuthResponse.successful()) {
+            Logger.error("Failed to authenticate with the proxy server for online level saving");
+            Logger.error("LevelProxyAuthenticator",
+                "" + proxyAuthResponse.getResponseCode(),
+                proxyAuthResponse.toString()
+            );
+            return;
+        }
+
+        LegacyFixLauncher.setValue("sessionid", proxyAuthResponse.toString());
+        Logger.info("Authenticated with level proxy server: " + LevelHandlerBase.ONLINE_LEVEL_SERVER);
+    }
+}

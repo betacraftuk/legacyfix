@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+targetCompatibility = 6
+sourceCompatibility = 6
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    api {
+        java {
+            srcDir 'src/api/java'
+        }
+    }
+}
+
+dependencies {
+    implementation project(':common')
+    compileOnly sourceSets.api.output
+
+    compileOnly files('../libs/javassist-java5.jar')
+    compileOnly('org.apache.logging.log4j:log4j-core:2.24.3')
+}
