@@ -88,6 +88,6 @@ public class ModloaderPatch extends Patch {
 
     @Override
     public boolean shouldApply(PatchTransformer transformer) {
-        return super.shouldApply(transformer) && JvmUtils.getJvmVersion() >= 9;
+        return super.shouldApply(transformer) && JvmUtils.getJvmVersion() >= 9 && transformer.getClass("BaseMod") != null;
     }
 }

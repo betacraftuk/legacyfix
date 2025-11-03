@@ -4,6 +4,7 @@ import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.patch.Patcher;
+import uk.betacraft.legacyfix.patch.impl.java.ModloaderPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
@@ -33,6 +34,7 @@ public class Agent {
         }
 
         patcher = new Patcher(ClassPool.getDefault());
+        patcher.patches.add(new ModloaderPatch());
         patcher.apply();
 
         try {
