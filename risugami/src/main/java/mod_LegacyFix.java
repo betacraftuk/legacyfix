@@ -11,4 +11,8 @@ public class mod_LegacyFix extends BaseMod {
 
     public void load() {
     }
+
+    public String Version() {
+        return Agent.VERSION;
+    }
 }

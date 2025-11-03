@@ -7,6 +7,7 @@ import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
@@ -24,8 +25,16 @@ public class Agent {
             BouncyCastleUtils.init();
         }
 
-        Agent.patcher = new Patcher(ClassPool.getDefault());
-        Agent.patcher.apply();
+        patcher = new Patcher(ClassPool.getDefault());
+        patcher.apply();
+
+        try {
+            for (Map.Entry<String, byte[]> transformed : patcher.getTransformedClasses().entrySet()) {
+                inst.redefineClasses(new ClassDefinition(Class.forName(transformed.getKey()), transformed.getValue()));
+            }
+        } catch (Exception e) {
+            Logger.error("Failed to redefine classes!", e);
+        }
     }
 
     public static Map<String, Object> getSettings() {

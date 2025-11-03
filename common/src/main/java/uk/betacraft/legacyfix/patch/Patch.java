@@ -1,5 +1,7 @@
 package uk.betacraft.legacyfix.patch;
 
+import javassist.ClassPool;
+import javassist.CtClass;
 import uk.betacraft.legacyfix.Agent;
 
 @SuppressWarnings("unused")
@@ -21,7 +23,7 @@ public abstract class Patch {
         this.id = id;
         this.description = description;
         this.def = def;
-        this.required = false;
+        this.required = required;
     }
 
     public Patch(String id, String description, boolean def) {
@@ -70,7 +72,8 @@ public abstract class Patch {
     public abstract void apply(PatchTransformer transformer) throws PatchException, Exception;
 
     // Helper utilities
-    public String asLoadClass(String className) {
+    public static CtClass ctString = ClassPool.getDefault().getOrNull("java.lang.String");
+    public static String asLoadClass(String className) {
         return "$0.getClass().getClassLoader().loadClass(\"" + className + "\")";
     }
 }

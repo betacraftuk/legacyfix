@@ -4,11 +4,13 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.impl.BitDepthPatch;
+import uk.betacraft.legacyfix.patch.impl.java.ModloaderPatch;
 
 import java.util.*;
 
 public class Patcher implements PatchTransformer {
     public static final Patch[] DEFAULT_PATCHES = new Patch[]{
+        new ModloaderPatch(),
         new BitDepthPatch(),
     };
 
@@ -42,7 +44,7 @@ public class Patcher implements PatchTransformer {
                 }
 
                 if (patch.isRequired()) {
-                    Logger.error("Patch " + patch.getId() + " is required, but failed to apply! Exiting.");
+                    Logger.error("Patch \"" + patch.getId() + "\" is required, but failed to apply! Exiting.");
                     System.exit(-1);
                 }
             }
@@ -83,5 +85,9 @@ public class Patcher implements PatchTransformer {
 
     public byte[] getTransformedClass(String name) {
         return transformedClasses.get(name);
+    }
+
+    public Map<String, byte[]> getTransformedClasses() {
+        return transformedClasses;
     }
 }
