@@ -38,7 +38,7 @@ public class LFTweaker implements ITweaker {
         ClassPool pool = new ClassPool(true);
         try {
             for (URL url : classLoader.getURLs()) {
-                pool.appendClassPath(url.getPath());
+                pool.appendClassPath(url.toURI().getPath());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
