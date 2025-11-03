@@ -1,6 +1,8 @@
 package uk.betacraft.legacyfix;
 
-import javassist.ClassPool;
+import javassist.*;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
@@ -21,6 +23,11 @@ public class Agent {
     public static void premain(String agentArgs, final Instrumentation inst) {
         Logger.info("Loading agent (" + VERSION + ")");
 
+        if (injectLaunchWrapperTransformer(inst)) {
+            Logger.info("Injected LaunchWrapper transformer");
+            return;
+        }
+
         if (Agent.useBouncyCastle()) {
             BouncyCastleUtils.init();
         }
@@ -34,6 +41,39 @@ public class Agent {
             }
         } catch (Exception e) {
             Logger.error("Failed to redefine classes!", e);
+        }
+    }
+
+    private static boolean injectLaunchWrapperTransformer(Instrumentation inst) {
+        CtClass launchClass;
+        try {
+            launchClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.Launch");
+        } catch (NotFoundException e) {
+            return false;
+        }
+
+        try {
+            CtMethod m = launchClass.getDeclaredMethod("launch");
+            m.instrument(new ExprEditor() {
+                public void edit(MethodCall m) throws CannotCompileException {
+                    if ("put".equals(m.getMethodName()) && "java.util.Map".equals(m.getClassName())) {
+                        m.replace("" +
+                            "{" +
+                            "   if (\"TweakClasses\".equals($1)) {" +
+                            "       ((java.util.List) $2).add(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
+                            "   }" +
+                            "   $_ = $proceed($$);"+
+                            "}"
+                        );
+                    }
+                }
+            });
+
+            inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
+            return true;
+        } catch (Exception e) {
+            Logger.error("Couldn't inject transformer", e);
+            return false;
         }
     }
 
