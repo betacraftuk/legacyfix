@@ -13,7 +13,6 @@ public class LFTransformer implements IClassTransformer {
 
         byte[] transformed = LFTweaker.patcher.getTransformedClass(transformedName);
         if (transformed != null) {
-            System.err.println("Transformed class " + transformedName);
             return transformed;
         }
 
