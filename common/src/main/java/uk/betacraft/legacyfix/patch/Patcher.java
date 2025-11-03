@@ -29,7 +29,7 @@ public class Patcher implements PatchTransformer {
 
         for (Patch patch : this.patches) {
             if (!patch.shouldApply(this)) {
-                return;
+                continue;
             }
 
             try {
