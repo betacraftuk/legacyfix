@@ -69,25 +69,6 @@ public class LFTweaker implements ITweaker {
         }
     }
 
-    private void injectForgeMod(LaunchClassLoader classLoader, String loaderPackage) throws Exception {
-        Class<?> loader = classLoader.loadClass(loaderPackage + ".Loader");
-        Field singletonField = loader.getDeclaredField("instance");
-        singletonField.setAccessible(true);
-        Object instance = singletonField.get(null);
-
-        Field modsField = loader.getDeclaredField("mods");
-        modsField.setAccessible(true);
-
-        List mods = (List) modsField.get(instance);
-        if (loaderPackage.contains("cpw")) {
-            mods.add(new uk.betacraft.legacyfix.fml.CpwModContainer(null));
-        } else {
-            mods.add(new uk.betacraft.legacyfix.fml.ForgeModContainer(null));
-        }
-
-        modsField.set(instance, mods);
-    }
-
     @Override
     public String getLaunchTarget() {
         return "";
