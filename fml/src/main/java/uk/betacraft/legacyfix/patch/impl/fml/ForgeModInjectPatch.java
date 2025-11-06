@@ -2,37 +2,37 @@ package uk.betacraft.legacyfix.patch.impl.fml;
 
 import javassist.CtClass;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
-import uk.betacraft.legacyfix.patch.PatchTransformer;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.api.PatchException;
+import uk.betacraft.legacyfix.patch.api.PatchPool;
 
 public class ForgeModInjectPatch extends Patch {
     public ForgeModInjectPatch() {
-        super("fml-mod-inject", "Injects a mod entry into FML when loading from a tweaker.", false, false);
+        super("fml-mod", "Injects a mod entry into FML when loading from a tweaker.", false, false);
     }
 
     @Override
-    public void apply(PatchTransformer transformer) throws Exception {
+    public void apply(PatchPool patchPool) throws Exception {
         CtClass loaderClass;
         String modContainerClassName = "uk.betacraft.legacyfix.fml.";
-        if (transformer.getClass("cpw.mods.fml.common.Loader") != null) {
-            loaderClass = transformer.getClass("cpw.mods.fml.common.Loader");
+        if (patchPool.getClass("cpw.mods.fml.common.Loader") != null) {
+            loaderClass = patchPool.getClass("cpw.mods.fml.common.Loader");
             modContainerClassName += "CpwModContainer";
-        } else if (transformer.getClass("net.minecraftforge.fml.common.Loader") != null) {
-            loaderClass = transformer.getClass("net.minecraftforge.fml.common.Loader");
+        } else if (patchPool.getClass("net.minecraftforge.fml.common.Loader") != null) {
+            loaderClass = patchPool.getClass("net.minecraftforge.fml.common.Loader");
             modContainerClassName += "ForgeModContainer";
         } else {
             throw new PatchException("Could not find Loader class!");
         }
 
         CtMethod identifyMods = loaderClass.getDeclaredMethod("identifyMods");
-        identifyMods.insertBefore("{ $0.injectedContainers.add(\"" + modContainerClassName + "\"); }");
+        identifyMods.insertBefore("$0.injectedContainers.add(\"" + modContainerClassName + "\");");
 
-        transformer.patchClass(loaderClass);
+        patchPool.patchClass(loaderClass);
     }
 
     @Override
-    public boolean shouldApply(PatchTransformer transformer) {
-        return transformer.getClass("cpw.mods.fml.common.Loader") != null || transformer.getClass("net.minecraftforge.fml.common.Loader") != null;
+    public boolean shouldApply(PatchPool patchPool) {
+        return patchPool.getClass("cpw.mods.fml.common.Loader") != null || patchPool.getClass("net.minecraftforge.fml.common.Loader") != null;
     }
 }

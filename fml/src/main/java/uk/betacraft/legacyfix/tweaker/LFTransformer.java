@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix.tweaker;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import uk.betacraft.legacyfix.patch.api.Transformer;
 
 @SuppressWarnings("unused")
 public class LFTransformer implements IClassTransformer {
@@ -14,6 +15,21 @@ public class LFTransformer implements IClassTransformer {
         byte[] transformed = LFTweaker.patcher.getTransformedClass(transformedName);
         if (transformed != null) {
             return transformed;
+        }
+
+        if (bytecode == null) {
+            return null;
+        }
+
+        for (Transformer transformer : LFTweaker.patcher.getTransformers()) {
+            try {
+                transformed = transformer.transform(name, bytecode);
+                if (transformed != null) {
+                    bytecode = transformed;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to apply transformer on class \"" + name + "\"", e);
+            }
         }
 
         return bytecode;

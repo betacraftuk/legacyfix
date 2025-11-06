@@ -3,9 +3,9 @@ package uk.betacraft.legacyfix.patch.impl.java;
 import javassist.CtClass;
 import javassist.CtMethod;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchException;
-import uk.betacraft.legacyfix.patch.PatchTransformer;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.api.PatchException;
+import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
 public class ModloaderPatch extends Patch {
@@ -26,7 +26,7 @@ public class ModloaderPatch extends Patch {
     }
 
     @Override
-    public void apply(PatchTransformer transformer) throws Exception {
+    public void apply(PatchPool patchPool) throws Exception {
         String args = JvmUtils.getJvmArguments();
         if (JvmUtils.getJvmVersion() >= 11) {
             for (String vmArg : vmArgs) {
@@ -50,8 +50,8 @@ public class ModloaderPatch extends Patch {
             }
         }
 
-        CtClass clazz = transformer.getClass("java.lang.Class");
-        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {ctString});
+        CtClass clazz = patchPool.getClass("java.lang.Class");
+        CtMethod method = clazz.getDeclaredMethod("getDeclaredField", new CtClass[] {CT_STRING});
 
         method.setBody("" +
             "{" +
@@ -73,21 +73,21 @@ public class ModloaderPatch extends Patch {
             "}"
         );
 
-        transformer.patchClass(clazz);
+        patchPool.patchClass(clazz);
 
-        clazz = transformer.getClass("java.lang.ClassLoader");
-        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {ctString});
+        clazz = patchPool.getClass("java.lang.ClassLoader");
+        method = clazz.getDeclaredMethod("loadClass", new CtClass[] {CT_STRING});
         method.insertBefore("" +
             "if ($1.startsWith(\"\\.mod_\")) {" +
             "    $1 = $1.substring(1);" +
             "}"
         );
 
-        transformer.patchClass(clazz);
+        patchPool.patchClass(clazz);
     }
 
     @Override
-    public boolean shouldApply(PatchTransformer transformer) {
-        return super.shouldApply(transformer) && JvmUtils.getJvmVersion() >= 9 && transformer.getClass("BaseMod") != null;
+    public boolean shouldApply(PatchPool patchPool) {
+        return super.shouldApply(patchPool) && JvmUtils.getJvmVersion() >= 9 && patchPool.getClass("BaseMod") != null;
     }
 }

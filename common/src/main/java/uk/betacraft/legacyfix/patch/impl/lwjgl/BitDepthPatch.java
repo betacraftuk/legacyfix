@@ -1,9 +1,9 @@
-package uk.betacraft.legacyfix.patch.impl;
+package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.patch.Patch;
-import uk.betacraft.legacyfix.patch.PatchTransformer;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.api.PatchPool;
 
 public class BitDepthPatch extends Patch {
     public BitDepthPatch() {
@@ -11,8 +11,8 @@ public class BitDepthPatch extends Patch {
     }
 
     @Override
-    public void apply(PatchTransformer transformer) throws Exception {
-        CtClass displayClass = transformer.getClass("org.lwjgl.opengl.Display");
+    public void apply(PatchPool patchPool) throws Exception {
+        CtClass displayClass = patchPool.getClass("org.lwjgl.opengl.Display");
         if (displayClass.isFrozen()) {
             displayClass.defrost();
         }
@@ -25,6 +25,6 @@ public class BitDepthPatch extends Patch {
             "}"
         );
 
-        transformer.patchClass(displayClass);
+        patchPool.patchClass(displayClass);
     }
 }

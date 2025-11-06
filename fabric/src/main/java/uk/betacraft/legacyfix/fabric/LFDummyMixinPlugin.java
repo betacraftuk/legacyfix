@@ -3,7 +3,6 @@ package uk.betacraft.legacyfix.fabric;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.transformers.TreeTransformer;
 import uk.betacraft.legacyfix.Logger;
 

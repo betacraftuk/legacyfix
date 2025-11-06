@@ -1,7 +1,8 @@
-package uk.betacraft.legacyfix.patch;
+package uk.betacraft.legacyfix.patch.api;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.bytecode.ConstPool;
 import uk.betacraft.legacyfix.Agent;
 
 @SuppressWarnings("unused")
@@ -58,22 +59,32 @@ public abstract class Patch {
      * @return If the patch should be applied
      */
     @SuppressWarnings("all")
-    public boolean shouldApply(PatchTransformer transformer) {
+    public boolean shouldApply(PatchPool patchPool) {
         return required || (def ? this.getSetting() == null : this.getSetting() != null);
     }
 
     /**
      * Applies the patch.
      *
-     * @param transformer     The patch transformer for ClassNode transformations
-     * @throws PatchException Exceptions thrown by the patches
+     * @param patchPool       The PatchPool for class patching/retrieval
+     * @throws PatchException Exceptions thrown by the patches directly
      * @throws Exception      Other exceptions, usually related to class patching
      */
-    public abstract void apply(PatchTransformer transformer) throws PatchException, Exception;
+    public abstract void apply(PatchPool patchPool) throws PatchException, Exception;
 
     // Helper utilities
-    public static CtClass ctString = ClassPool.getDefault().getOrNull("java.lang.String");
-    public static String asLoadClass(String className) {
-        return "$0.getClass().getClassLoader().loadClass(\"" + className + "\")";
+    public static final CtClass CT_INT = CtClass.intType;
+    public static final CtClass CT_STRING = ClassPool.getDefault().getOrNull("java.lang.String");
+
+    public static CtClass ctFromBytes(byte[] classBytes) throws Exception {
+        return new ClassPool().makeClass(new java.io.ByteArrayInputStream(classBytes));
+    }
+
+    public static boolean isString(ConstPool constPool, int ldcPos) {
+        return constPool.getTag(ldcPos) == ConstPool.CONST_String;
+    }
+
+    public static boolean isUtf8(ConstPool constPool, int ldcPos) {
+        return constPool.getTag(ldcPos) == ConstPool.CONST_Utf8;
     }
 }

@@ -3,19 +3,30 @@ package uk.betacraft.legacyfix.patch;
 import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.impl.BitDepthPatch;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.api.PatchException;
+import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.patch.api.Transformer;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.BitDepthPatch;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.MousePatch;
 
 import java.util.*;
 
-public class Patcher implements PatchTransformer {
+public class Patcher implements PatchPool {
     public static final Patch[] DEFAULT_PATCHES = new Patch[]{
         new BitDepthPatch(),
+        new MousePatch(),
+        new DeAwtPatch(),
+        new FramePatch()
     };
 
     public final List<Patch> patches = new ArrayList<Patch>();
     private final ClassPool pool;
     private final Map<String, CtClass> transformedNodes = new HashMap<String, CtClass>();
     private final Map<String, byte[]> transformedClasses = new HashMap<String, byte[]>();
+    private final List<Transformer> transformers = new ArrayList<Transformer>();
 
     public Patcher(ClassPool pool) {
         this.pool = pool;
@@ -81,11 +92,19 @@ public class Patcher implements PatchTransformer {
         transformedNodes.put(patchedClass.getName(), patchedClass);
     }
 
+    public void addTransformer(Transformer transformer) {
+        transformers.add(transformer);
+    }
+
     public byte[] getTransformedClass(String name) {
         return transformedClasses.get(name);
     }
 
     public Map<String, byte[]> getTransformedClasses() {
         return transformedClasses;
+    }
+
+    public List<Transformer> getTransformers() {
+        return transformers;
     }
 }

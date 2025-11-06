@@ -1,6 +1,6 @@
 package uk.betacraft.legacyfix;
 
-import uk.betacraft.legacyfix.patch.Patch;
+import uk.betacraft.legacyfix.patch.api.Patch;
 
 import java.util.List;
 

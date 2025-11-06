@@ -4,6 +4,7 @@ import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.patch.Patcher;
+import uk.betacraft.legacyfix.patch.api.Transformer;
 import uk.betacraft.legacyfix.patch.impl.java.ModloaderPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
@@ -11,7 +12,10 @@ import uk.betacraft.legacyfix.util.JvmUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassDefinition;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 public class Agent {
@@ -43,6 +47,18 @@ public class Agent {
             }
         } catch (Exception e) {
             Logger.error("Failed to redefine classes!", e);
+        }
+
+        for (final Transformer transformer : patcher.getTransformers()) {
+            inst.addTransformer(new ClassFileTransformer() {
+                public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+                    try {
+                        return transformer.transform(className.replace('/', '.'), classfileBuffer);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to apply transformer on class \"" + className + "\"", e);
+                    }
+                }
+            });
         }
     }
 
