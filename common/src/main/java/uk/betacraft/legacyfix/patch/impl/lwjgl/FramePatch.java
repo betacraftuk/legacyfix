@@ -42,19 +42,19 @@ public class FramePatch extends Patch {
         CtMethod setTitleMethod = displayClass.getDeclaredMethod("setTitle", new CtClass[]{CT_STRING});
         setTitleMethod.insertBefore("" +
             // Title
-            "Class legacyfix = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "Class legacyfix = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
             "$1 = (String) legacyfix.getMethod(\"getFrameName\", null).invoke(null, null);" +
 
             // Resizable
             "org.lwjgl.opengl.Display.setResizable(true);" +
 
             // 16x16 icon
-            "java.lang.reflect.Field f16 = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch$Icons\").getDeclaredField(\"pixels16\");" +
+            "java.lang.reflect.Field f16 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch$Icons\").getDeclaredField(\"pixels16\");" +
             "f16.setAccessible(true);" +
             "java.nio.ByteBuffer pix16 = f16.get(null);" +
 
             // 32x32 icon
-            "java.lang.reflect.Field f32 = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch$Icons\").getDeclaredField(\"pixels32\");" +
+            "java.lang.reflect.Field f32 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch$Icons\").getDeclaredField(\"pixels32\");" +
             "f32.setAccessible(true);" +
             "java.nio.ByteBuffer pix32 = f32.get(null);" +
 
@@ -67,7 +67,7 @@ public class FramePatch extends Patch {
         CtClass displayModeClass = patchPool.getClass("org.lwjgl.opengl.DisplayMode");
         CtConstructor displayModeConstructor = displayModeClass.getDeclaredConstructor(new CtClass[]{CT_INT, CT_INT});
         displayModeConstructor.insertBefore("" +
-            "Class legacyfix = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "Class legacyfix = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
             "$1 = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
             "$2 = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
         );
@@ -107,7 +107,7 @@ public class FramePatch extends Patch {
                         }
 
                         minecraftConstructor.insertBefore("" +
-                            "Class legacyfix = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                            "Class legacyfix = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
                             "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
                             "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
                         );

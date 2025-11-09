@@ -28,10 +28,7 @@ public class Agent {
     public static void premain(String agentArgs, final Instrumentation inst) {
         Logger.info("Loading agent (" + VERSION + ")");
 
-        if (injectLaunchWrapperTransformer(inst)) {
-            Logger.info("Injected LaunchWrapper transformer");
-            return;
-        }
+        injectLaunchWrapperTransformer(inst);
 
         if (Agent.useBouncyCastle()) {
             BouncyCastleUtils.init();
@@ -62,37 +59,58 @@ public class Agent {
         }
     }
 
-    private static boolean injectLaunchWrapperTransformer(Instrumentation inst) {
-        CtClass launchClass;
+    private static void injectLaunchWrapperTransformer(Instrumentation inst) {
         try {
-            launchClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.Launch");
-        } catch (NotFoundException e) {
-            return false;
-        }
+            CtClass launchClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.Launch");
 
-        try {
-            CtMethod m = launchClass.getDeclaredMethod("launch");
-            m.instrument(new ExprEditor() {
-                public void edit(MethodCall m) throws CannotCompileException {
-                    if ("put".equals(m.getMethodName()) && "java.util.Map".equals(m.getClassName())) {
-                        m.replace("" +
-                            "{" +
-                            "   if (\"TweakClasses\".equals($1)) {" +
-                            "       ((java.util.List) $2).add(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
-                            "   }" +
-                            "   $_ = $proceed($$);"+
-                            "}"
-                        );
-                    }
-                }
-            });
+            try {
+                launchClass.getDeclaredField("blackboard");
+                patchNewLw(launchClass, inst);
+            } catch (NotFoundException e) {
+                patchOldLw(inst);
+            }
 
-            inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
-            return true;
+            Logger.info("Injected LaunchWrapper transformer");
         } catch (Exception e) {
-            Logger.error("Couldn't inject transformer", e);
-            return false;
+            if (!(e instanceof NotFoundException)) {
+                Logger.error("Error injecting into LaunchWrapper", e);
+            }
         }
+    }
+
+    private static void patchNewLw(CtClass launchClass, Instrumentation inst) throws Exception {
+        CtMethod m = launchClass.getDeclaredMethod("launch");
+        m.instrument(new ExprEditor() {
+            public void edit(MethodCall m) throws CannotCompileException {
+                if ("put".equals(m.getMethodName()) && "java.util.Map".equals(m.getClassName())) {
+                    m.replace("" +
+                        "{" +
+                        "   if (\"TweakClasses\".equals($1)) {" +
+                        "       ((java.util.List) $2).add(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
+                        "   }" +
+                        "   $_ = $proceed($$);"+
+                        "}"
+                    );
+                }
+            }
+        });
+
+        inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
+    }
+
+    private static void patchOldLw(Instrumentation inst) throws  Exception {
+        CtClass vanillaTweakerClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.VanillaTweaker");
+        CtMethod m = vanillaTweakerClass.getDeclaredMethod("injectIntoClassLoader");
+        m.setBody("" +
+            "{" +
+            "   Class clClass = Thread.currentThread().getContextClassLoader().loadClass(\"net.minecraft.launchwrapper.LaunchClassLoader\");" +
+            "   Class tweakerClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
+            "   Object tweaker = tweakerClass.newInstance();" +
+            "   tweakerClass.getMethod(\"injectIntoClassLoader\", new Class[] { clClass }).invoke(tweaker, new Object[] { $1 });" +
+            "}"
+        );
+
+        inst.redefineClasses(new ClassDefinition(Class.forName(vanillaTweakerClass.getName()), vanillaTweakerClass.toBytecode()));
     }
 
     public static Map<String, Object> getSettings() {

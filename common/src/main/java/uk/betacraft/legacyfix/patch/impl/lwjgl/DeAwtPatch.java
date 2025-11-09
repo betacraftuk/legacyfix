@@ -95,7 +95,7 @@ public class DeAwtPatch extends Patch {
 
         getParameterMethod.setBody("" +
             "{" +
-            "    Class launcherClass = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+            "    Class launcherClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
             "    java.lang.reflect.Method method = launcherClass.getMethod(\"getValue\", new Class[] {String.class, String.class});" +
             "    return (String) method.invoke(null, new Object[] {$1, null});" +
             "}"
@@ -144,14 +144,14 @@ public class DeAwtPatch extends Patch {
                 intCount++;
 
                 minecraftConstructor.insertBefore("" +
-                    "Class legacyfix = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "Class legacyfix = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
                     "$" + (i + 1) + " = ((Integer) legacyfix.getMethod(\"getWidth\", null).invoke(null, null)).intValue();" +
                     "$" + (i + 2) + " = ((Integer) legacyfix.getMethod(\"getHeight\", null).invoke(null, null)).intValue();"
                 );
             } else if (className.equals("boolean")) {
                 // Fullscreen
                 minecraftConstructor.insertBefore("" +
-                    "Class legacyfix = java.lang.Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
+                    "Class legacyfix = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.LegacyFixLauncher\");" +
                     "$" + (i + 1) + " = ((Boolean) legacyfix.getMethod(\"getFullscreen\", null).invoke(null, null)).booleanValue();"
                 );
             } else if (className.equals("java.awt.Canvas") || className.equals(minecraftAppletClass.getName())) {
