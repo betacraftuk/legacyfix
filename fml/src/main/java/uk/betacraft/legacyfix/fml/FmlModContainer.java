@@ -6,12 +6,13 @@ import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
 import uk.betacraft.legacyfix.Agent;
 
-public class ForgeModContainer extends DummyModContainer {
-    public ForgeModContainer() {
+@SuppressWarnings("unused")
+public class FmlModContainer extends DummyModContainer {
+    public FmlModContainer() {
         this(new ModMetadata());
     }
 
-    public ForgeModContainer(ModMetadata md) {
+    public FmlModContainer(ModMetadata md) {
         super(md = new ModMetadata());
         md.modId = "legacyfix";
         md.name = "LegacyFix";

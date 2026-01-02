@@ -2,11 +2,18 @@ package uk.betacraft.legacyfix;
 
 import uk.betacraft.legacyfix.patch.api.Patch;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.*;
 
 public class Logger {
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger("LF");
+
     public static void info(String... lines) {
-        log("INFO", lines);
+        log(Level.INFO, lines);
     }
 
     public static void error(Patch patch, Throwable t) {
@@ -20,29 +27,68 @@ public class Logger {
     }
 
     public static void error(String... lines) {
-        log("ERROR", lines);
+        log(Level.SEVERE, lines);
     }
 
-    public static void log(String prefix, String... lines) {
+    public static void log(Level level, String... lines) {
+        ensureConfigured();
         for (int i = 0; i < lines.length; i++) {
             if (i == 0) {
-                System.out.println("[LF] " + prefix + ": " + lines[i]);
+                LOGGER.log(level, lines[i]);
             } else {
-                System.out.println("        " + lines[i]);
+                LOGGER.log(level,"    " + lines[i]);
             }
         }
     }
 
     public static void logList(String header, List<String> lines) {
-        System.out.println("[LF] " + header);
+        ensureConfigured();
+        LOGGER.info(header);
         for (String line : lines) {
-            System.out.println("        " + line);
+            LOGGER.info("    " + line);
         }
     }
 
     public static void debug(String... lines) {
         if (Agent.DEBUG) {
-            log("DEBUG", lines);
+            log(Level.FINE, lines);
         }
+    }
+
+    private static void ensureConfigured() {
+        if (LOGGER.getHandlers().length == 0) {
+            LOGGER.setUseParentHandlers(false);
+            LOGGER.setLevel(Level.ALL);
+
+            Formatter formatter = new Formatter() {
+                private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+                @Override
+                public String format(LogRecord record) {
+                    return
+                        "[" + dateFormat.format(new Date(record.getMillis())) + "]" +
+                        " [" + record.getLoggerName() + "/" + record.getLevel().getName() + "] " +
+                        formatMessage(record) + "\n";
+                }
+            };
+
+            StreamHandler handler = new StreamHandler(new FileOutputStream(FileDescriptor.out), formatter) {
+                public synchronized void publish(LogRecord record) {
+                    super.publish(record);
+                    flush();
+                }
+
+                public synchronized void close() throws SecurityException {
+                    flush();
+                }
+            };
+
+            handler.setLevel(Level.ALL);
+            LOGGER.addHandler(handler);
+        }
+    }
+
+    static {
+        ensureConfigured();
     }
 }

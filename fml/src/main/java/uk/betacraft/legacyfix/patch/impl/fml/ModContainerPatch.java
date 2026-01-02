@@ -6,8 +6,8 @@ import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
-public class ForgeModInjectPatch extends Patch {
-    public ForgeModInjectPatch() {
+public class ModContainerPatch extends Patch {
+    public ModContainerPatch() {
         super("fml-mod", "Injects a mod entry into FML when loading from a tweaker.", false, false);
     }
 
@@ -20,7 +20,7 @@ public class ForgeModInjectPatch extends Patch {
             modContainerClassName += "CpwModContainer";
         } else if (patchPool.getClass("net.minecraftforge.fml.common.Loader") != null) {
             loaderClass = patchPool.getClass("net.minecraftforge.fml.common.Loader");
-            modContainerClassName += "ForgeModContainer";
+            modContainerClassName += "FmlModContainer";
         } else {
             throw new PatchException("Could not find Loader class!");
         }

@@ -1,7 +1,8 @@
-package uk.betacraft.legacyfix.tweaker;
+package uk.betacraft.legacyfix.tweaker.transformer;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import uk.betacraft.legacyfix.patch.api.Transformer;
+import uk.betacraft.legacyfix.tweaker.LFTweaker;
 
 @SuppressWarnings("unused")
 public class LFTransformer implements IClassTransformer {

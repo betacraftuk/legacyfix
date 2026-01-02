@@ -1,21 +1,21 @@
 package uk.betacraft.legacyfix.tweaker;
 
-import javassist.ClassPool;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraft.launchwrapper.LogWrapper;
+import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.patch.Patcher;
-import uk.betacraft.legacyfix.patch.impl.fml.ForgeModInjectPatch;
+import uk.betacraft.legacyfix.patch.impl.fml.ModContainerPatch;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.net.URL;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
-import java.util.Set;
 
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused", "rawtypes"})
 public class LFTweaker implements ITweaker {
-    protected static Patcher patcher;
+    public static Patcher patcher;
 
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
@@ -23,46 +23,49 @@ public class LFTweaker implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        try {
-            Field exceptionsField = LaunchClassLoader.class.getDeclaredField("classLoaderExceptions");
-            exceptionsField.setAccessible(true);
-
-            Set<String> exceptions = (Set<String>) exceptionsField.get(classLoader);
-            exceptions.remove("org.lwjgl.");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        Tweakers.removeLwjglException(classLoader);
         patchLogger();
 
-        ClassPool pool = new ClassPool(true);
-        try {
-            for (URL url : classLoader.getURLs()) {
-                pool.appendClassPath(url.toURI().getPath());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()));
+        if (!Agent.loaded) {
+            patcher.patches.add(new ModContainerPatch());
         }
-
-        patcher = new Patcher(pool);
-        patcher.patches.add(new ForgeModInjectPatch());
         patcher.apply();
-        classLoader.registerTransformer("uk.betacraft.legacyfix.tweaker.LFTransformer");
+
+        classLoader.registerTransformer("uk.betacraft.legacyfix.tweaker.transformer.LFTransformer");
     }
 
     private void patchLogger() {
         try {
-            Field loggerField = LogWrapper.class.getDeclaredField("myLog");
-            loggerField.setAccessible(true);
+            Class logWrapperClass = Class.forName("net.minecraft.launchwrapper.LogWrapper");
 
-            Object logger = loggerField.get(LogWrapper.log);
+            Field logInstanceField = logWrapperClass.getDeclaredField("log");
+            logInstanceField.setAccessible(true);
+            Object logInstance = logInstanceField.get(null);
+
+            Field myLogField = logWrapperClass.getDeclaredField("myLog");
+            myLogField.setAccessible(true);
+            final Object logger = myLogField.get(logInstance);
+
             Object newLogger;
             if (logger instanceof java.util.logging.Logger) {
                 newLogger = new uk.betacraft.legacyfix.tweaker.logger.LFLogger((java.util.logging.Logger) logger);
             } else {
-                newLogger = new uk.betacraft.legacyfix.tweaker.logger.LFLog4jLogger((org.apache.logging.log4j.core.Logger) logger);
+                Class<?> loggerInterface = Class.forName("org.apache.logging.log4j.Logger");
+                newLogger = Proxy.newProxyInstance(loggerInterface.getClassLoader(), new Class<?>[]{loggerInterface}, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        if ("log".equals(method.getName()) && args.length == 2) {
+                            String message = String.valueOf(args[1]);
+                            if (message != null && message.contains("but that path is defined and not secure")) {
+                                return null;
+                            }
+                        }
+                        return method.invoke(logger, args);
+                    }
+                });
             }
-            loggerField.set(LogWrapper.log, newLogger);
+            myLogField.set(logInstance, newLogger);
         } catch (Exception e) {
             System.out.println("Couldn't silence seal class errors!");
             e.printStackTrace();

@@ -6,6 +6,7 @@ import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.LoadController;
 import uk.betacraft.legacyfix.Agent;
 
+@SuppressWarnings("unused")
 public class CpwModContainer extends DummyModContainer {
     public CpwModContainer() {
         this(new ModMetadata());

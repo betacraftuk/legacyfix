@@ -37,7 +37,8 @@ jar {
             'Main-Class': 'uk.betacraft.legacyfix.LegacyFixLauncher',
             'Premain-Class': 'uk.betacraft.legacyfix.Agent',
             'Can-Redefine-Classes': 'true',
-            'Can-Retransform-Classes': 'true'
+            'Can-Retransform-Classes': 'true',
+            'FMLCorePlugin': 'uk.betacraft.legacyfix.fml.CpwCoreMod'
         )
     }
 }
