@@ -29,6 +29,12 @@
 - [x] No duplicated assets for every instance
 - [x] ModLoader support for Java 9 and later
 
+## Known Issues
+- [ ] No Fabric support
+- [ ] No Forge support
+
+Support for Fabric and Forge is next in line to come. Monitor the [multiloader](https://github.com/betacraftuk/legacyfix/tree/multiloader) branch for progress.
+
 ## Usage
 Use the [Betacraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2) which includes LF by default,<br>
 or apply the javaagent in the launcher of your choice:
