@@ -7,10 +7,7 @@ import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.patch.api.Transformer;
-import uk.betacraft.legacyfix.patch.impl.lwjgl.BitDepthPatch;
-import uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch;
-import uk.betacraft.legacyfix.patch.impl.lwjgl.FramePatch;
-import uk.betacraft.legacyfix.patch.impl.lwjgl.MousePatch;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
 
 import java.util.*;
 
@@ -18,8 +15,7 @@ public class Patcher implements PatchPool {
     public static final Patch[] DEFAULT_PATCHES = new Patch[]{
         new BitDepthPatch(),
         new MousePatch(),
-        new DeAwtPatch(),
-        new FramePatch()
+        new DeAwtPatch()
     };
 
     public final List<Patch> patches = new ArrayList<Patch>();

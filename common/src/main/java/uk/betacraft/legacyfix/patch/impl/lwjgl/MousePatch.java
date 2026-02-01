@@ -24,6 +24,10 @@ public class MousePatch extends Patch {
             return;
         }
 
+        if (mouseHelperClass.isFrozen()) {
+            mouseHelperClass.defrost();
+        }
+
         String[] deltaXYFieldNames = new String[2];
         boolean usesRobot = false;
         for (CtField field : mouseHelperClass.getDeclaredFields()) {
