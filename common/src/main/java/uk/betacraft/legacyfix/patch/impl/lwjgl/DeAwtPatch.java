@@ -320,35 +320,34 @@ public class DeAwtPatch extends Patch {
     private boolean isFinallyBlockEmpty(CtMethod method) {
         MethodInfo mi = method.getMethodInfo();
         CodeAttribute ca = mi.getCodeAttribute();
-        if (ca == null) return true;
+        if (ca == null) return false;
 
         ExceptionTable et = ca.getExceptionTable();
-        if (et == null) return true;
+        if (et == null || et.size() == 0) return false;
 
         CodeIterator it = ca.iterator();
         for (int i = 0; i < et.size(); i++) {
             if (et.catchType(i) != 0) continue;
 
             int pos = et.handlerPc(i);
-            while (pos < ca.getCodeLength()) {
-                int opcode = it.byteAt(pos);
+            it.move(pos);
 
-                if (opcode == Opcode.ATHROW) {
-                    break;
-                }
+            try {
+                while (it.hasNext()) {
+                    int index = it.next();
+                    int opcode = it.byteAt(index);
 
-                if (opcode == Opcode.INVOKEVIRTUAL || opcode == Opcode.INVOKESTATIC ||
-                    opcode == Opcode.INVOKESPECIAL || opcode == Opcode.INVOKEINTERFACE) {
-                    return false;
-                }
+                    if (opcode == Opcode.ATHROW) {
+                        break;
+                    }
 
-                try {
-                    int nextPos = it.next();
-                    if (nextPos <= pos) break;
-                    pos = nextPos;
-                } catch (BadBytecode e) {
-                    break;
+                    if (opcode == Opcode.INVOKEVIRTUAL || opcode == Opcode.INVOKESTATIC ||
+                        opcode == Opcode.INVOKESPECIAL || opcode == Opcode.INVOKEINTERFACE) {
+                        return false;
+                    }
                 }
+            } catch (BadBytecode e) {
+                break;
             }
         }
 
