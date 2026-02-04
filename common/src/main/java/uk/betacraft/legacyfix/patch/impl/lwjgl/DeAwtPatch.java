@@ -73,8 +73,8 @@ public class DeAwtPatch extends Patch {
     }
 
     private void patchGameClass(PatchPool patchPool, CtClass gameClass) throws Exception {
-        CtMethod method = findUpdateMethod(gameClass, gameClass.getDeclaredMethod("run"));
-        if (method == null) {
+        CtMethod updateMethod = findUpdateMethod(gameClass, gameClass.getDeclaredMethod("run"));
+        if (updateMethod == null) {
             throw new PatchException("No update method found");
         }
 
@@ -88,8 +88,24 @@ public class DeAwtPatch extends Patch {
             throw new PatchException("No width/height fields found");
         }
 
+        if (isFinallyBlockEmpty(updateMethod)) {
+            updateMethod.insertAfter("" +
+                "System.out.println(\"Shutting down...\");" +
+                "try {" +
+                "    org.lwjgl.input.Mouse.destroy();" +
+                "    org.lwjgl.input.Keyboard.destroy();" +
+                "    org.lwjgl.openal.AL.destroy();" +
+                "} catch (Throwable ignored) {" +
+                "} finally {" +
+                "    org.lwjgl.opengl.Display.destroy();" +
+                "    System.exit(0);" +
+                "}",
+                true
+            );
+        }
+
         final CtField canvasField = findCanvasField(gameClass);
-        method.instrument(new ExprEditor() {
+        updateMethod.instrument(new ExprEditor() {
             @Override
             public void edit(MethodCall m) throws CannotCompileException {
                 if (!"isCloseRequested".equals(m.getMethodName())) return;
@@ -115,7 +131,7 @@ public class DeAwtPatch extends Patch {
             }
         });
 
-        MethodInfo mi = method.getMethodInfo();
+        MethodInfo mi = updateMethod.getMethodInfo();
         CodeAttribute ca = mi.getCodeAttribute();
         if (ca == null) {
             return;
@@ -143,6 +159,50 @@ public class DeAwtPatch extends Patch {
         }
 
         patchPool.patchClass(gameClass);
+    }
+
+    private void patchDisplay(PatchPool patchPool) throws Exception {
+        try {
+            Icons.loadIcons((String) Agent.getSettings().get("lf.icon"));
+        } catch (Exception e) {
+            Logger.error(this, e);
+        }
+
+        CtClass displayClass = patchPool.getClass("org.lwjgl.opengl.Display");
+        if (displayClass.isFrozen()) {
+            displayClass.defrost();
+        }
+
+        displayClass.getDeclaredMethod("setParent").setBody("" +
+            "{" +
+            "    if ($1 == null) return;" +
+            "    java.awt.Component child = (java.awt.Component)$1;" +
+            "    java.awt.Container parent = child.getParent();" +
+            "    while (parent != null && !(parent instanceof java.awt.Frame)) parent = parent.getParent();" +
+            "    if (parent == null) return;" +
+            "    java.awt.Frame frame = (java.awt.Frame) parent;" +
+            "    frame.setVisible(false);" +
+            "    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$FrameHider\");" +
+            "    frame.addHierarchyListener((java.awt.event.HierarchyListener) clazz.newInstance());" +
+            "    org.lwjgl.opengl.Display.setDisplayMode(new org.lwjgl.opengl.DisplayMode(child.getWidth(), child.getHeight()));" +
+            "    org.lwjgl.opengl.Display.setResizable(true);" +
+            "}"
+        );
+
+        displayClass.getDeclaredMethod("setTitle").insertBefore("" +
+            "$1 = $1.replace(\"Minecraft Minecraft\", \"Minecraft\");" +
+            "java.lang.reflect.Field f16 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels16\");" +
+            "f16.setAccessible(true);" +
+            "java.nio.ByteBuffer pix16 = f16.get(null);" +
+            "java.lang.reflect.Field f32 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels32\");" +
+            "f32.setAccessible(true);" +
+            "java.nio.ByteBuffer pix32 = f32.get(null);" +
+            "if (pix16 != null && pix32 != null) {" +
+            "    org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});" +
+            "}"
+        );
+
+        patchPool.patchClass(displayClass);
     }
 
     private CtField findCanvasField(CtClass gameClass) throws Exception {
@@ -257,48 +317,42 @@ public class DeAwtPatch extends Patch {
         return null;
     }
 
-    private void patchDisplay(PatchPool patchPool) throws Exception {
-        try {
-            Icons.loadIcons((String) Agent.getSettings().get("lf.icon"));
-        } catch (Exception e) {
-            Logger.error(this, e);
+    private boolean isFinallyBlockEmpty(CtMethod method) {
+        MethodInfo mi = method.getMethodInfo();
+        CodeAttribute ca = mi.getCodeAttribute();
+        if (ca == null) return true;
+
+        ExceptionTable et = ca.getExceptionTable();
+        if (et == null) return true;
+
+        CodeIterator it = ca.iterator();
+        for (int i = 0; i < et.size(); i++) {
+            if (et.catchType(i) != 0) continue;
+
+            int pos = et.handlerPc(i);
+            while (pos < ca.getCodeLength()) {
+                int opcode = it.byteAt(pos);
+
+                if (opcode == Opcode.ATHROW) {
+                    break;
+                }
+
+                if (opcode == Opcode.INVOKEVIRTUAL || opcode == Opcode.INVOKESTATIC ||
+                    opcode == Opcode.INVOKESPECIAL || opcode == Opcode.INVOKEINTERFACE) {
+                    return false;
+                }
+
+                try {
+                    int nextPos = it.next();
+                    if (nextPos <= pos) break;
+                    pos = nextPos;
+                } catch (BadBytecode e) {
+                    break;
+                }
+            }
         }
 
-        CtClass displayClass = patchPool.getClass("org.lwjgl.opengl.Display");
-        if (displayClass.isFrozen()) {
-            displayClass.defrost();
-        }
-
-        displayClass.getDeclaredMethod("setParent").setBody("" +
-            "{" +
-            "    if ($1 == null) return;" +
-            "    java.awt.Component child = (java.awt.Component)$1;" +
-            "    java.awt.Container parent = child.getParent();" +
-            "    while (parent != null && !(parent instanceof java.awt.Frame)) parent = parent.getParent();" +
-            "    if (parent == null) return;" +
-            "    java.awt.Frame frame = (java.awt.Frame) parent;" +
-            "    frame.setVisible(false);" +
-            "    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$FrameHider\");" +
-            "    frame.addHierarchyListener((java.awt.event.HierarchyListener) clazz.newInstance());" +
-            "    org.lwjgl.opengl.Display.setDisplayMode(new org.lwjgl.opengl.DisplayMode(child.getWidth(), child.getHeight()));" +
-            "    org.lwjgl.opengl.Display.setResizable(true);" +
-            "}"
-        );
-
-        displayClass.getDeclaredMethod("setTitle").insertBefore("" +
-            "$1 = $1.replace(\"Minecraft Minecraft\", \"Minecraft\");" +
-            "java.lang.reflect.Field f16 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels16\");" +
-            "f16.setAccessible(true);" +
-            "java.nio.ByteBuffer pix16 = f16.get(null);" +
-            "java.lang.reflect.Field f32 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels32\");" +
-            "f32.setAccessible(true);" +
-            "java.nio.ByteBuffer pix32 = f32.get(null);" +
-            "if (pix16 != null && pix32 != null) {" +
-            "    org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});" +
-            "}"
-        );
-
-        patchPool.patchClass(displayClass);
+        return true;
     }
 
     @SuppressWarnings("unused")
