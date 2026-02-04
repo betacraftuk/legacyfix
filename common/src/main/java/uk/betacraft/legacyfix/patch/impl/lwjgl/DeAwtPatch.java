@@ -220,29 +220,41 @@ public class DeAwtPatch extends Patch {
             }
         }
 
-        if (exIndex == -1) {
-            return null;
-        }
+        if (exIndex != -1) {
+            int startPc = et.startPc(exIndex);
+            int endPc = et.endPc(exIndex);
+            CodeIterator it = ca.iterator();
 
-        int startPc = et.startPc(exIndex);
-        int endPc = et.endPc(exIndex);
-        CodeIterator it = ca.iterator();
+            while (it.hasNext()) {
+                int pos = it.next();
+                if (pos < startPc || pos >= endPc) continue;
 
-        while (it.hasNext()) {
-            int pos = it.next();
-            if (pos < startPc || pos >= endPc) continue;
+                if (it.byteAt(pos) != Opcode.INVOKESPECIAL) continue;
 
-            if (it.byteAt(pos) != Opcode.INVOKESPECIAL) continue;
-
-            int methodIndex = it.u16bitAt(pos + 1);
-            if ("()V".equals(cp.getMethodrefType(methodIndex))
-                && gameClass.getName().equals(cp.getMethodrefClassName(methodIndex))
-            ) {
-                return gameClass.getDeclaredMethod(cp.getMethodrefName(methodIndex));
+                int methodIndex = it.u16bitAt(pos + 1);
+                if ("()V".equals(cp.getMethodrefType(methodIndex))
+                    && gameClass.getName().equals(cp.getMethodrefClassName(methodIndex))
+                ) {
+                    return gameClass.getDeclaredMethod(cp.getMethodrefName(methodIndex));
+                }
             }
         }
 
-        return runMethod;
+        CodeIterator it = ca.iterator();
+        while (it.hasNext()) {
+            int pos = it.next();
+            if (it.byteAt(pos) != Opcode.INVOKESTATIC) continue;
+
+            int methodIndex = it.u16bitAt(pos + 1);
+            if ("org.lwjgl.opengl.Display".equals(cp.getMethodrefClassName(methodIndex))) {
+                String methodName = cp.getMethodrefName(methodIndex);
+                if ("update".equals(methodName) || "isCloseRequested".equals(methodName)) {
+                    return runMethod;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void patchDisplay(PatchPool patchPool) throws Exception {
