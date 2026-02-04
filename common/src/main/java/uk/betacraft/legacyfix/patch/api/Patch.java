@@ -74,6 +74,7 @@ public abstract class Patch {
 
     // Helper utilities
     public static final CtClass CT_INT = CtClass.intType;
+    public static final CtClass CT_FLOAT = CtClass.floatType;
     public static final CtClass CT_STRING = ClassPool.getDefault().getOrNull("java.lang.String");
 
     public static CtClass ctFromBytes(byte[] classBytes) throws Exception {

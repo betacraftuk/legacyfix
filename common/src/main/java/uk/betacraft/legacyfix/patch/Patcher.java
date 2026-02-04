@@ -3,19 +3,26 @@ package uk.betacraft.legacyfix.patch;
 import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.api.Patch;
-import uk.betacraft.legacyfix.patch.api.PatchException;
-import uk.betacraft.legacyfix.patch.api.PatchPool;
-import uk.betacraft.legacyfix.patch.api.Transformer;
+import uk.betacraft.legacyfix.patch.api.*;
 import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
+import uk.betacraft.legacyfix.patch.impl.misc.*;
+import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
 
 import java.util.*;
 
 public class Patcher implements PatchPool {
-    public static final Patch[] DEFAULT_PATCHES = new Patch[]{
+    public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
         new BitDepthPatch(),
+        new DeAwtPatch(),
         new MousePatch(),
-        new DeAwtPatch()
+        new VSyncPatch(),
+        new GameDirPatch(),
+        new IndevSoundPatch(),
+        new IntelGraphicsPatch(),
+        new ScreenshotPatch(),
+        new SeecretSaturdayPatch(),
+        new TexturePackFolderPatch(),
+        new BetaForgePatch()
     };
 
     public final List<Patch> patches = new ArrayList<Patch>();
@@ -26,7 +33,7 @@ public class Patcher implements PatchPool {
 
     public Patcher(ClassPool pool) {
         this.pool = pool;
-        this.patches.addAll(Arrays.asList(DEFAULT_PATCHES));
+        this.patches.addAll(Arrays.asList(BUILT_IN_PATCHES));
     }
 
     public void apply() {
