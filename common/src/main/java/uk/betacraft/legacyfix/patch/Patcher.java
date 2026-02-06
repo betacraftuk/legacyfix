@@ -13,6 +13,7 @@ import java.util.*;
 public class Patcher implements PatchPool {
     public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
         new BitDepthPatch(),
+        new DisableControllersPatch(),
         new DeAwtPatch(),
         new MousePatch(),
         new VSyncPatch(),
