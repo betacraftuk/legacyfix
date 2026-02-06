@@ -5,7 +5,7 @@ import uk.betacraft.legacyfix.agent.FmlInjector;
 import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.Transformer;
-import uk.betacraft.legacyfix.patch.impl.java.ModloaderPatch;
+import uk.betacraft.legacyfix.patch.impl.java.JavaModulesPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.*;
@@ -44,7 +43,7 @@ public class Agent {
         }
 
         Patcher patcher = new Patcher(ClassPool.getDefault());
-        patcher.patches.add(new ModloaderPatch());
+        patcher.patches.add(new JavaModulesPatch());
         patcher.apply();
 
         try {
