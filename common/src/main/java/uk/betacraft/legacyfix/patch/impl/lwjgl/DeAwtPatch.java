@@ -327,10 +327,12 @@ public class DeAwtPatch extends Patch {
         ExceptionTable et = ca.getExceptionTable();
         if (et == null || et.size() == 0) return false;
 
+        boolean foundFinally = false;
         CodeIterator it = ca.iterator();
         for (int i = 0; i < et.size(); i++) {
             if (et.catchType(i) != 0) continue;
 
+            foundFinally = true;
             int pos = et.handlerPc(i);
             it.move(pos);
 
@@ -353,7 +355,7 @@ public class DeAwtPatch extends Patch {
             }
         }
 
-        return true;
+        return foundFinally;
     }
 
     @SuppressWarnings("unused")
