@@ -191,7 +191,18 @@ public class DeAwtPatch extends Patch {
             "}"
         );
 
+        // older Forge checks the game version by title in format "Minecraft Minecraft <VERSION>"
+        displayClass.getDeclaredMethod("getTitle").insertBefore("" +
+            "String val = System.getProperty(\"lf.deawt.originalTitle\");" +
+            "if (val != null) {" +
+            "    return val;" +
+            "}"
+        );
+
         displayClass.getDeclaredMethod("setTitle").insertBefore("" +
+            "if ($1 != null && System.getProperty(\"lf.deawt.originalTitle\") == null) {" +
+            "    System.setProperty(\"lf.deawt.originalTitle\", $1);" +
+            "}" +
             "$1 = $1.replace(\"Minecraft Minecraft\", \"Minecraft\");" +
             "java.lang.reflect.Field f16 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels16\");" +
             "f16.setAccessible(true);" +
