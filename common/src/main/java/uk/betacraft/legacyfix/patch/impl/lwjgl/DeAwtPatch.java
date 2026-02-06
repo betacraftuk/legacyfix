@@ -15,14 +15,16 @@ import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
 public class DeAwtPatch extends Patch {
@@ -363,6 +365,11 @@ public class DeAwtPatch extends Patch {
 
             Frame frame = (Frame) hierarchyEvent.getSource();
             if (frame.isShowing() || frame.isVisible()) {
+                try { // Race condition workaround for Linux
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                }
+
                 frame.setVisible(false);
             }
         }
