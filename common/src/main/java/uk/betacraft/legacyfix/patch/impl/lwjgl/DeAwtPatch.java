@@ -10,6 +10,7 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
@@ -32,49 +33,51 @@ public class DeAwtPatch extends Patch {
         super("deawt", "Forces the game to use LWJGL's windowing system", true);
     }
 
-    public void apply(PatchPool patchPool) throws Exception {
-        CtClass minecraftAppletClass = GameClasses.findMinecraftAppletClass(patchPool);
+    public void apply(final PatchPool patchPool) throws Exception {
+        final String minecraftAppletClass = GameClasses.findMinecraftAppletClass(patchPool);
         if (minecraftAppletClass == null) {
             throw new PatchException("No applet class found");
         }
 
-        if (minecraftAppletClass.isFrozen()) {
-            minecraftAppletClass.defrost();
-        }
-
-        final CtField minecraftField = GameClasses.findMinecraftField(patchPool);
-        final CtClass minecraftClass = GameClasses.findMinecraftClass(patchPool);
-        if (minecraftField == null || minecraftClass == null) {
+        final String minecraftClass = GameClasses.findMinecraftClass(patchPool);
+        final String minecraftFieldName = GameClasses.findMinecraftFieldName(patchPool);
+        if (minecraftFieldName == null || minecraftClass == null) {
             throw new PatchException("No game instance found");
         }
 
-        if (minecraftClass.isFrozen()) {
-            minecraftClass.defrost();
-        }
+        final String appletModeFieldName = GameClasses.findAppletModeFieldName(patchPool);
+        patchPool.addCtTransformer(minecraftAppletClass, new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                if (appletModeFieldName != null) {
+                    CtMethod initMethod = ctClass.getDeclaredMethod("init");
+                    initMethod.insertAfter("$0." + minecraftFieldName + "." + appletModeFieldName + " = false;");
+                }
+            }
+        });
 
-        patchApplet(patchPool, minecraftAppletClass, minecraftField);
-        patchGameClass(patchPool, minecraftClass);
-        patchDisplay(patchPool);
+        patchPool.addCtTransformer("java.applet.Applet", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                if (ctClass.isFrozen()) {
+                    ctClass.defrost();
+                }
+                ctClass.getDeclaredMethod("getDocumentBase").setBody("{ return new java.net.URL(\"http://www.minecraft.net/\"); }");
+            }
+        });
+
+        patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                transformGameClass(ctClass);
+            }
+        });
+
+        patchPool.addCtTransformer("org.lwjgl.opengl.Display", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                transformDisplay(ctClass);
+            }
+        });
     }
 
-    private void patchApplet(PatchPool patchPool, CtClass appletClass, CtField gameInstanceField) throws Exception {
-        CtField appletModeField = GameClasses.findAppletModeField(patchPool);
-        if (appletModeField != null) {
-            CtMethod initMethod = appletClass.getDeclaredMethod("init");
-            initMethod.insertAfter("$0." + gameInstanceField.getName() + "." + appletModeField.getName() + " = false;");
-            patchPool.patchClass(appletClass);
-        }
-
-        CtClass javaAppletClass = patchPool.getClass("java.applet.Applet");
-        if (javaAppletClass.isFrozen()) {
-            javaAppletClass.defrost();
-        }
-
-        javaAppletClass.getDeclaredMethod("getDocumentBase").setBody("{ return new java.net.URL(\"http://www.minecraft.net/\"); }");
-        patchPool.patchClass(javaAppletClass);
-    }
-
-    private void patchGameClass(PatchPool patchPool, CtClass gameClass) throws Exception {
+    private void transformGameClass(CtClass gameClass) throws Exception {
         CtMethod updateMethod = findUpdateMethod(gameClass, gameClass.getDeclaredMethod("run"));
         if (updateMethod == null) {
             throw new PatchException("No update method found");
@@ -159,18 +162,15 @@ public class DeAwtPatch extends Patch {
                 break;
             }
         }
-
-        patchPool.patchClass(gameClass);
     }
 
-    private void patchDisplay(PatchPool patchPool) throws Exception {
+    private void transformDisplay(CtClass displayClass) throws Exception {
         try {
             Icons.loadIcons((String) Agent.getSettings().get("lf.icon"));
         } catch (Exception e) {
             Logger.error(this, e);
         }
 
-        CtClass displayClass = patchPool.getClass("org.lwjgl.opengl.Display");
         if (displayClass.isFrozen()) {
             displayClass.defrost();
         }
@@ -214,8 +214,6 @@ public class DeAwtPatch extends Patch {
             "    org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});" +
             "}"
         );
-
-        patchPool.patchClass(displayClass);
     }
 
     private CtField findCanvasField(CtClass gameClass) throws Exception {
@@ -224,7 +222,6 @@ public class DeAwtPatch extends Patch {
                 return field;
             }
         }
-
         return null;
     }
 

@@ -2,6 +2,7 @@ package uk.betacraft.legacyfix.patch.impl.misc;
 
 import javassist.CtClass;
 import javassist.CtMethod;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
@@ -12,14 +13,11 @@ public class SeecretSaturdayPatch extends Patch {
 
     @Override
     public void apply(PatchPool patchPool) throws Exception {
-        CtClass clazz = patchPool.getClass("org.lwjgl.opengl.Display");
-        if (clazz.isFrozen()) {
-            clazz.defrost();
-        }
-
-        CtMethod method = clazz.getDeclaredMethod("setDisplayConfiguration", new CtClass[]{Patch.CT_FLOAT, Patch.CT_FLOAT, Patch.CT_FLOAT});
-        method.setBody("{ return; }");
-
-        patchPool.patchClass(clazz);
+        patchPool.addCtTransformer("org.lwjgl.opengl.Display", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                CtMethod method = ctClass.getDeclaredMethod("setDisplayConfiguration", new CtClass[]{Patch.CT_FLOAT, Patch.CT_FLOAT, Patch.CT_FLOAT});
+                method.setBody("{ return; }");
+            }
+        });
     }
 }

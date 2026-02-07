@@ -2,6 +2,7 @@ package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
@@ -12,16 +13,13 @@ public class DisableControllersPatch extends Patch {
 
     @Override
     public void apply(PatchPool patchPool) throws Exception {
-        CtClass controllersClass = patchPool.getClass("org.lwjgl.input.Controllers");
-        if (controllersClass.isFrozen()) {
-            controllersClass.defrost();
-        }
-
-        CtMethod createMethod = controllersClass.getDeclaredMethod("create");
-        createMethod.setBody(
-            "{ return; }"
-        );
-
-        patchPool.patchClass(controllersClass);
+        patchPool.addCtTransformer("org.lwjgl.input.Controllers", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                CtMethod createMethod = ctClass.getDeclaredMethod("create");
+                createMethod.setBody(
+                    "{ return; }"
+                );
+            }
+        });
     }
 }

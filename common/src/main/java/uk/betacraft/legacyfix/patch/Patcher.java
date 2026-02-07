@@ -28,9 +28,8 @@ public class Patcher implements PatchPool {
 
     public final List<Patch> patches = new ArrayList<Patch>();
     private final ClassPool pool;
-    private final Map<String, CtClass> transformedNodes = new HashMap<String, CtClass>();
-    private final Map<String, byte[]> transformedClasses = new HashMap<String, byte[]>();
     private final List<Transformer> transformers = new ArrayList<Transformer>();
+    private final Map<String, List<CtTransformer>> ctTransformers = new HashMap<String, List<CtTransformer>>();
 
     public Patcher(ClassPool pool) {
         this.pool = pool;
@@ -68,47 +67,30 @@ public class Patcher implements PatchPool {
         } else {
             Logger.info("No patches applied");
         }
-
-        for (CtClass node : transformedNodes.values()) {
-            String key = node.getName().replace('/', '.');
-
-            try {
-                transformedClasses.put(key, node.toBytecode());
-            } catch (Exception e) {
-                throw new RuntimeException("Error writing transformed class " + key, e);
-            }
-        }
-
-        int transformed = transformedNodes.size();
-        Logger.info(transformed + " class" + (transformed == 1 ? "" : "es") + " transformed");
     }
 
-    public CtClass getClass(String className) {
-        CtClass transformedNode = transformedNodes.get(className);
-        if (transformedNode != null) {
-            return transformedNode;
-        }
-
+    public CtClass getRawClass(String className) {
         return this.pool.getOrNull(className);
     }
 
-    public void patchClass(CtClass patchedClass) {
-        transformedNodes.put(patchedClass.getName(), patchedClass);
-    }
-
     public void addTransformer(Transformer transformer) {
-        transformers.add(transformer);
+        this.transformers.add(transformer);
     }
 
-    public byte[] getTransformedClass(String name) {
-        return transformedClasses.get(name);
+    public void addCtTransformer(String className, CtTransformer transformer) {
+        if (!this.ctTransformers.containsKey(className)) {
+            this.ctTransformers.put(className, new ArrayList<CtTransformer>());
+        }
+
+        this.ctTransformers.get(className).add(transformer);
     }
 
-    public Map<String, byte[]> getTransformedClasses() {
-        return transformedClasses;
-    }
 
     public List<Transformer> getTransformers() {
-        return transformers;
+        return this.transformers;
+    }
+
+    public Map<String, List<CtTransformer>> getCtTransformers() {
+        return ctTransformers;
     }
 }

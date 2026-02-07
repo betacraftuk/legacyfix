@@ -6,12 +6,12 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
-import uk.betacraft.legacyfix.patch.api.Transformer;
 
 public class MousePatch extends Patch {
-    private boolean mouseDXYmatched;
 
     public MousePatch() {
         super("mouse", "Fixes mouse handling, required for deAWT", true);
@@ -19,11 +19,30 @@ public class MousePatch extends Patch {
 
     @Override
     public void apply(PatchPool patchPool) throws Exception {
-        final CtClass mouseHelperClass = GameClasses.findMouseHelperClass(patchPool);
-        if (mouseHelperClass == null) {
-            return;
+        final String mouseHelperClassName = GameClasses.findMouseHelperClass(patchPool);
+        if (mouseHelperClassName == null) {
+            throw new PatchException("No MouseHelper class found");
         }
 
+        patchPool.addCtTransformer(mouseHelperClassName, new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                transformMouseHelper(ctClass);
+            }
+        });
+
+        final String minecraftClassName = GameClasses.findMinecraftClass(patchPool);
+        if (minecraftClassName == null) {
+            throw new PatchException("No Minecraft class found");
+        }
+
+        patchPool.addCtTransformer(minecraftClassName, new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                transformMinecraft(ctClass);
+            }
+        });
+    }
+
+    private void transformMouseHelper(CtClass mouseHelperClass) throws Exception {
         if (mouseHelperClass.isFrozen()) {
             mouseHelperClass.defrost();
         }
@@ -80,7 +99,6 @@ public class MousePatch extends Patch {
         } else if (mouseHelperMethods.length >= 3) {
             Logger.debug("mouse", "Mouse Helper method size: " + mouseHelperMethods.length);
             mouseHelperMethods[0].setBody(lockBody);
-            // unlock
             mouseHelperMethods[1].setBody("" +
                 "{" +
                 "    org.lwjgl.input.Mouse.setCursorPosition(org.lwjgl.opengl.Display.getWidth() / 2, org.lwjgl.opengl.Display.getHeight() / 2);" +
@@ -89,61 +107,36 @@ public class MousePatch extends Patch {
             );
             mouseHelperMethods[2].setBody((invert ? tickBodyInvert : tickBody));
         }
+    }
 
-        patchPool.patchClass(mouseHelperClass);
-
-        // Replace all calls to Mouse.getDX() and Mouse.getDY() with 0
-        patchPool.addTransformer(new Transformer() {
-            public byte[] transform(String name, byte[] bytecode) throws Exception {
-                CtClass clas = ctFromBytes(bytecode);
-                if (clas == null || clas.getName().startsWith("org.lwjgl") || clas.getName().equals(mouseHelperClass.getName())) {
-                    return null;
-                }
-
-                if (clas.isFrozen()) {
-                    clas.defrost();
-                }
-
-                clas.instrument(new ExprEditor() {
-                    public void edit(MethodCall m) throws CannotCompileException {
-                        if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                            "getDX".equals(m.getMethodName()) &&
-                            "()I".equalsIgnoreCase(m.getSignature())) {
-                            mouseDXYmatched = true;
-                            m.replace("$_ = 0;");
-                            Logger.debug("mouse", "Mouse.getDX() match!");
-
-                        } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
-                            "getDY".equals(m.getMethodName()) &&
-                            "()I".equalsIgnoreCase(m.getSignature())) {
-                            mouseDXYmatched = true;
-                            m.replace("$_ = 0;");
-                            Logger.debug("mouse", "Mouse.getDY() match!");
-                        }
-                    }
-                });
-
-                if (mouseDXYmatched) {
-                    mouseDXYmatched = false;
-                    return clas.toBytecode();
-                }
-
-                return null;
-            }
-        });
-
-        // Some versions refer to setNativeCursor within methods of the Minecraft class,
-        // we need to account for that too
-        CtClass minecraftClass = GameClasses.findMinecraftClass(patchPool);
+    private void transformMinecraft(CtClass minecraftClass) throws Exception {
         if (minecraftClass.isFrozen()) {
             minecraftClass.defrost();
         }
 
         minecraftClass.instrument(new ExprEditor() {
+            public void edit(MethodCall m) throws CannotCompileException {
+                if ("org.lwjgl.input.Mouse".equals(m.getClassName())
+                    && "getDX".equals(m.getMethodName())
+                    && "()I".equalsIgnoreCase(m.getSignature())
+                ) {
+                    m.replace("$_ = 0;");
+                    Logger.debug("mouse", "Mouse.getDX() match!");
+                } else if ("org.lwjgl.input.Mouse".equals(m.getClassName())
+                    && "getDY".equals(m.getMethodName())
+                    && "()I".equalsIgnoreCase(m.getSignature())
+                ) {
+                    m.replace("$_ = 0;");
+                    Logger.debug("mouse", "Mouse.getDY() match!");
+                }
+            }
+        });
+
+        minecraftClass.instrument(new ExprEditor() {
             public void edit(MethodCall mc) throws CannotCompileException {
                 if (!(
-                    "org.lwjgl.input.Mouse".equals(mc.getClassName()) &&
-                    "setNativeCursor".equals(mc.getMethodName())
+                    "org.lwjgl.input.Mouse".equals(mc.getClassName())
+                    && "setNativeCursor".equals(mc.getMethodName())
                 )) return;
 
                 mc.replace("" +
@@ -157,7 +150,5 @@ public class MousePatch extends Patch {
                 );
             }
         });
-
-        patchPool.patchClass(minecraftClass);
     }
 }

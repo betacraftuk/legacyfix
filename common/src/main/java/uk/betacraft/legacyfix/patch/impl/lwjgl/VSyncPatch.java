@@ -2,6 +2,7 @@ package uk.betacraft.legacyfix.patch.impl.lwjgl;
 
 import javassist.CtClass;
 import javassist.CtMethod;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
@@ -12,14 +13,11 @@ public class VSyncPatch extends Patch {
 
     @Override
     public void apply(PatchPool patchPool) throws Exception {
-        CtClass clazz = patchPool.getClass("org.lwjgl.opengl.Display");
-        if (clazz.isFrozen()) {
-            clazz.defrost();
-        }
-
-        CtMethod createMethod = clazz.getDeclaredMethod("create");
-        createMethod.insertBefore("setVSyncEnabled(true);");
-
-        patchPool.patchClass(clazz);
+        patchPool.addCtTransformer("org.lwjgl.opengl.Display", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                CtMethod createMethod = ctClass.getDeclaredMethod("create");
+                createMethod.insertBefore("setVSyncEnabled(true);");
+            }
+        });
     }
 }

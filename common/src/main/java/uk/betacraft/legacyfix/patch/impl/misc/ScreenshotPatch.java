@@ -6,9 +6,11 @@ import javassist.CtMethod;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
 import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
@@ -20,119 +22,117 @@ public class ScreenshotPatch extends Patch {
 
     @Override
     public void apply(PatchPool patchPool) throws Exception {
-        CtMethod takeMethod = this.findScreenshotMethod(patchPool);
-        if (takeMethod == null) {
-            throw new PatchException("Not applicable");
+        final String mcClassName = GameClasses.findMinecraftClass(patchPool);
+        if (mcClassName == null) {
+            throw new PatchException("Minecraft class not found");
         }
 
-        CtClass screenshotClass = takeMethod.getDeclaringClass();
-        if (screenshotClass.isFrozen()) {
-            screenshotClass.defrost();
+        final CtClass mcClass = patchPool.getRawClass(mcClassName);
+        final String[] screenshotInfo = findScreenshotMethodInfo(mcClass);
+
+        if (screenshotInfo == null) {
+            throw new PatchException("Not applicable: Screenshot method not found");
         }
 
-        CtField pixelsField = null;
-        for (CtField field : screenshotClass.getDeclaredFields()) {
-            if (!"java.nio.ByteBuffer".equals(field.getType().getName())) {
+        final String screenshotClassName = screenshotInfo[0];
+        final String screenshotMethodName = screenshotInfo[1];
+        patchPool.addCtTransformer(screenshotClassName, new CtTransformer() {
+            public void transform(CtClass screenshotClass) throws Exception {
+                CtField pixelsField = null;
+                for (CtField field : screenshotClass.getDeclaredFields()) {
+                    if ("java.nio.ByteBuffer".equals(field.getType().getName())) {
+                        pixelsField = field;
+                        break;
+                    }
+                }
+
+                if (pixelsField == null) {
+                    throw new PatchException("No Screenshot.pixels found in " + screenshotClass.getName());
+                }
+
+                String pixelsRef = screenshotClass.getName() + "." + pixelsField.getName();
+                CtMethod takeMethod = screenshotClass.getDeclaredMethod(screenshotMethodName);
+                takeMethod.insertBefore("" +
+                    "try {" +
+                    "    if (" + pixelsRef + " == null || " + pixelsRef + ".capacity() != $2 * $3 * 3) {" +
+                    "        " + pixelsRef + " = org.lwjgl.BufferUtils.createByteBuffer($2 * $3 * 3);" +
+                    "    }" +
+                    "} catch (Throwable t) { t.printStackTrace(); }"
+                );
+            }
+        });
+    }
+
+    private String[] findScreenshotMethodInfo(CtClass minecraftClass) throws Exception {
+        if (minecraftClass.isFrozen()) {
+            minecraftClass.defrost();
+        }
+
+        for (CtMethod candidateMethod : minecraftClass.getDeclaredMethods()) {
+            MethodInfo mi = candidateMethod.getMethodInfo();
+            CodeAttribute codeAttribute = mi.getCodeAttribute();
+            if (codeAttribute == null) {
                 continue;
             }
 
-            pixelsField = field;
-        }
+            CodeIterator codeIterator = codeAttribute.iterator();
+            ConstPool cp = mi.getConstPool();
 
-        if (pixelsField == null) {
-            throw new PatchException("No Screenshot.pixels found");
-        }
-
-        String pixelsRef = screenshotClass.getName() + "." + pixelsField.getName();
-        takeMethod.insertBefore("" +
-            "try {" +
-            "    if (" + pixelsRef + " == null || " + pixelsRef + ".capacity() != $2 * $3 * 3) {" +
-            "        " + pixelsRef + " = org.lwjgl.BufferUtils.createByteBuffer($2 * $3 * 3);" +
-            "    }" +
-            "} catch (Throwable t) { t.printStackTrace(); }"
-        );
-
-        patchPool.patchClass(screenshotClass);
-    }
-
-    private CtMethod findScreenshotMethod(PatchPool patchPool) {
-        try {
-            CtClass fileClass = patchPool.getClass("java.io.File");
-            CtClass minecraftClass = GameClasses.findMinecraftClass(patchPool);
-            if (minecraftClass.isFrozen()) {
-                minecraftClass.defrost();
+            if (codeIterator.getCodeLength() <= 6) {
+                continue;
             }
 
-            for (CtMethod candidateMethod : minecraftClass.getDeclaredMethods()) {
-                CodeAttribute codeAttribute = candidateMethod.getMethodInfo().getCodeAttribute();
-                if (codeAttribute == null) {
+            while (codeIterator.hasNext()) {
+                int pos = codeIterator.next();
+                if (pos != 0) {
+                    break;
+                }
+
+                int opcode = codeIterator.byteAt(pos);
+
+                if (opcode != Opcode.BIPUSH &&
+                    codeIterator.byteAt(pos + 2) != Opcode.INVOKESTATIC &&
+                    codeIterator.byteAt(pos + 5) != Opcode.IFEQ
+                ) {
                     continue;
                 }
 
-                CodeIterator codeIterator = codeAttribute.iterator();
-                ConstPool cp = candidateMethod.getMethodInfo().getConstPool();
+                int keyId = codeIterator.byteAt(pos + 1);
+                if (keyId != 60) {
+                    break;
+                }
 
-                if (codeIterator.getCodeLength() <= 6) {
-                    continue;
+                int keyMethodIndex = codeIterator.u16bitAt(pos + 3);
+                String refName = cp.getMethodrefName(keyMethodIndex);
+                String refClassName = cp.getMethodrefClassName(keyMethodIndex);
+
+                if (!"isKeyDown".equals(refName) || !"org.lwjgl.input.Keyboard".equals(refClassName)) {
+                    break;
+                }
+
+                for (int i = 0; i < 7; i++) {
+                    if (codeIterator.hasNext()) codeIterator.next();
                 }
 
                 while (codeIterator.hasNext()) {
-                    int pos = codeIterator.next();
-                    if (pos != 0) {
-                        break;
-                    }
-
-                    int opcode = codeIterator.byteAt(pos);
-
-                    if (opcode != Opcode.BIPUSH &&
-                        codeIterator.byteAt(pos + 2) != Opcode.INVOKESTATIC &&
-                        codeIterator.byteAt(pos + 5) != Opcode.IFEQ
-                    ) {
+                    pos = codeIterator.next();
+                    if (codeIterator.byteAt(pos) != Opcode.INVOKESTATIC) {
                         continue;
                     }
 
-                    int keyId = codeIterator.byteAt(pos + 1);
-                    if (keyId != 60) {
-                        break;
-                    }
+                    int methodIndex = codeIterator.u16bitAt(pos + 1);
+                    String refType = cp.getMethodrefType(methodIndex);
+                    String foundName = cp.getMethodrefName(methodIndex);
+                    String foundClassName = cp.getMethodrefClassName(methodIndex);
 
-                    String refName = cp.getMethodrefName(codeIterator.u16bitAt(pos + 3));
-                    String refClassName = cp.getMethodrefClassName(codeIterator.u16bitAt(pos + 3));
-                    if (!"isKeyDown".equals(refName)) {
-                        break;
-                    }
+                    if ("(Ljava/io/File;II)Ljava/lang/String;".equals(refType)) {
+                        Logger.debug("screenshot", "Found Screenshot class: " + foundClassName);
+                        Logger.debug("screenshot", "Found Screenshot.take method: " + foundName);
 
-                    if (!"org.lwjgl.input.Keyboard".equals(refClassName)) {
-                        break;
-                    }
-
-                    for (int i = 0; i < 7; i++) {
-                        codeIterator.next();
-                    }
-
-                    while (codeIterator.hasNext()) {
-                        pos = codeIterator.next();
-                        if (codeIterator.byteAt(pos) != Opcode.INVOKESTATIC) {
-                            continue;
-                        }
-
-                        String refType = cp.getMethodrefType(codeIterator.u16bitAt(pos + 1));
-                        refName = cp.getMethodrefName(codeIterator.u16bitAt(pos + 1));
-                        refClassName = cp.getMethodrefClassName(codeIterator.u16bitAt(pos + 1));
-
-                        if (!"(Ljava/io/File;II)Ljava/lang/String;".equals(refType)) {
-                            break;
-                        }
-
-                        Logger.debug("screenshot", "Found Screenshot class: " + refClassName);
-                        Logger.debug("screenshot", "Found Screenshot.take method: " + refName);
-
-                        return patchPool.getClass(refClassName).getDeclaredMethod(refName, new CtClass[]{fileClass, Patch.CT_INT, Patch.CT_INT});
+                        return new String[] { foundClassName, foundName };
                     }
                 }
             }
-        } catch (Exception e) {
-            Logger.error(this, e);
         }
 
         return null;
@@ -140,6 +140,6 @@ public class ScreenshotPatch extends Patch {
 
     @Override
     public boolean shouldApply(PatchPool patchPool) {
-        return super.shouldApply(patchPool) && patchPool.getClass("net.minecraft.client.MinecraftApplet") != null;
+        return super.shouldApply(patchPool) && patchPool.getRawClass("net.minecraft.client.MinecraftApplet") != null;
     }
 }

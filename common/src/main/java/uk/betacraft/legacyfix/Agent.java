@@ -4,6 +4,7 @@ import javassist.*;
 import uk.betacraft.legacyfix.agent.FmlInjector;
 import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.patch.Patcher;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Transformer;
 import uk.betacraft.legacyfix.patch.impl.java.JavaModulesPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
@@ -42,29 +43,85 @@ public class Agent {
             BouncyCastleUtils.init();
         }
 
-        Patcher patcher = new Patcher(ClassPool.getDefault());
+        final Patcher patcher = new Patcher(ClassPool.getDefault());
         patcher.patches.add(new JavaModulesPatch());
         patcher.apply();
 
-        try {
-            for (Map.Entry<String, byte[]> transformed : patcher.getTransformedClasses().entrySet()) {
-                inst.redefineClasses(new ClassDefinition(Class.forName(transformed.getKey()), transformed.getValue()));
+        Map<String, List<CtTransformer>> ctTransformersMap = patcher.getCtTransformers();
+        List<ClassDefinition> definitions = new ArrayList<ClassDefinition>();
+
+        for (String className : ctTransformersMap.keySet()) {
+            try {
+                Class<?> loadedClass = Class.forName(className);
+
+                ClassPool pool = ClassPool.getDefault();
+                CtClass ctClass = pool.get(className);
+                if (ctClass.isFrozen()) {
+                    ctClass.defrost();
+                }
+
+                for (CtTransformer transformer : ctTransformersMap.get(className)) {
+                    transformer.transform(ctClass);
+                }
+
+                definitions.add(new ClassDefinition(loadedClass, ctClass.toBytecode()));
+                ctClass.detach();
+            } catch (ClassNotFoundException ignored) {
+            } catch (Exception e) {
+                Logger.error("Failed to prepare redefinition for " + className, e);
             }
-        } catch (Exception e) {
-            Logger.error("Failed to redefine classes!", e);
         }
 
-        for (final Transformer transformer : patcher.getTransformers()) {
-            inst.addTransformer(new ClassFileTransformer() {
-                public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+        if (!definitions.isEmpty()) {
+            try {
+                inst.redefineClasses(definitions.toArray(new ClassDefinition[0]));
+            } catch (Exception e) {
+                Logger.error("Failed to redefine classes!", e);
+            }
+        }
+
+        inst.addTransformer(new ClassFileTransformer() {
+            public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+                if (className == null) return null;
+                String dotName = className.replace('/', '.');
+
+                byte[] currentBuffer = classfileBuffer;
+                boolean modified = false;
+
+                List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
+                if (ctTransformers != null && !ctTransformers.isEmpty()) {
                     try {
-                        return transformer.transform(className.replace('/', '.'), classfileBuffer);
+                        ClassPool ctPool = new ClassPool(true);
+                        ctPool.appendClassPath(new ByteArrayClassPath(dotName, currentBuffer));
+                        CtClass ctClass = ctPool.get(dotName);
+
+                        for (CtTransformer ctTransformer : ctTransformers) {
+                            ctTransformer.transform(ctClass);
+                        }
+
+                        currentBuffer = ctClass.toBytecode();
+                        ctClass.detach();
+                        modified = true;
                     } catch (Exception e) {
-                        throw new RuntimeException("Failed to apply transformer on class \"" + className + "\"", e);
+                        Logger.error("Failed to apply CtTransformers on class \"" + dotName + "\"", e);
                     }
                 }
-            });
-        }
+
+                for (Transformer transformer : patcher.getTransformers()) {
+                    try {
+                        byte[] result = transformer.transform(dotName, currentBuffer);
+                        if (result != null) {
+                            currentBuffer = result;
+                            modified = true;
+                        }
+                    } catch (Exception e) {
+                        Logger.error("Failed to apply Transformer on class \"" + dotName + "\"", e);
+                    }
+                }
+
+                return modified ? currentBuffer : null;
+            }
+        });
     }
 
     public static Map<String, Object> getSettings() {

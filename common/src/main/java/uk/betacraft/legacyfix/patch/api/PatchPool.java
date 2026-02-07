@@ -3,9 +3,9 @@ package uk.betacraft.legacyfix.patch.api;
 import javassist.CtClass;
 
 public interface PatchPool {
-    CtClass getClass(String className);
-
-    void patchClass(CtClass patchedClass);
+    CtClass getRawClass(String className);
 
     void addTransformer(Transformer transformer);
+
+    void addCtTransformer(String className, CtTransformer transformer);
 }

@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.transformers.TreeTransformer;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.Patcher;
+import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Transformer;
 
 import java.lang.reflect.Field;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> extends MixinTransformerDelegate<T> {
     private final Patcher patcher;
+    private final ClassPool mainPool;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     LFMixinTransformer(T delegate) throws Exception {
@@ -25,34 +27,51 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
         miscGameLibsField.setAccessible(true);
 
         ClassPool pool = new ClassPool(true);
-        ClassPool gamePool = new ClassPool(pool);
+        this.mainPool = new ClassPool(pool);
         List libraries = new ArrayList();
         libraries.add(provider.getGameJar());
         libraries.addAll((List) miscGameLibsField.get(provider));
         for (Object path : libraries) {
-            gamePool.appendPathList(path.toString());
+            this.mainPool.appendPathList(path.toString());
             Logger.debug("Loading " + path);
         }
-        gamePool.childFirstLookup = true;
+        this.mainPool.childFirstLookup = true;
 
-        this.patcher = new Patcher(gamePool);
+        this.patcher = new Patcher(this.mainPool);
         this.patcher.apply();
     }
 
     @Override
     public byte[] transformClassBytes(String name, String transformedName, byte[] bytecode) {
-        byte[] transformed = this.patcher.getTransformedClass(transformedName);
-        if (transformed != null) {
-            bytecode = transformed;
-        }
-
         if (bytecode == null) {
             return super.transformClassBytes(name, transformedName, null);
         }
 
+        List<CtTransformer> ctTransformers = this.patcher.getCtTransformers().get(transformedName);
+        if (ctTransformers != null && !ctTransformers.isEmpty()) {
+            try {
+                ClassPool ctPool = new ClassPool(this.mainPool);
+                ctPool.childFirstLookup = true;
+                ctPool.insertClassPath(new ByteArrayClassPath(transformedName, bytecode));
+
+                CtClass ctClass = ctPool.get(transformedName);
+                for (CtTransformer ctTransformer : ctTransformers) {
+                    ctTransformer.transform(ctClass);
+                }
+
+                if (ctClass.isModified()) {
+                    bytecode = ctClass.toBytecode();
+                }
+
+                ctClass.detach();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to apply CtTransformer on class \"" + name + "\"", e);
+            }
+        }
+
         for (Transformer transformer : this.patcher.getTransformers()) {
             try {
-                transformed = transformer.transform(name, bytecode);
+                byte[] transformed = transformer.transform(name, bytecode);
                 if (transformed != null) {
                     bytecode = transformed;
                 }

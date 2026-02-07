@@ -10,14 +10,14 @@ import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
 public class GameClasses {
-    private static CtClass minecraftAppletClass = null;
-    private static CtClass mouseHelperClass = null;
-    private static CtClass minecraftClass = null;
+    private static String minecraftAppletClass = null;
+    private static String mouseHelperClass = null;
+    private static String minecraftClass = null;
 
-    private static CtField appletModeField = null;
-    private static CtField minecraftField = null;
+    private static String appletModeFieldName = null;
+    private static String minecraftFieldName = null;
 
-    public static CtClass findMinecraftAppletClass(PatchPool transformer) {
+    public static String findMinecraftAppletClass(PatchPool patchPool) {
         if (minecraftAppletClass != null) {
             return minecraftAppletClass;
         }
@@ -28,8 +28,9 @@ public class GameClasses {
         };
 
         for (String path : typicalPaths) {
-            minecraftAppletClass = transformer.getClass(path);
-            if (minecraftAppletClass != null) {
+            CtClass cls = patchPool.getRawClass(path);
+            if (cls != null) {
+                minecraftAppletClass = cls.getName();
                 break;
             }
         }
@@ -37,25 +38,27 @@ public class GameClasses {
         return minecraftAppletClass;
     }
 
-    public static CtClass findMinecraftClass(PatchPool transformer) throws NotFoundException {
+    public static String findMinecraftClass(PatchPool patchPool) throws NotFoundException {
         if (minecraftClass != null) {
             return minecraftClass;
         }
 
         if (minecraftAppletClass == null) {
-            findMinecraftAppletClass(transformer);
+            findMinecraftAppletClass(patchPool);
         }
 
         if (minecraftAppletClass != null) {
-            for (CtField field : minecraftAppletClass.getDeclaredFields()) {
+            CtClass appletClass = patchPool.getRawClass(minecraftAppletClass);
+
+            for (CtField field : appletClass.getDeclaredFields()) {
                 String className = field.getType().getName();
 
-                if (!className.equals("java.awt.Canvas") &&
-                    !className.equals("java.lang.Thread") &&
-                    !className.equals("long")) {
-
-                    minecraftClass = field.getType();
-                    Logger.debug("Found Minecraft class: " + minecraftClass.getName());
+                if (!className.equals("java.awt.Canvas")
+                    && !className.equals("java.lang.Thread")
+                    && !className.equals("long")
+                ) {
+                    minecraftClass = className;
+                    Logger.debug("Found Minecraft class: " + minecraftClass);
                     break;
                 }
             }
@@ -64,81 +67,88 @@ public class GameClasses {
         return minecraftClass;
     }
 
-    public static CtField findMinecraftField(PatchPool transformer) throws NotFoundException {
-        if (minecraftField != null) {
-            return minecraftField;
+    public static String findMinecraftFieldName(PatchPool patchPool) throws NotFoundException {
+        if (minecraftFieldName != null) {
+            return minecraftFieldName;
         }
 
         if (minecraftAppletClass == null) {
-            findMinecraftAppletClass(transformer);
+            findMinecraftAppletClass(patchPool);
         }
 
-        for (CtField field : minecraftAppletClass.getDeclaredFields()) {
-            String className = field.getType().getName();
+        if (minecraftAppletClass != null) {
+            CtClass appletClass = patchPool.getRawClass(minecraftAppletClass);
 
-            if (!className.equals("java.awt.Canvas") &&
-                !className.equals("java.lang.Thread") &&
-                !className.equals("long")) {
+            for (CtField field : appletClass.getDeclaredFields()) {
+                String className = field.getType().getName();
 
-                minecraftField = field;
-                Logger.debug("Found Minecraft field: " + field.getName());
-
-                return field;
+                if (!className.equals("java.awt.Canvas")
+                    && !className.equals("java.lang.Thread")
+                    && !className.equals("long")
+                ) {
+                    minecraftFieldName = field.getName();
+                    Logger.debug("Found Minecraft field: " + field.getName());
+                    return minecraftFieldName;
+                }
             }
         }
 
-        return minecraftField;
+        return minecraftFieldName;
     }
 
-    public static CtField findAppletModeField(PatchPool transformer) throws NotFoundException {
-        if (appletModeField != null) {
-            return appletModeField;
+    public static String findAppletModeFieldName(PatchPool patchPool) throws NotFoundException {
+        if (appletModeFieldName != null) {
+            return appletModeFieldName;
         }
 
         if (minecraftClass == null) {
-            findMinecraftClass(transformer);
+            findMinecraftClass(patchPool);
         }
 
-        for (CtField field : minecraftClass.getDeclaredFields()) {
-            String className = field.getType().getName();
+        if (minecraftClass != null) {
+            CtClass mcClass = patchPool.getRawClass(minecraftClass);
 
-            if (className.equals("boolean") && Modifier.isPublic(field.getModifiers())) {
-                appletModeField = field;
+            for (CtField field : mcClass.getDeclaredFields()) {
+                String className = field.getType().getName();
 
-                Logger.debug("Found appletMode field: " + appletModeField.getName());
-                break;
+                if (className.equals("boolean") && Modifier.isPublic(field.getModifiers())) {
+                    appletModeFieldName = field.getName();
+                    Logger.debug("Found appletMode field: " + appletModeFieldName);
+                    break;
+                }
             }
         }
 
-        return appletModeField;
+        return appletModeFieldName;
     }
 
-    public static CtClass findMouseHelperClass(PatchPool transformer) throws NotFoundException {
+    public static String findMouseHelperClass(PatchPool patchPool) throws NotFoundException {
         if (mouseHelperClass != null) {
             return mouseHelperClass;
         }
 
         if (minecraftClass == null) {
-            findMinecraftClass(transformer);
+            findMinecraftClass(patchPool);
         }
 
         if (minecraftClass == null) {
             return null;
         }
 
-        CtField[] minecraftFields = minecraftClass.getDeclaredFields();
+        CtClass mcClass = patchPool.getRawClass(minecraftClass);
+        CtField[] minecraftFields = mcClass.getDeclaredFields();
         for (CtField field : minecraftFields) {
             CtConstructor[] constructors = field.getType().getConstructors();
 
             for (CtConstructor constr : constructors) {
                 CtClass[] constrParams = constr.getParameterTypes();
 
-                if (constrParams.length >= 1 &&
-                    constrParams[0].getName().equals("java.awt.Component") &&
-                    !field.getType().getName().equals(minecraftClass.getName())) {
-                    mouseHelperClass = field.getType();
-
-                    Logger.debug("Found match for MouseHelper class: " + mouseHelperClass.getName());
+                if (constrParams.length >= 1
+                    && constrParams[0].getName().equals("java.awt.Component")
+                    && !field.getType().getName().equals(minecraftClass)
+                ) {
+                    mouseHelperClass = field.getType().getName();
+                    Logger.debug("Found match for MouseHelper class: " + mouseHelperClass);
                     break;
                 }
             }
