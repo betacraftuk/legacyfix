@@ -49,7 +49,7 @@ public abstract class Patch {
 
     public Object getSetting() {
         if (this.setting == null) {
-            this.setting = Agent.getSettings().get("lf." + getId() + (def ? ".disable" : ""));
+            this.setting = Agent.getSettings().get("lf." + getId() + (isDefault() ? ".disable" : ""));
         }
 
         return this.setting;
@@ -60,7 +60,7 @@ public abstract class Patch {
      */
     @SuppressWarnings("all")
     public boolean shouldApply(PatchPool patchPool) {
-        return required || (def ? this.getSetting() == null : this.getSetting() != null);
+        return isRequired() || (isDefault() ? this.getSetting() == null : this.getSetting() != null);
     }
 
     /**

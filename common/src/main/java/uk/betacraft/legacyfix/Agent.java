@@ -6,7 +6,6 @@ import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Transformer;
-import uk.betacraft.legacyfix.patch.impl.java.JavaModulesPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
@@ -24,6 +23,7 @@ public class Agent {
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
 
     public static boolean loaded = false;
+    public static boolean active = false;
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         loaded = true;
@@ -43,8 +43,8 @@ public class Agent {
             BouncyCastleUtils.init();
         }
 
+        active = true;
         final Patcher patcher = new Patcher(ClassPool.getDefault());
-        patcher.patches.add(new JavaModulesPatch());
         patcher.apply();
 
         Map<String, List<CtTransformer>> ctTransformersMap = patcher.getCtTransformers();

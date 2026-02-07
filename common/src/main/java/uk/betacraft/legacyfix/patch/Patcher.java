@@ -4,6 +4,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.*;
+import uk.betacraft.legacyfix.patch.impl.java.*;
 import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
 import uk.betacraft.legacyfix.patch.impl.misc.*;
 import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
@@ -12,6 +13,7 @@ import java.util.*;
 
 public class Patcher implements PatchPool {
     public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
+        new JavaModulesPatch(),
         new BitDepthPatch(),
         new DisableControllersPatch(),
         new DeAwtPatch(),
