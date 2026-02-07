@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.patch.impl.fml;
+package uk.betacraft.legacyfix.patch.impl.thirdparty;
 
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -6,8 +6,8 @@ import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
-public class ModContainerPatch extends Patch {
-    public ModContainerPatch() {
+public class FmlModContainerPatch extends Patch {
+    public FmlModContainerPatch() {
         super("fml-mod", "Injects a mod entry into FML when loading from a tweaker.", false, false);
     }
 

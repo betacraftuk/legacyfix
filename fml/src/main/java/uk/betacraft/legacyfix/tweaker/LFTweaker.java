@@ -4,7 +4,7 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.patch.Patcher;
-import uk.betacraft.legacyfix.patch.impl.fml.ModContainerPatch;
+import uk.betacraft.legacyfix.patch.impl.thirdparty.FmlModContainerPatch;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -28,7 +28,7 @@ public class LFTweaker implements ITweaker {
 
         patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()));
         if (!Agent.loaded) {
-            patcher.patches.add(new ModContainerPatch());
+            patcher.patches.add(new FmlModContainerPatch());
         }
         patcher.apply();
 
