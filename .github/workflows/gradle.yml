@@ -1,8 +1,8 @@
-name: Java CI with Gradle
+name: Nightly Build
 
 on:
   push:
-    branches: [ develop, stable ]
+    branches: [ develop, stable, multiloader ]
   pull_request:
     branches: [ develop ]
 
@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 8
-      uses: actions/setup-java@v4
+    - name: Setup JDK 8
+      uses: actions/setup-java@v5
       with:
         java-version: 8
         distribution: 'zulu'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
-    - name: Build with Gradle
+    - name: Build
       run: ./gradlew build
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v7
       with:
         path: build/libs
