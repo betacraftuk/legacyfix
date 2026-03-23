@@ -25,11 +25,6 @@ shadowJar {
     from project(':fabric').jar
     from project(':fml').jar
     from project(':risugami').jar
-    relocate('org.objectweb.asm', 'uk.betacraft.legacyfix.shadowed.org.objectweb.asm')
-}
-
-jar {
-    dependsOn(shadowJar)
 
     manifest {
         attributes(
@@ -41,4 +36,12 @@ jar {
             'FMLCorePlugin': 'uk.betacraft.legacyfix.fml.CpwCoreMod'
         )
     }
+}
+
+assemble {
+    dependsOn(shadowJar)
+}
+
+jar {
+    enabled = false
 }
