@@ -1,7 +1,7 @@
-package uk.betacraft.legacyfix.protocol.http;
+package uk.betacraft.legacyfix.proxy.protocol.http;
 
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.protocol.URLHandlers;
+import uk.betacraft.legacyfix.proxy.URLHandlers;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

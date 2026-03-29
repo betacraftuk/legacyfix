@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
 import uk.betacraft.legacyfix.Agent;
 

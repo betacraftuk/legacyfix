@@ -1,4 +1,4 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
 import java.net.URL;
 import java.util.regex.Pattern;

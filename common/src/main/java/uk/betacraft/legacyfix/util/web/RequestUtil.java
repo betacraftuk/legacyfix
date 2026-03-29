@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLStreamHandler;
 
 public class RequestUtil {
-
     public static String webDataToString(WebData data) {
         if (data.getData() != null) {
             try {
@@ -113,9 +112,9 @@ public class RequestUtil {
         }
     }
 
-    public static boolean download(Request req, File destination) {
+    public static boolean download(String sourceUrl, File destination) {
         try {
-            URL url = RequestUtil.createDirectURL(req.REQUEST_URL);
+            URL url = RequestUtil.createDirectURL(sourceUrl);
 
             BufferedInputStream bin = new BufferedInputStream(url.openStream());
             FileOutputStream fos = new FileOutputStream(destination);

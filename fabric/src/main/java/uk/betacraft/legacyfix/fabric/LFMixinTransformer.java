@@ -3,9 +3,11 @@ package uk.betacraft.legacyfix.fabric;
 import javassist.*;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider;
+import net.fabricmc.loader.impl.util.Arguments;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.transformers.TreeTransformer;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Transformer;
@@ -36,6 +38,9 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
             Logger.debug("Loading " + path);
         }
         this.mainPool.childFirstLookup = true;
+
+        Arguments args = provider.getArguments();
+        GameArgs.setArgs(args.get("username"), args.get("session"));
 
         this.patcher = new Patcher(this.mainPool);
         this.patcher.apply();

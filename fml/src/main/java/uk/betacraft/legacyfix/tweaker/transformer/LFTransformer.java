@@ -1,6 +1,5 @@
 package uk.betacraft.legacyfix.tweaker.transformer;
 
-import javassist.ByteArrayClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -23,12 +22,11 @@ public class LFTransformer implements IClassTransformer {
             return bytecode;
         }
 
-        List<CtTransformer> ctTransformers = LFTweaker.patcher.getCtTransformers().get(transformedName);
+        List<CtTransformer> ctTransformers = LFTweaker.patcher.getCtTransformers().get(name);
         if (ctTransformers != null && !ctTransformers.isEmpty()) {
             try {
                 ClassPool ctPool = new ClassPool(true);
-                ctPool.appendClassPath(new ByteArrayClassPath(transformedName, bytecode));
-                CtClass ctClass = ctPool.get(transformedName);
+                CtClass ctClass = ctPool.makeClass(new java.io.ByteArrayInputStream(bytecode));
 
                 for (CtTransformer ctTransformer : ctTransformers) {
                     ctTransformer.transform(ctClass);

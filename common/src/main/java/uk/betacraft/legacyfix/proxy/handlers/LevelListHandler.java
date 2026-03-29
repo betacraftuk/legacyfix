@@ -1,7 +1,7 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 
 import java.io.*;
 import java.net.URL;
@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class LevelListHandler extends LevelHandlerBase {
     private static final Pattern LEVEL_LIST_PATTERN = Pattern.compile("(http:\\/\\/(www\\.)?minecraft\\.net(:(.+)?)?\\/listmaps\\.jsp\\?user=(.+)?)");
 
-    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelDir", LegacyFixLauncher.getGameDir() + "/levels");
+    protected static final String LEVELS_DIR_PATH = System.getProperty("lf.levelDir", GameArgs.getGameDir() + "/levels");
 
     public static final String EMPTY_LEVEL = "-";
 

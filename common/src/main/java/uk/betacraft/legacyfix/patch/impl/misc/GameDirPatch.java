@@ -3,10 +3,10 @@ package uk.betacraft.legacyfix.patch.impl.misc;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 
 import java.io.File;
 
@@ -27,7 +27,7 @@ public class GameDirPatch extends Patch {
                     "    if ($2.startsWith(\".minecraft/\") || $2.startsWith(\"minecraft/\") || " +
                     "               $2.startsWith(\"Library/Application Support/minecraft\")) {" +
                     "        $1 = null;" +
-                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "        $2 = (String) assetUtils.getMethod(\"getRelativePathToGameDir\", new Class[] {String.class}).invoke(null, new Object[] {$2});" +
                     "    }" +
                     "}"
@@ -37,7 +37,7 @@ public class GameDirPatch extends Patch {
                 fileConstructor2.insertBefore("" +
                     "try {" +
                     "    if ($1.path.contains(\"assets\") && $2.equals(\"skins\")) {" +
-                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "        if (((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$1.path})).booleanValue()) {" +
                     "            $1 = (java.io.File) assetUtils.getMethod(\"getCacheDirectory\", null).invoke(null, null);" +
                     "        }" +
@@ -50,7 +50,7 @@ public class GameDirPatch extends Patch {
                     "if (!($r)$_) {" +
                     "    try {" +
                     "        if (System.getProperty(\"assets-loaded\", \"false\").equals(\"true\")) {" +
-                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "            Object asset = assetUtils.getMethod(\"getAssetPathFromExpectedPath\", new Class[] {String.class}).invoke(null, new Object[] {$0.path});" +
                     "            if (asset != null) {" +
                     "                return true;" +
@@ -72,7 +72,7 @@ public class GameDirPatch extends Patch {
                     "if (($r)$_ == 0L) {" +
                     "    try {" +
                     "        if (System.getProperty(\"assets-loaded\", \"false\").equals(\"true\")) {" +
-                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "            Long size = (Long) assetUtils.getMethod(\"getAssetSizeFromExpectedPath\", new Class[] {String.class}).invoke(null, new Object[] {$0.path});" +
                     "            if (size.longValue() != -1L) {" +
                     "                return size.longValue();" +
@@ -86,7 +86,7 @@ public class GameDirPatch extends Patch {
                 listFilesMethod.insertBefore("" +
                     "try {" +
                     "    if ($0.path.contains(\"assets\")) {" +
-                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "        if (((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$0.path})).booleanValue()) {" +
                     "            return (java.io.File[]) assetUtils.getMethod(\"getAssetsAsFileArray\", null).invoke(null, null);" +
                     "        }" +
@@ -98,7 +98,7 @@ public class GameDirPatch extends Patch {
                 listFiles2Method.insertBefore("" +
                     "try {" +
                     "    if ($0.path.contains(\"assets\")) {" +
-                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "        if (((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$0.path})).booleanValue()) {" +
                     "            return (java.io.File[]) assetUtils.getMethod(\"getAssetsAsFileArray\", null).invoke(null, null);" +
                     "        }" +
@@ -111,7 +111,7 @@ public class GameDirPatch extends Patch {
                     "if (!($r)$_) {" +
                     "    try {" +
                     "        if ($0.path.contains(\"assets\")) {" +
-                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "            return ((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$0.path})).booleanValue();" +
                     "        }" +
                     "    } catch (Throwable t) { t.printStackTrace(); }" +
@@ -126,7 +126,7 @@ public class GameDirPatch extends Patch {
                 fileInputStreamConstructor.insertBefore("" +
                     "try {" +
                     "    if (System.getProperty(\"assets-loaded\", \"false\").equals(\"true\")) {" +
-                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.util.AssetUtils\");" +
+                    "        Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "        String asset = (String) assetUtils.getMethod(\"getAssetPathFromExpectedPath\", new Class[] {String.class}).invoke(null, new Object[] {$1.getPath()});" +
                     "        if (asset != null) {" +
                     "            $1 = new java.io.File(asset);" +
@@ -165,6 +165,6 @@ public class GameDirPatch extends Patch {
             return null;
         }
 
-        return new File(LegacyFixLauncher.getScreenshotsDir(), fileName).getAbsoluteFile();
+        return new File(GameArgs.getScreenshotsDir(), fileName).getAbsoluteFile();
     }
 }

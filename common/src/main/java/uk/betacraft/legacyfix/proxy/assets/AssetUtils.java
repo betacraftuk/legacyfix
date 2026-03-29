@@ -1,11 +1,11 @@
-package uk.betacraft.legacyfix.util;
+package uk.betacraft.legacyfix.proxy.assets;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -23,7 +23,7 @@ public class AssetUtils {
 
     private static File getAssetsDir() {
         if (ASSETS_DIR == null) {
-            ASSETS_DIR = new File(LegacyFixLauncher.getAssetsDir());
+            ASSETS_DIR = new File(GameArgs.getAssetsDir());
         }
 
         return ASSETS_DIR;
@@ -31,28 +31,29 @@ public class AssetUtils {
 
     private static File getResourcesDir() {
         if (RESOURCES_DIR == null) {
-            RESOURCES_DIR = new File(LegacyFixLauncher.getGameDir(), "resources/");
+            RESOURCES_DIR = new File(GameArgs.getGameDir(), "resources/");
         }
 
         return RESOURCES_DIR;
     }
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
-        String assetIndexPath = LegacyFixLauncher.getAssetIndexPath();
+        String assetIndexPath = GameArgs.getAssetIndexPath();
         if (assetIndexPath == null) {
             return new JSONObject();
         }
 
-        return new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))).getJSONObject("objects");
+        return new JSONObject(
+            new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))
+        ).getJSONObject("objects");
     }
 
     public static String generateTxtIndex() {
         try {
-            StringBuilder txtIndex = new StringBuilder();
-
             JSONObject assetIndex = getAssetIndex();
-
             initAssets(assetIndex);
+
+            StringBuilder txtIndex = new StringBuilder();
 
             for (AssetObject assetObject : assets) {
                 txtIndex.append(assetObject.key).append(",").append(assetObject.size).append(",0").append("\n");
@@ -67,13 +68,12 @@ public class AssetUtils {
 
     public static String generateXmlIndex() {
         try {
+            JSONObject assetIndex = getAssetIndex();
+            initAssets(assetIndex);
+
             Document xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Element rootElement = xmlDocument.createElement("ListBucketResult");
             xmlDocument.appendChild(rootElement);
-
-            JSONObject assetIndex = getAssetIndex();
-
-            initAssets(assetIndex);
 
             for (AssetObject assetObject : assets) {
                 rootElement.appendChild(makeContentsNode(xmlDocument, assetObject.key, assetObject.size));
@@ -81,7 +81,10 @@ public class AssetUtils {
 
             StringWriter stringWriter = new StringWriter();
 
-            TransformerFactory.newInstance().newTransformer().transform(new DOMSource(xmlDocument), new StreamResult(stringWriter));
+            TransformerFactory.newInstance().newTransformer().transform(
+                new DOMSource(xmlDocument),
+                new StreamResult(stringWriter)
+            );
 
             return stringWriter.toString();
         } catch (Throwable t) {
@@ -138,7 +141,6 @@ public class AssetUtils {
 
                 // Use local file if it overrides the asset at its path
                 File localAsset = new File(getResourcesDir(), key).getCanonicalFile();
-
                 localAssetsToSkip.add(localAsset);
 
                 final String path;
@@ -155,7 +157,6 @@ public class AssetUtils {
 
             // Add the remaining (additional) local asset files
             List<File> localAssets = recursePaths(getResourcesDir(), new LinkedList<File>());
-
             localAssets.removeAll(localAssetsToSkip);
 
             for (File additionalAsset : localAssets) {
@@ -163,9 +164,16 @@ public class AssetUtils {
                     continue;
                 }
 
-                String key = additionalAsset.getCanonicalPath().substring(getResourcesDir().getCanonicalPath().length() + 1).replace("\\", "/");
+                String key = additionalAsset.getCanonicalPath().substring(
+                    getResourcesDir().getCanonicalPath().length() + 1
+                ).replace("\\", "/");
 
-                if (key.startsWith("._") || key.endsWith(".DS_Store") || key.endsWith("Thumbs.db") || key.endsWith("desktop.ini")) {
+                if (key.indexOf('/') == -1
+                    || key.startsWith("._")
+                    || key.endsWith(".DS_Store")
+                    || key.endsWith("Thumbs.db")
+                    || key.endsWith("desktop.ini")
+                ) {
                     continue;
                 }
 
@@ -193,7 +201,7 @@ public class AssetUtils {
             path = "";
         }
 
-        return LegacyFixLauncher.getGameDir() + path;
+        return GameArgs.getGameDir() + path;
     }
 
     // Used by GameDirPatch
@@ -221,19 +229,14 @@ public class AssetUtils {
 
     // Used by GameDirPatch
     public static File getCacheDirectory() {
-        File file = new File(LegacyFixLauncher.getGameDir(), "cache");
+        File file = new File(GameArgs.getGameDir(), "cache");
         file.mkdirs();
         return file;
     }
 
     public static File getExpectedAssetsDir() {
-        // 13w16a-13w23b
-        if (LegacyFixLauncher.hasKey("usesWorkDir")) {
-            return new File(LegacyFixLauncher.getGameDir(), "assets");
-        } else // 13w24a-13w48b
-        {
-            return getAssetsDir();
-        }
+        // TODO 13w16a-13w23b
+        return getAssetsDir();
     }
 
     // Used by GameDirPatch
@@ -285,7 +288,7 @@ public class AssetUtils {
             this.size = size;
             this.path = path;
 
-            Logger.debug("AssetUtils", key + ", " + size + ", " + path);
+            Logger.debug("Asset: " + key + ", " + size + ", " + path);
         }
     }
 }

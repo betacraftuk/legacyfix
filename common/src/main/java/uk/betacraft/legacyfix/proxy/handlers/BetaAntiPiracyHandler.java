@@ -1,6 +1,6 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
-import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public class BetaAntiPiracyHandler extends HandlerBase {
     }
 
     public int getResponseCode() {
-        return LegacyFixLauncher.hasKey("demo") ? 400 : 200;
+        return GameArgs.isDemo() ? 400 : 200;
     }
 
     public static List<Pattern> regexPatterns() {

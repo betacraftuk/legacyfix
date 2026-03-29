@@ -59,7 +59,7 @@ public class VisualizerLauncher {
             Frame frame = new Frame("Minecraft Infinite Map Visualizer");
             frame.setLayout(new BorderLayout());
             frame.add(previewCanvasInstance, "Center");
-            previewCanvasInstance.setPreferredSize(new Dimension(LegacyFixLauncher.getWidth(), LegacyFixLauncher.getHeight()));
+            previewCanvasInstance.setPreferredSize(new Dimension(854, 480));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

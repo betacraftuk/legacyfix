@@ -2,10 +2,8 @@ package uk.betacraft.legacyfix.patch;
 
 import java.lang.reflect.Modifier;
 
-import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
-import javassist.NotFoundException;
+import javassist.*;
+import javassist.bytecode.*;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
@@ -58,13 +56,104 @@ public class GameClasses {
                     && !className.equals("long")
                 ) {
                     minecraftClass = className;
-                    Logger.debug("Found Minecraft class: " + minecraftClass);
-                    break;
+                }
+            }
+        } else {
+            CtClass clientClass = patchPool.getRawClass("net.minecraft.client.Minecraft");
+            if (clientClass != null) {
+                minecraftClass = clientClass.getName();
+            } else {
+                try {
+                    minecraftClass = findMinecraftFromMain(patchPool);
+                } catch (Exception e) {
+                    Logger.error("GameClasses", e);
                 }
             }
         }
 
+        if (minecraftClass != null) {
+            Logger.debug("Minecraft class found: " + minecraftClass);
+        }
+
         return minecraftClass;
+    }
+
+    private static String findMinecraftFromMain(PatchPool patchPool) throws NotFoundException, BadBytecode {
+        CtClass mainCt = patchPool.getRawClass("net.minecraft.client.main.Main");
+        if (mainCt == null) {
+            return null;
+        }
+
+        CtMethod main = mainCt.getDeclaredMethod("main");
+        MethodInfo mi = main.getMethodInfo();
+        CodeAttribute ca = mi.getCodeAttribute();
+        if (ca == null) {
+            return null;
+        }
+
+        CodeIterator it = ca.iterator();
+        ConstPool cp = mi.getConstPool();
+
+        boolean seenUsername = false;
+        String lastNew = null;
+        String profile = null;
+
+        while (it.hasNext()) {
+            int pos = it.next();
+            int op = it.byteAt(pos);
+
+            if (!seenUsername && op == Opcode.LDC) {
+                int idx = it.byteAt(pos + 1) & 0xFF;
+                if (cp.getTag(idx) == ConstPool.CONST_String) {
+                    String s = cp.getStringInfo(idx);
+                    if ("username".equals(s)) {
+                        seenUsername = true;
+                    }
+                }
+                continue;
+            }
+
+            int index = it.u16bitAt(pos + 1);
+            if (op == Opcode.NEW) {
+                lastNew = cp.getClassInfo(index).replace('/', '.');
+                continue;
+            }
+
+            if (op == Opcode.INVOKESTATIC) {
+                String mClass = cp.getMethodrefClassName(index);
+                if ("java.net.Authenticator".equals(mClass)) {
+                    profile = null;
+                }
+            }
+
+            if (op == Opcode.INVOKESPECIAL) {
+                String mClass = cp.getMethodrefClassName(index);
+                String mName = cp.getMethodrefName(index);
+                String mDesc = cp.getMethodrefType(index);
+                if ("<init>".equals(mName) && lastNew != null && seenUsername && profile == null) {
+                    if (mClass.equals(lastNew)
+                        && mDesc.contains("Ljava/lang/String;Ljava/lang/String;")
+                    ) {
+                        profile = mClass;
+                        lastNew = null;
+                        continue;
+                    }
+                }
+
+                if ("<init>".equals(mName) && profile != null) {
+                    if (mDesc.contains("L" + profile + ";")) {
+                        if (mClass.contains("$")) { // 1.8+
+                            profile = mClass.split("\\$")[0];
+                            continue;
+                        }
+
+                        return mClass;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static String findMinecraftFieldName(PatchPool patchPool) throws NotFoundException {

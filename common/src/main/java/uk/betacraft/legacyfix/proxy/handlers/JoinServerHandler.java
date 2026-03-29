@@ -1,7 +1,7 @@
-package uk.betacraft.legacyfix.protocol.impl;
+package uk.betacraft.legacyfix.proxy.handlers;
 
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 import uk.betacraft.legacyfix.util.web.WebData;
 
@@ -32,7 +32,7 @@ public class JoinServerHandler extends HandlerBase {
         String sessionId = URLDecoder.decode(matcher.group(8), "UTF-8");
         String serverId = matcher.group(10);
 
-        WebData response = RequestUtil.performJoinServer(LegacyFixLauncher.getUUID(), sessionId, serverId);
+        WebData response = RequestUtil.performJoinServer(GameArgs.getUuid(), sessionId, serverId);
 
         String write = response.getResponseCode() == 204 ? "ok" : "Invalid session (Try restarting your game)";
 

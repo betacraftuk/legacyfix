@@ -1,21 +1,20 @@
 package uk.betacraft.legacyfix.util;
 
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.LegacyFixLauncher;
-import uk.betacraft.legacyfix.protocol.impl.LevelHandlerBase;
+import uk.betacraft.legacyfix.proxy.GameArgs;
+import uk.betacraft.legacyfix.proxy.handlers.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.web.Request;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 import uk.betacraft.legacyfix.util.web.WebData;
 
 public class LevelProxyAuthenticator extends Thread {
-
     @Override
     public void run() {
-        String uuid = LegacyFixLauncher.getUUID();
+        String uuid = GameArgs.getUuid();
 
         WebData joinServerResponse = RequestUtil.performJoinServer(
             uuid,
-            LegacyFixLauncher.getSessionId(),
+            GameArgs.getSession(),
             HashUtils.sha1(RequestUtil.getIPFromAmazon())
         );
 
@@ -44,7 +43,7 @@ public class LevelProxyAuthenticator extends Thread {
             return;
         }
 
-        LegacyFixLauncher.setValue("sessionid", proxyAuthResponse.toString());
+//        LegacyFixLauncher.setValue("sessionid", proxyAuthResponse.toString()); TODO
         Logger.info("Authenticated with level proxy server: " + LevelHandlerBase.ONLINE_LEVEL_SERVER);
     }
 }

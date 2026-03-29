@@ -1,6 +1,5 @@
 package uk.betacraft.legacyfix.patch.impl.java;
 
-import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
@@ -52,16 +51,6 @@ public class JavaModulesPatch extends Patch {
                 implAddExportsOrOpens.invoke(module, pkg, unnamedModule, true, true);
             }
         }
-    }
-
-    @Override
-    public boolean isDefault() {
-        return Agent.active;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return this.isDefault();
     }
 
     @Override
