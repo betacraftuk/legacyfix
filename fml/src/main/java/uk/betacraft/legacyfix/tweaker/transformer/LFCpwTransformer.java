@@ -1,7 +1,6 @@
 package uk.betacraft.legacyfix.tweaker.transformer;
 
 import cpw.mods.fml.relauncher.IClassTransformer;
-import javassist.ByteArrayClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
@@ -23,12 +22,15 @@ public class LFCpwTransformer implements IClassTransformer {
             return bytes;
         }
 
+        if (name.startsWith("javassist")) {
+            return bytes;
+        }
+
         List<CtTransformer> ctTransformers = CpwTweaker.patcher.getCtTransformers().get(name);
         if (ctTransformers != null && !ctTransformers.isEmpty()) {
             try {
                 ClassPool ctPool = new ClassPool(true);
-                ctPool.appendClassPath(new ByteArrayClassPath(name, bytes));
-                CtClass ctClass = ctPool.get(name);
+                CtClass ctClass = ctPool.makeClass(new java.io.ByteArrayInputStream(bytes));
 
                 for (CtTransformer ctTransformer : ctTransformers) {
                     ctTransformer.transform(ctClass);

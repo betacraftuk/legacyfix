@@ -22,6 +22,10 @@ public class LFTransformer implements IClassTransformer {
             return bytecode;
         }
 
+        if (name.startsWith("javassist")) {
+            return bytecode;
+        }
+
         List<CtTransformer> ctTransformers = LFTweaker.patcher.getCtTransformers().get(name);
         if (ctTransformers != null && !ctTransformers.isEmpty()) {
             try {

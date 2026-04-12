@@ -52,6 +52,10 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
             return super.transformClassBytes(name, transformedName, null);
         }
 
+        if (name.startsWith("javassist")) {
+            return super.transformClassBytes(name, transformedName, bytecode);
+        }
+
         List<CtTransformer> ctTransformers = this.patcher.getCtTransformers().get(transformedName);
         if (ctTransformers != null && !ctTransformers.isEmpty()) {
             try {
