@@ -1,38 +1,67 @@
-<div align="center">
-<h1>LegacyFix</h1>
-<span>Utility made to patch old and misbehaving versions of Minecraft.</span>
-</div>
-<br>
+<h1 align="center">LegacyFix</h1>
 
-![](/.github/img/banner.webp)
+![LegacyFix banner](/.github/img/banner.webp)
+
+---
+
+## Downloads
+
+### Nightly builds
+Find the latest (topmost) run in the [Actions tab](https://github.com/betacraftuk/legacyfix/actions/workflows/gradle.yml).
+Scroll down to the **Artifacts** section and download the `artifact.zip` file, in which you can find `legacyfix-2.0-all.jar`.
+
+Note: If you don't have a GitHub account, download the zip [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/multiloader/artifact.zip).
+
+## Installation
+
+### Forge
+LegacyFix acts as a core mod. Depending on the game version:
+* **For Minecraft 1.4 or older**: Drop the `.jar` file into your `.minecraft/coremods` folder.
+* **For Minecraft 1.5 or newer**: Drop the `.jar` file into your `.minecraft/mods` folder.
+
+### Fabric
+LegacyFix can be installed as a standard mod. Simply drop the `.jar` file into your `.minecraft/mods` folder.
+
+All Fabric-based loaders (Legacy Fabric, Babric, Ornithe, etc.) are supported.
+
+### Other
+If you are playing Vanilla or using an older mod loader (like Risugami's ModLoader), you can run LegacyFix as a Java Agent.
+* [Tutorial for Prism Launcher](docs/Prism%20Launcher.md)
+* [Tutorial for MultiMC](docs/MultiMC.md)
+
+*Note: If you're using the [Betacraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2), LegacyFix is included by default*
+
+---
 
 ## Patches
-- [x] Skins
-- [x] Sound (correct sounds for every version)
-- [x] Online mode support (multiplayer authentication)
-- [x] Offline & online saving in Classic versions
-- [x] Dynamic resizing in Classic and early Indev versions
-- [x] deAWT - Fix for flipped red & blue colors in versions before 13w16a on Apple Silicon devices (M1, M2, etc.)
-- [x] BitDepthFix - Fix for glitchy clouds with AMD graphics
-- [x] Playing Indev & Infdev versions (also offline)
-- [x] Running versions before 13w16a with no dependency on Java AWT/Swing
-- [x] Fix for rendering issues in versions b1.9-1.7.10 with Intel graphics
-- [x] Fix for running Classic, Indev & Infdev versions on modern macOS
-- [x] Fix for c0.0.14a-1.2.5 crashing due to certain USB peripherals
-- [x] Fix for "Open texture pack folder" button not being functional before 1.2-pre on Linux and macOS
-- [x] Fix for a1.1.1 gray screen
-- [x] Fix for sound in early Indev versions
-- [x] Fix for running pre-Classic, c0.0.15a-c0.0.16a_02 and b1.3 versions with Java 5
-- [x] Fix for b1.7.3 - b1.8.1 Forge when running Java 9+
-- [x] Joining servers with c0.0.15a
-- [x] Isolated game directory before inf-20100611
-- [x] No duplicated assets for every instance
-- [x] ModLoader support for Java 9 and later
 
-## Usage
-Use the [Betacraft v2 Launcher](https://github.com/betacraftuk/betacraft-launcher/tree/v2) which includes LF by default,<br>
-or apply the javaagent in the launcher of your choice:
-- [Tutorial for Prism Launcher](docs/Prism%20Launcher.md)
-- [Tutorial for MultiMC](docs/MultiMC.md)
+### Proxy
+- Online mode multiplayer auth
+- Skins and capes (with [override support](docs/Skin%20overrides.md))
+- Accurate version-specific assets and sounds
+
+### Graphics
+- `bitdepth`: Torn clouds on AMD GPUs
+- `a1.1.1`: Gray screen crash in Alpha v1.1.1
+- `intel`: Rendering bugs on Intel GPUs (b1.9 - 1.7.10)
+- `screenshot`: Broken screenshots after resizing the game window
+
+### Windowing
+- `vsync`: Forces V-Sync
+- `deawt`: Flipped colors on Apple Silicon Macs
+- `classic-resize`: Fixes window resizing in Classic and early Indev
+
+### Input & Audio
+- `mouse`: Modernizes mouse input handling
+- `indev-sound`: Restores missing sound in early Indev
+- `disable-controllers`: Disables buggy controller support that freezes the startup screen
+
+### Mod Compatibility
+- `beta-forge`: Fixes Beta Forge (b1.7.3 - b1.8.1) crashing on Java 9+
+
+### Misc
+- `game-dir`: Isolates the game directory for ancient versions
+- `java-modules`: Unlocks internal modules (required for Java 11+)
+- `texture-pack-folder`: Fixes the broken "Open Texture Pack Folder" button on Mac/Linux
 
 Information about additional settings can be found [here](docs/Additional%20settings.md).
