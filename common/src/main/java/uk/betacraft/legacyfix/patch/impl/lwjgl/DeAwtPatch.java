@@ -83,16 +83,6 @@ public class DeAwtPatch extends Patch {
             throw new PatchException("No update method found");
         }
 
-        final CtMethod resizeMethod = findResizeMethod(gameClass);
-        if (resizeMethod == null) {
-            throw new PatchException("No resize method found");
-        }
-
-        final CtField[] sizeFields = findSizeFields(gameClass);
-        if (sizeFields == null || sizeFields[0] == null || sizeFields[1] == null) {
-            throw new PatchException("No width/height fields found");
-        }
-
         if (isFinallyBlockEmpty(updateMethod)) {
             updateMethod.insertAfter("" +
                 "System.out.println(\"Shutting down...\");" +
@@ -107,6 +97,18 @@ public class DeAwtPatch extends Patch {
                 "}",
                 true
             );
+        }
+
+        final CtMethod resizeMethod = findResizeMethod(gameClass);
+        if (resizeMethod == null) {
+            Logger.debug("No resize method found");
+            return;
+        }
+
+        final CtField[] sizeFields = findSizeFields(gameClass);
+        if (sizeFields == null || sizeFields[0] == null || sizeFields[1] == null) {
+            Logger.debug("No width/height fields found");
+            return;
         }
 
         final CtField canvasField = findCanvasField(gameClass);

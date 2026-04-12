@@ -4,6 +4,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.*;
+import uk.betacraft.legacyfix.patch.impl.classic.*;
 import uk.betacraft.legacyfix.patch.impl.java.*;
 import uk.betacraft.legacyfix.patch.impl.lwjgl.*;
 import uk.betacraft.legacyfix.patch.impl.misc.*;
@@ -26,7 +27,8 @@ public class Patcher implements PatchPool {
         new ScreenshotPatch(),
         new SeecretSaturdayPatch(),
         new TexturePackFolderPatch(),
-        new BetaForgePatch()
+        new BetaForgePatch(),
+        new ClassicResizePatch()
     };
 
     public final List<Patch> patches = new ArrayList<Patch>();
@@ -51,7 +53,9 @@ public class Patcher implements PatchPool {
                 patch.apply(this);
                 patchStates.add(patch.getId() + " - Applied");
             } catch (Throwable e) {
-                if (e instanceof PatchException) {
+                if (e instanceof PatchUnapplicableException) {
+                    patchStates.add(patch.getId() + " - Unapplicable: " + e.getMessage());
+                } else if (e instanceof PatchException) {
                     patchStates.add(patch.getId() + " - Error: " + e.getMessage());
                 } else {
                     patchStates.add(patch.getId() + " - Exception, see stacktrace");

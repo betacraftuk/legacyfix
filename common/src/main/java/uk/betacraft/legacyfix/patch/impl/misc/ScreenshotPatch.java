@@ -10,10 +10,7 @@ import javassist.bytecode.MethodInfo;
 import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
-import uk.betacraft.legacyfix.patch.api.CtTransformer;
-import uk.betacraft.legacyfix.patch.api.Patch;
-import uk.betacraft.legacyfix.patch.api.PatchException;
-import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.patch.api.*;
 
 public class ScreenshotPatch extends Patch {
     public ScreenshotPatch() {
@@ -31,7 +28,7 @@ public class ScreenshotPatch extends Patch {
         final String[] screenshotInfo = findScreenshotMethodInfo(mcClass);
 
         if (screenshotInfo == null) {
-            throw new PatchException("Not applicable: Screenshot method not found");
+            throw new PatchUnapplicableException("Screenshot method not found");
         }
 
         final String screenshotClassName = screenshotInfo[0];

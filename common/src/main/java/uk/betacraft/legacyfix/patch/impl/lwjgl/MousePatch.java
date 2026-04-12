@@ -19,7 +19,7 @@ public class MousePatch extends Patch {
     public void apply(final PatchPool patchPool) throws Exception {
         final String mouseHelperClassName = GameClasses.findMouseHelperClass(patchPool);
         if (mouseHelperClassName == null) {
-            throw new PatchException("No MouseHelper class found");
+            throw new PatchUnapplicableException("No MouseHelper found");
         }
 
         patchPool.addCtTransformer(mouseHelperClassName, new CtTransformer() {
