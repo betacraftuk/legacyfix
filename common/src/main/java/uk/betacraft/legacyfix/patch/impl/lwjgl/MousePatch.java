@@ -6,19 +6,17 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
-import uk.betacraft.legacyfix.patch.api.CtTransformer;
-import uk.betacraft.legacyfix.patch.api.Patch;
-import uk.betacraft.legacyfix.patch.api.PatchException;
-import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.patch.api.*;
 
 public class MousePatch extends Patch {
+    private boolean mouseDeltaFound = false;
 
     public MousePatch() {
         super("mouse", "Fixes mouse handling, required for deAWT", true);
     }
 
     @Override
-    public void apply(PatchPool patchPool) throws Exception {
+    public void apply(final PatchPool patchPool) throws Exception {
         final String mouseHelperClassName = GameClasses.findMouseHelperClass(patchPool);
         if (mouseHelperClassName == null) {
             throw new PatchException("No MouseHelper class found");
@@ -40,6 +38,55 @@ public class MousePatch extends Patch {
                 transformMinecraft(ctClass);
             }
         });
+
+        patchPool.addTransformer(new Transformer() {
+            public byte[] transform(String name, byte[] bytecode) {
+                if (mouseDeltaFound) {
+                    return null;
+                }
+
+                if (name.startsWith("org.lwjgl") || name.equals(mouseHelperClassName)) {
+                    return null;
+                }
+
+                CtClass clas = patchPool.getRawClass(name);
+                if (clas == null) {
+                    return null;
+                }
+
+                try {
+                    if (clas.isFrozen()) {
+                        clas.defrost();
+                    }
+
+                    clas.instrument(new ExprEditor() {
+                        public void edit(MethodCall m) throws CannotCompileException {
+                            if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
+                                "getDX".equals(m.getMethodName()) &&
+                                "()I".equalsIgnoreCase(m.getSignature())) {
+                                mouseDeltaFound = true;
+                                m.replace("$_ = 0;");
+                                Logger.debug("Patched Mouse.getDX()");
+                            } else if ("org.lwjgl.input.Mouse".equals(m.getClassName()) &&
+                                "getDY".equals(m.getMethodName()) &&
+                                "()I".equalsIgnoreCase(m.getSignature())) {
+                                mouseDeltaFound = true;
+                                m.replace("$_ = 0;");
+                                Logger.debug("Patched Mouse.getDY()");
+                            }
+                        }
+                    });
+
+                    if (mouseDeltaFound) {
+                        return clas.toBytecode();
+                    }
+                } catch (Throwable t) {
+                    Logger.error("mouse", t);
+                }
+
+                return null;
+            }
+        });
     }
 
     private void transformMouseHelper(CtClass mouseHelperClass) throws Exception {
@@ -57,7 +104,7 @@ public class MousePatch extends Patch {
             }
         }
 
-        Logger.debug("mouse", "MouseHelper uses AWT Robot: " + usesRobot);
+        Logger.debug("MouseHelper AWT Robot: " + usesRobot);
 
         CtMethod[] mouseHelperMethods = mouseHelperClass.getDeclaredMethods();
         String lockBody = ("" +
@@ -87,17 +134,17 @@ public class MousePatch extends Patch {
             invert = !invert;
         }
 
-        Logger.debug("mouse", "Mouse Y invert: " + invert);
+        Logger.debug("Mouse Y invert: " + invert);
 
         if (mouseHelperMethods.length == 1) {
-            Logger.debug("mouse", "Mouse Helper method size: 1");
+            Logger.debug("MouseHelper method size: 1");
             mouseHelperMethods[0].setBody((invert ? tickBodyInvert : tickBody));
         } else if (mouseHelperMethods.length == 2) {
-            Logger.debug("mouse", "Mouse Helper method size: 2");
+            Logger.debug("MouseHelper method size: 2");
             mouseHelperMethods[0].setBody(lockBody);
             mouseHelperMethods[1].setBody((invert ? tickBodyInvert : tickBody));
         } else if (mouseHelperMethods.length >= 3) {
-            Logger.debug("mouse", "Mouse Helper method size: " + mouseHelperMethods.length);
+            Logger.debug("MouseHelper method size: " + mouseHelperMethods.length);
             mouseHelperMethods[0].setBody(lockBody);
             mouseHelperMethods[1].setBody("" +
                 "{" +
@@ -121,13 +168,13 @@ public class MousePatch extends Patch {
                     && "()I".equalsIgnoreCase(m.getSignature())
                 ) {
                     m.replace("$_ = 0;");
-                    Logger.debug("mouse", "Mouse.getDX() match!");
+                    Logger.debug("Patched Mouse.getDX() in Minecraft");
                 } else if ("org.lwjgl.input.Mouse".equals(m.getClassName())
                     && "getDY".equals(m.getMethodName())
                     && "()I".equalsIgnoreCase(m.getSignature())
                 ) {
                     m.replace("$_ = 0;");
-                    Logger.debug("mouse", "Mouse.getDY() match!");
+                    Logger.debug("Patched Mouse.getDY() in Minecraft");
                 }
             }
         });
