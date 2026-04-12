@@ -2,7 +2,8 @@ package uk.betacraft.legacyfix.proxy.handlers;
 
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.Agent;
-import uk.betacraft.legacyfix.util.MinecraftAPI;
+import uk.betacraft.legacyfix.proxy.api.SkinOverrideApi;
+import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 import uk.betacraft.legacyfix.util.SkinUtils;
 
 import java.io.ByteArrayInputStream;
@@ -36,21 +37,34 @@ public class SkinHandler extends HandlerBase {
     public void connect() throws IOException {
         Matcher matcher = this.patternUsed.matcher(this.getURLString());
         if (!matcher.find()) {
-            Logger.error("SkinHandler", "No match for skin URL :(");
+            Logger.error("SkinHandler", "No match for skin URL");
             return;
         }
 
         String username = matcher.group(5);
 
         byte[] data;
+        MinecraftApi.SkinData skinData = null;
         if (this.isCapeRequest) {
-            data = SkinUtils.getFixedCape(
-                MinecraftAPI.getSkin(username)
-            );
+            if (SkinOverrideApi.ENABLED) {
+                skinData = SkinOverrideApi.getCapeOverride(username);
+            }
+
+            if (skinData == null) {
+                skinData = MinecraftApi.getSkin(username);
+            }
+
+            data = SkinUtils.getFixedCape(skinData);
         } else {
-            data = SkinUtils.getFixedSkin(
-                MinecraftAPI.getSkin(username)
-            );
+            if (SkinOverrideApi.ENABLED) {
+                skinData = SkinOverrideApi.getSkinOverride(username);
+            }
+
+            if (skinData == null) {
+                skinData = MinecraftApi.getSkin(username);
+            }
+
+            data = SkinUtils.getFixedSkin(skinData);
         }
 
         if (data != null) {

@@ -1,8 +1,8 @@
-package uk.betacraft.legacyfix.util;
+package uk.betacraft.legacyfix.proxy;
 
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.proxy.handlers.LevelHandlerBase;
+import uk.betacraft.legacyfix.util.HashUtils;
 import uk.betacraft.legacyfix.util.web.Request;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 import uk.betacraft.legacyfix.util.web.WebData;

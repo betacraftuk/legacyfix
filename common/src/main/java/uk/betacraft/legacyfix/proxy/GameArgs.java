@@ -3,7 +3,7 @@ package uk.betacraft.legacyfix.proxy;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.assets.AssetIndexResolver;
-import uk.betacraft.legacyfix.util.MinecraftAPI;
+import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 
 import java.io.File;
 import java.net.URL;
@@ -24,7 +24,7 @@ public class GameArgs {
 
     public static String getUuid() {
         if (uuid == null) {
-            uuid = MinecraftAPI.getUUID(username);
+            uuid = MinecraftApi.getUUID(username);
         }
 
         return uuid;

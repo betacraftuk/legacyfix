@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix.util;
 
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 
 import java.io.ByteArrayInputStream;
 
@@ -15,7 +16,7 @@ public class SkinUtils {
         return OVERLAY_OUTER_BODY_TO_BASE || OVERLAY_OUTER_HEAD_LAYER || ROTATE_BOTTOM_TEXTURES || CONVERT_ALEX_TO_STEVE || SERVE_AS_64x32;
     }
 
-    public static byte[] getFixedCape(MinecraftAPI.SkinData skinData) {
+    public static byte[] getFixedCape(MinecraftApi.SkinData skinData) {
         if (skinData == null) {
             return null;
         }
@@ -33,7 +34,7 @@ public class SkinUtils {
         return null;
     }
 
-    public static byte[] getFixedSkin(MinecraftAPI.SkinData skinData) {
+    public static byte[] getFixedSkin(MinecraftApi.SkinData skinData) {
         if (skinData == null) {
             return null;
         }

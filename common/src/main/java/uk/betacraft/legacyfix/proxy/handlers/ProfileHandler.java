@@ -5,7 +5,7 @@ import org.json.JSONTokener;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.util.Base64Utils;
-import uk.betacraft.legacyfix.util.MinecraftAPI;
+import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 import uk.betacraft.legacyfix.util.SkinUtils;
 import uk.betacraft.legacyfix.util.web.Request;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
@@ -77,7 +77,7 @@ public class ProfileHandler extends HandlerBase {
         req.setUrl(skinUrl);
         WebData data = RequestUtil.performRawGETRequest(req);
 
-        MinecraftAPI.SkinData skinData = new MinecraftAPI.SkinData(data.getData(), null, alex);
+        MinecraftApi.SkinData skinData = new MinecraftApi.SkinData(data.getData(), null, alex);
 
         byte[] fixed = SkinUtils.getFixedSkin(skinData);
 
