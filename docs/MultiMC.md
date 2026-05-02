@@ -1,6 +1,6 @@
 # Using LegacyFix with MultiMC
 ## Grab the latest artifact from GitHub Action
-Head over to the [Actions tab](https://github.com/betacraftuk/legacyfix/actions/workflows/gradle.yml) and click on the latest run (at the top).<br>
+Head over to the [Actions tab](https://github.com/betacraftuk/legacyfix/actions/workflows/gradle.yml?query=branch%3Adevelop) and click on the latest run (at the top).<br>
 Then, scroll down to the **Artifacts** section and download the `artifact.zip` file,<br>
 in it should be a file called `legacyfix-2.0.jar`.
 
