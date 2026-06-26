@@ -97,6 +97,9 @@ public class RequestUtil {
             byte[] data;
 
             if (http >= 400 && http < 600) {
+                if (con.getErrorStream() == null) {
+                    return new WebData(null, http);
+                }
                 data = readInputStream(con.getErrorStream());
             } else {
                 data = readInputStream(con.getInputStream());
