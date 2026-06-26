@@ -74,15 +74,62 @@ public class GameArgs {
         return Agent.getSetting("lf.screenshotsDir", new File(getGameDir(), "screenshots").getPath());
     }
 
+    @SuppressWarnings("unused")
     public static void setArgs(String username, String session) {
-        GameArgs.username = username;
-        GameArgs.session = session;
+        setArgsRaw(new String[]{"--username", username, "--session", session});
+    }
 
-        if (Agent.hasSetting("lf.proxy.disable")) {
+    public static void setArgsRaw(String[] args) {
+        if (args == null || args.length == 0) {
             return;
         }
 
-        URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
+        if (!args[0].startsWith("--")) {
+            GameArgs.username = args[0];
+            if (args.length > 1 && !args[1].startsWith("--")) {
+                GameArgs.session = args[1];
+            }
+        }
+
+        for (int i = 0; i < args.length - 1; i++) {
+            String key = args[i];
+            String value = args[i + 1];
+
+            if (key.startsWith("--") && value.startsWith("--")) {
+                Logger.debug("setArgsRaw", "Argument " + key + " has no value, skipping");
+                continue;
+            }
+
+            if ("--username".equals(key)) {
+                GameArgs.username = value;
+            } else if ("--uuid".equals(key)) {
+                GameArgs.uuid = value;
+            } else if ("--session".equals(key)) {
+                GameArgs.session = value;
+            } else if ("--version".equals(key)) {
+                if (Agent.getSetting("lf.version", null) == null) {
+                    System.setProperty("lf.version", value);
+                    GameArgs.assetIndex = AssetIndexResolver.resolve(value);
+                    Logger.debug("Resolved asset index: " + GameArgs.assetIndex);
+                }
+            } else if ("--gameDir".equals(key)) {
+                if (Agent.getSetting("lf.gameDir", null) == null) {
+                    System.setProperty("lf.gameDir", value);
+                }
+            } else if ("--assetsDir".equals(key)) {
+                if (Agent.getSetting("lf.assetsDir", null) == null) {
+                    System.setProperty("lf.assetsDir", value);
+                }
+            } else if ("--assetIndex".equals(key)) {
+                if (Agent.getSetting("lf.assetIndex", null) == null) {
+                    GameArgs.assetIndex = value;
+                }
+            }
+        }
+
+        if (!Agent.hasSetting("lf.proxy.disable")) {
+            URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
+        }
     }
 
     public static void setVersion(String title) {
@@ -90,6 +137,7 @@ public class GameArgs {
             .replace("Minecraft", "")
             .replace("Beta ", "b")
             .replace("Alpha ", "a")
+            .replace("Infdev", "inf")
             .replace("v", "")
             .trim();
 

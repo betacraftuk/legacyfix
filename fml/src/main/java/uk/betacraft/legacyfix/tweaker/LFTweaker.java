@@ -20,23 +20,9 @@ public class LFTweaker implements ITweaker {
 
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-        String username = null;
-        String session = null;
-        for (int i = 0; i < args.size(); i++) {
-            String arg = args.get(i);
-            String nextArg = args.size() == (i + 1) ? null : args.get(i + 1);
-            if ("--username".equals(arg)) {
-                username = nextArg;
-            }
-
-            if ("--session".equals(arg)) {
-                session = nextArg;
-            }
-        }
-
-        if (username != null || session != null) {
-            GameArgs.setArgs(username, session);
-        }
+        String[] rawArgs = new String[args.size()];
+        rawArgs = args.toArray(rawArgs);
+        GameArgs.setArgsRaw(rawArgs);
     }
 
     @Override

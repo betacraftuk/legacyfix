@@ -40,7 +40,7 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
         this.mainPool.childFirstLookup = true;
 
         Arguments args = provider.getArguments();
-        GameArgs.setArgs(args.get("username"), args.get("session"));
+        GameArgs.setArgsRaw(args.toArray());
 
         this.patcher = new Patcher(this.mainPool);
         this.patcher.apply();
