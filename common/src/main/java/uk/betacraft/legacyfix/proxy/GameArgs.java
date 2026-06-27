@@ -13,6 +13,7 @@ public class GameArgs {
     private static String session = null;
     private static String uuid = null;
     private static String assetIndex = null;
+    private static boolean paramsApplied = false;
 
     public static String getUsername() {
         return username;
@@ -72,6 +73,20 @@ public class GameArgs {
 
     public static String getScreenshotsDir() {
         return Agent.getSetting("lf.screenshotsDir", new File(getGameDir(), "screenshots").getPath());
+    }
+
+    @SuppressWarnings("unused")
+    public static void setParam(String key, String value) {
+        if ("username".equals(key)) {
+            GameArgs.username = value;
+        } else if ("sessionid".equals(key)) {
+            GameArgs.session = value;
+        }
+
+        if (!GameArgs.paramsApplied && GameArgs.username != null && GameArgs.session != null) {
+            setArgs(GameArgs.username, GameArgs.session);
+            GameArgs.paramsApplied = true;
+        }
     }
 
     @SuppressWarnings("unused")

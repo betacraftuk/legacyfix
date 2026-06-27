@@ -63,6 +63,10 @@ public class ProxyPatch extends Patch {
             return;
         }
 
+        if (findArgsWithWrapper(patchPool)) {
+            return;
+        }
+
         Logger.error(
             "",
             "Game arguments could not be found and the proxy might not work properly.",
@@ -129,6 +133,24 @@ public class ProxyPatch extends Patch {
                 mainMethod.insertBefore("" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
                     "gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{$1});"
+                );
+            }
+        });
+
+        return true;
+    }
+
+    private boolean findArgsWithWrapper(PatchPool patchPool) throws Exception {
+        if (patchPool.getRawClass("net.minecraft.Launcher") == null) {
+            return false;
+        }
+
+        patchPool.addCtTransformer("net.minecraft.Launcher", new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                CtMethod mainMethod = ctClass.getDeclaredMethod("setParameter");
+                mainMethod.insertBefore("" +
+                    "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
+                    "gameArgsClass.getMethod(\"setParam\", new Class[]{String.class, String.class}).invoke(null, new Object[]{$1, $2});"
                 );
             }
         });
