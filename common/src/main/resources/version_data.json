@@ -34,8 +34,8 @@
         ]
     },
     {
-        "version": "^c0\\.(?:2[4-9]|30)(?:.+)?",
-        "desc": "c0.24_st to c0.30",
+        "version": "^c0\\.(?:2[4-9]|30|31)(?:.+)?",
+        "desc": "c0.24_st to c0.31",
         "assetIndex": "c0.0.22a_01",
         "settings": [
             "lf.SERVE_AS_64x32",
