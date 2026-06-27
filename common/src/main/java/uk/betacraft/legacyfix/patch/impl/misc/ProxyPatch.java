@@ -55,6 +55,12 @@ public class ProxyPatch extends Patch {
             return;
         }
 
+        // TODO: Prism Launcher detection
+        //  "org.prismlauncher.launch.mainclass" isn't yet set here
+        if ("uk.betacraft.legacyfix.applet.AppletLauncher".equals(System.getProperty("sun.java.command"))) {
+            return;
+        }
+
         if (findArgsWithApplet(patchPool)) {
             return;
         }
