@@ -108,14 +108,26 @@ public class ProxyPatch extends Patch {
 
         patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
+                CtMethod mainMethod = ctClass.getDeclaredMethod("main");
+                mainMethod.insertBefore("" +
+                    "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
+                    "boolean initialized = ((java.lang.Boolean) gameArgsClass.getMethod(\"initialized\", null).invoke(null, null)).booleanValue();" +
+                    "if (!initialized) {" +
+                    "   gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{$1});" +
+                    "}"
+                );
+
                 CtMethod runMethod = ctClass.getDeclaredMethod("run");
                 runMethod.insertBefore("" +
-                    "java.applet.Applet applet = (java.applet.Applet) $0." + appletFieldName[0] + ";" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
-                    "gameArgsClass.getMethod(\"setArgs\", new Class[]{String.class, String.class}).invoke(null, new Object[]{" +
-                    "   applet.getParameter(\"username\")," +
-                    "   applet.getParameter(\"sessionid\")" +
-                    "});"
+                    "boolean initialized = ((java.lang.Boolean) gameArgsClass.getMethod(\"initialized\", null).invoke(null, null)).booleanValue();" +
+                    "java.applet.Applet applet = (java.applet.Applet) $0." + appletFieldName[0] + ";" +
+                    "if (!initialized && (applet != null)) {" +
+                    "   gameArgsClass.getMethod(\"setArgs\", new Class[]{String.class, String.class}).invoke(null, new Object[]{" +
+                    "       applet.getParameter(\"username\")," +
+                    "       applet.getParameter(\"sessionid\")" +
+                    "   });" +
+                    "}"
                 );
             }
         });

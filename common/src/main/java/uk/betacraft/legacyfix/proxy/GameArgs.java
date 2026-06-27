@@ -85,7 +85,6 @@ public class GameArgs {
 
         if (!GameArgs.paramsApplied && GameArgs.username != null && GameArgs.session != null) {
             setArgs(GameArgs.username, GameArgs.session);
-            GameArgs.paramsApplied = true;
         }
     }
 
@@ -95,7 +94,7 @@ public class GameArgs {
     }
 
     public static void setArgsRaw(String[] args) {
-        if (args == null || args.length == 0) {
+        if (GameArgs.paramsApplied || args == null || args.length == 0) {
             return;
         }
 
@@ -145,6 +144,8 @@ public class GameArgs {
         if (!Agent.hasSetting("lf.proxy.disable")) {
             URL.setURLStreamHandlerFactory(new LegacyURLStreamHandlerFactory());
         }
+
+        GameArgs.paramsApplied = true;
     }
 
     public static void setVersion(String title) {
