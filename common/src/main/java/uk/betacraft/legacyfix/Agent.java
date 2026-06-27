@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix;
 
 import javassist.*;
+import uk.betacraft.legacyfix.agent.FabricInjector;
 import uk.betacraft.legacyfix.agent.FmlInjector;
 import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.patch.Patcher;
@@ -36,6 +37,11 @@ public class Agent {
 
         if (FmlInjector.inject()) {
             Logger.info("Injected legacy FML transformer");
+            return;
+        }
+
+        if (FabricInjector.inject()) {
+            Logger.info("Injected Fabric mod");
             return;
         }
 
