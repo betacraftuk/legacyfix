@@ -66,7 +66,7 @@ public class ProxyPatch extends Patch {
         Logger.error(
             "",
             "Game arguments could not be found and the proxy might not work properly.",
-            "Please report this to the LegacyFix GitHub along with your game setup if you experience issues.",
+            "If you experience issues, report this to the LegacyFix GitHub along with info about your game setup.",
             ""
         );
     }
@@ -115,6 +115,11 @@ public class ProxyPatch extends Patch {
 
     private boolean findArgsByMain(PatchPool patchPool) throws Exception {
         if (!Agent.active) {
+            return false;
+        }
+
+        CtClass mainClass = patchPool.getRawClass("net.minecraft.client.main.Main");
+        if (mainClass == null) {
             return false;
         }
 
