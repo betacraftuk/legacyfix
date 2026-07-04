@@ -44,7 +44,8 @@ public class ScreenshotPatch extends Patch {
                 }
 
                 if (pixelsField == null) {
-                    throw new PatchException("No Screenshot.pixels found in " + screenshotClass.getName());
+                    Logger.debug("ScreenshotPatch", "No Screenshot.pixels found in " + screenshotClass.getName());
+                    return;
                 }
 
                 String pixelsRef = screenshotClass.getName() + "." + pixelsField.getName();
