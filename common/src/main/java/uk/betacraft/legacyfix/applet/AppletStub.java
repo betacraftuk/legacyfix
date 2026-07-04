@@ -30,6 +30,11 @@ public class AppletStub extends Applet implements java.applet.AppletStub {
     }
 
     @Override
+    public boolean isActive() {
+        return true;
+    }
+
+    @Override
     public URL getDocumentBase() {
         try {
             return new java.net.URL("http://www.minecraft.net/");
