@@ -55,15 +55,22 @@ public class GameArgs {
     }
 
     public static String getAssetIndexPath() {
-        String assetIndex = Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
-        if (assetIndex == null) {
+        String index = Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
+        if (isInvalidIndex(index)) {
+            String ver = Agent.getSetting("lf.version", null);
+            if (ver != null) {
+                index = resolveIndex(ver);
+            }
+        }
+
+        if (index == null) {
             Logger.error("getAssetIndexPath", "Asset index not set!");
             return null;
         }
 
-        File indexFile = new File(getAssetsDir(), "indexes/" + assetIndex + ".json");
+        File indexFile = new File(getAssetsDir(), "indexes/" + index + ".json");
         try {
-            AssetIndexResolver.ensureAssetIndex(assetIndex, indexFile);
+            AssetIndexResolver.ensureAssetIndex(index, indexFile);
         } catch (Exception e) {
             Logger.error("getAssetIndexPath", e);
         }
@@ -123,8 +130,7 @@ public class GameArgs {
             } else if ("--version".equals(key)) {
                 if (Agent.getSetting("lf.version", null) == null) {
                     System.setProperty("lf.version", value);
-                    GameArgs.assetIndex = AssetIndexResolver.resolve(value);
-                    Logger.debug("Resolved asset index: " + GameArgs.assetIndex);
+                    resolveIndex(value);
                 }
             } else if ("--gameDir".equals(key)) {
                 if (Agent.getSetting("lf.gameDir", null) == null) {
@@ -135,6 +141,10 @@ public class GameArgs {
                     System.setProperty("lf.assetsDir", value);
                 }
             } else if ("--assetIndex".equals(key)) {
+                if (isInvalidIndex(value)) {
+                    continue;
+                }
+
                 if (Agent.getSetting("lf.assetIndex", null) == null) {
                     GameArgs.assetIndex = value;
                 }
@@ -162,13 +172,24 @@ public class GameArgs {
         }
 
         Logger.debug("Game version: " + title);
+        resolveIndex(title);
+    }
 
+    private static String resolveIndex(String version) {
         try {
-            assetIndex = AssetIndexResolver.resolve(title);
-            Logger.debug("Resolved asset index: " + assetIndex);
+            GameArgs.assetIndex = AssetIndexResolver.resolve(version);
+            Logger.debug("Resolved asset index: " + GameArgs.assetIndex);
+            return GameArgs.assetIndex;
         } catch (Exception e) {
             Logger.error("Failed to resolve the asset index!");
+            Logger.error("resolveIndex", e);
         }
+
+        return null;
+    }
+
+    private static boolean isInvalidIndex(String index) {
+        return index == null || index.equals("legacy") || index.equals("pre-1.6");
     }
 
     public static boolean initialized() {
