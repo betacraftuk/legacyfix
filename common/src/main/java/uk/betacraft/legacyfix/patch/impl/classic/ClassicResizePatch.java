@@ -10,6 +10,7 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
 import uk.betacraft.legacyfix.patch.api.*;
+import uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch;
 
 public class ClassicResizePatch extends Patch {
     public ClassicResizePatch() {
@@ -64,6 +65,7 @@ public class ClassicResizePatch extends Patch {
         patchPool.addCtTransformer(minecraftClassName, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
                 CtMethod runMethod = ctClass.getDeclaredMethod("run");
+                removeCanvasCloseRequestGuard(runMethod);
 
                 runMethod.instrument(new ExprEditor() {
                     final String thisWidth = "this." + widthFieldName;
@@ -73,10 +75,11 @@ public class ClassicResizePatch extends Patch {
                     @Override
                     public void edit(MethodCall m) throws CannotCompileException {
                         if (m.getClassName().equals("org.lwjgl.opengl.Display")
-                            && m.getMethodName().equals("update")
+                            && m.getMethodName().equals("isCloseRequested")
                         ) {
                             m.replace("" +
                                 "{" +
+                                "   if (org.lwjgl.opengl.Display.isCloseRequested()) {" + DeAwtPatch.SHUTDOWN_HOOK + "}" +
                                 "   int lastWidth = " + thisWidth + ";" +
                                 "   int lastHeight = " + thisHeight + ";" +
                                     thisWidth + " = org.lwjgl.opengl.Display.getWidth();" +
@@ -148,6 +151,57 @@ public class ClassicResizePatch extends Patch {
         }
 
         return false;
+    }
+
+    private void removeCanvasCloseRequestGuard(CtMethod runMethod) {
+        try {
+            CodeAttribute codeAttribute = runMethod.getMethodInfo().getCodeAttribute();
+            if (codeAttribute == null) {
+                return;
+            }
+
+            CodeIterator codeIterator = codeAttribute.iterator();
+            ConstPool cp = runMethod.getMethodInfo().getConstPool();
+            int lastCanvasBranch = -1;
+
+            while (codeIterator.hasNext()) {
+                int pos = codeIterator.next();
+                int opcode = codeIterator.byteAt(pos);
+
+                if (opcode == Opcode.GETFIELD) {
+                    int fieldIndex = codeIterator.u16bitAt(pos + 1);
+                    if (!"Ljava/awt/Canvas;".equals(cp.getFieldrefType(fieldIndex))) {
+                        continue;
+                    }
+
+                    int branchPos = codeIterator.next();
+                    int branchOpcode = codeIterator.byteAt(branchPos);
+                    if (branchOpcode == Opcode.IFNULL || branchOpcode == Opcode.IFNONNULL) {
+                        lastCanvasBranch = branchPos;
+                    }
+                    continue;
+                }
+
+                if (opcode != Opcode.INVOKESTATIC || lastCanvasBranch == -1) {
+                    continue;
+                }
+
+                int methodIndex = codeIterator.u16bitAt(pos + 1);
+                if (!"org.lwjgl.opengl.Display".equals(cp.getMethodrefClassName(methodIndex))) {
+                    continue;
+                }
+
+                if ("isCloseRequested".equals(cp.getMethodrefName(methodIndex))) {
+                    codeIterator.writeByte(Opcode.POP, lastCanvasBranch);
+                    codeIterator.writeByte(Opcode.NOP, lastCanvasBranch + 1);
+                    codeIterator.writeByte(Opcode.NOP, lastCanvasBranch + 2);
+                    codeAttribute.computeMaxStack();
+                    Logger.debug("Removed isCloseRequested canvas guard");
+                    return;
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private CtField findScreen(CtClass minecraftClass) {

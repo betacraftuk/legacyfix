@@ -29,6 +29,18 @@ import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
 public class DeAwtPatch extends Patch {
+    public static final String SHUTDOWN_HOOK = "" +
+        "System.out.println(\"Shutting down...\");" +
+        "try {" +
+        "    org.lwjgl.input.Mouse.destroy();" +
+        "    org.lwjgl.input.Keyboard.destroy();" +
+        "    org.lwjgl.openal.AL.destroy();" +
+        "} catch (Throwable ignored) {" +
+        "} finally {" +
+        "    org.lwjgl.opengl.Display.destroy();" +
+        "    System.exit(0);" +
+        "}";
+
     public DeAwtPatch() {
         super("deawt", "Forces the game to use LWJGL's windowing system", true);
     }
@@ -48,6 +60,12 @@ public class DeAwtPatch extends Patch {
         final String appletModeFieldName = GameClasses.findAppletModeFieldName(patchPool);
         patchPool.addCtTransformer(minecraftAppletClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
+                CtMethod cleanupMethod = findCleanupMethod(ctClass);
+                if (cleanupMethod != null) {
+                    Logger.debug("Found applet cleanup method: " + cleanupMethod.getName());
+                    cleanupMethod.insertAfter(SHUTDOWN_HOOK);
+                }
+
                 if (appletModeFieldName != null) {
                     CtMethod initMethod = ctClass.getDeclaredMethod("init");
                     initMethod.insertAfter("$0." + minecraftFieldName + "." + appletModeFieldName + " = false;");
@@ -84,19 +102,7 @@ public class DeAwtPatch extends Patch {
         }
 
         if (isFinallyBlockEmpty(updateMethod)) {
-            updateMethod.insertAfter("" +
-                "System.out.println(\"Shutting down...\");" +
-                "try {" +
-                "    org.lwjgl.input.Mouse.destroy();" +
-                "    org.lwjgl.input.Keyboard.destroy();" +
-                "    org.lwjgl.openal.AL.destroy();" +
-                "} catch (Throwable ignored) {" +
-                "} finally {" +
-                "    org.lwjgl.opengl.Display.destroy();" +
-                "    System.exit(0);" +
-                "}",
-                true
-            );
+            updateMethod.insertAfter(SHUTDOWN_HOOK, true);
         }
 
         final CtMethod resizeMethod = findResizeMethod(gameClass);
@@ -258,6 +264,47 @@ public class DeAwtPatch extends Patch {
         }
 
         return fields;
+    }
+
+    private CtMethod findCleanupMethod(CtClass appletClass) {
+        for (CtMethod method : appletClass.getDeclaredMethods()) {
+            if (!"()V".equals(method.getSignature())) continue;
+
+            MethodInfo mi = method.getMethodInfo();
+            CodeAttribute ca = mi.getCodeAttribute();
+            if (ca == null) continue;
+
+            ConstPool cp = mi.getConstPool();
+            CodeIterator it = ca.iterator();
+            boolean callsRemoveAll = false;
+            boolean callsValidate = false;
+
+            try {
+                while (it.hasNext()) {
+                    int pos = it.next();
+                    int opcode = it.byteAt(pos);
+                    if (opcode != Opcode.INVOKEVIRTUAL) continue;
+
+                    int methodIndex = it.u16bitAt(pos + 1);
+                    String name = cp.getMethodrefName(methodIndex);
+                    String signature = cp.getMethodrefType(methodIndex);
+                    if (!"()V".equals(signature)) continue;
+
+                    if ("removeAll".equals(name)) {
+                        callsRemoveAll = true;
+                    } else if ("validate".equals(name)) {
+                        callsValidate = true;
+                    }
+
+                    if (callsRemoveAll && callsValidate) {
+                        return method;
+                    }
+                }
+            } catch (BadBytecode ignored) {
+            }
+        }
+
+        return null;
     }
 
     private CtMethod findResizeMethod(CtClass gameClass) {
