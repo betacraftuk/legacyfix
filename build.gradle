@@ -10,7 +10,10 @@ subprojects {
     apply plugin: 'java'
 
     processResources {
-        def tokens = [version: "${rootProject.version}-${new Date().format('yyyyMMdd')}"]
+        def versionString = "${rootProject.version}-${new Date().format('yyyyMMdd')}"
+        inputs.property 'version', versionString
+
+        def tokens = [version: versionString]
         filesMatching('*mod*') { expand tokens }
         filesMatching('version.txt') { expand tokens }
     }
