@@ -9,6 +9,7 @@ import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.proxy.LevelProxyAuthenticator;
+import uk.betacraft.legacyfix.proxy.LevelProxyConfig;
 import uk.betacraft.legacyfix.proxy.handlers.LevelHandlerBase;
 
 import java.applet.Applet;
@@ -20,15 +21,20 @@ public class LevelProxyPatch extends Patch {
     private static String sessionField;
     private static String tokenField;
     private static boolean authStarted;
+    private static boolean applied;
 
     public LevelProxyPatch() {
         super("level-proxy", "", true, false);
     }
 
+    public static boolean applied() {
+        return applied;
+    }
+
     @SuppressWarnings("unused")
     public static synchronized void register(Applet applet) {
         LevelProxyPatch.applet = applet;
-        if (!authStarted && LevelHandlerBase.ONLINE_LEVEL_SERVER != null) {
+        if (!authStarted && LevelProxyConfig.getOnlineLevelServer() != null) {
             authStarted = true;
             new LevelProxyAuthenticator().start();
         }
@@ -72,6 +78,8 @@ public class LevelProxyPatch extends Patch {
             return;
         }
 
+        applied = true;
+
         patchPool.addCtTransformer(appletClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
                 CtMethod init = ctClass.getDeclaredMethod("init");
@@ -99,5 +107,10 @@ public class LevelProxyPatch extends Patch {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean shouldApply(PatchPool patchPool) {
+        return patchPool.getRawClass("com.mojang.minecraft.level.Level") != null && super.shouldApply(patchPool);
     }
 }

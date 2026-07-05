@@ -42,18 +42,19 @@ public class URLHandlers {
                         continue;
                     }
 
-                    if (LevelHandlerBase.ONLINE_LEVEL_SERVER != null && handler.getSuperclass().equals(LevelHandlerBase.class)) {
+                    String levelServer = LevelProxyConfig.getOnlineLevelServer();
+                    if (levelServer != null && handler.getSuperclass().equals(LevelHandlerBase.class)) {
                         String query = url.getQuery() != null ? "?" + url.getQuery() : "";
 
-                        URLStreamHandler protocolHandler = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http:") ?
+                        URLStreamHandler protocolHandler = levelServer.startsWith("http:") ?
                             new sun.net.www.protocol.http.Handler() : new sun.net.www.protocol.https.Handler();
 
-                        String protocol = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http") ?
+                        String protocol = levelServer.startsWith("http") ?
                             "" : "https://";
 
                         return new URL(
                             null,
-                            protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/proxy" + url.getPath() + query,
+                            protocol + levelServer + "/proxy" + url.getPath() + query,
                             protocolHandler
                         ).openConnection();
                     }

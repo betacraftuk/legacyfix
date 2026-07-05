@@ -1,7 +1,9 @@
 package uk.betacraft.legacyfix.applet;
 
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.patch.impl.misc.LevelProxyPatch;
 import uk.betacraft.legacyfix.proxy.GameArgs;
+import uk.betacraft.legacyfix.proxy.LevelProxyConfig;
 
 import java.applet.Applet;
 import java.util.Arrays;
@@ -39,6 +41,10 @@ public class AppletLauncher {
         // c0.30
         if (!hasKey("demo")) {
             addKey("haspaid");
+        }
+
+        if (LevelProxyPatch.applied()) {
+            LevelProxyConfig.promptIfNeeded();
         }
 
         launch();

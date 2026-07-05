@@ -11,6 +11,11 @@ import uk.betacraft.legacyfix.util.web.WebData;
 public class LevelProxyAuthenticator extends Thread {
     @Override
     public void run() {
+        String levelServer = LevelProxyConfig.getOnlineLevelServer();
+        if (levelServer == null) {
+            return;
+        }
+
         String uuid = GameArgs.getUuid();
 
         WebData joinServerResponse = RequestUtil.performJoinServer(
@@ -28,11 +33,11 @@ public class LevelProxyAuthenticator extends Thread {
             return;
         }
 
-        String protocol = LevelHandlerBase.ONLINE_LEVEL_SERVER.startsWith("http") ?
+        String protocol = levelServer.startsWith("http") ?
             "" : "https://";
 
         Request sessionRequest = new Request();
-        sessionRequest.setUrl(protocol + LevelHandlerBase.ONLINE_LEVEL_SERVER + "/api/proxy_token?player=" + uuid);
+        sessionRequest.setUrl(protocol + levelServer + "/api/proxy_token?player=" + uuid);
 
         WebData proxyAuthResponse = RequestUtil.performRawGETRequest(sessionRequest);
         if (!proxyAuthResponse.successful()) {
@@ -46,6 +51,6 @@ public class LevelProxyAuthenticator extends Thread {
 
         LevelHandlerBase.levelToken = proxyAuthResponse.toString();
         LevelProxyPatch.update();
-        Logger.info("Authenticated with level proxy server: " + LevelHandlerBase.ONLINE_LEVEL_SERVER);
+        Logger.info("Authenticated with level proxy server: " + levelServer);
     }
 }
