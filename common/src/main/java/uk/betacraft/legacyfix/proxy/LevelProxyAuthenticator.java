@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix.proxy;
 
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.patch.impl.misc.LevelProxyPatch;
 import uk.betacraft.legacyfix.proxy.handlers.LevelHandlerBase;
 import uk.betacraft.legacyfix.util.HashUtils;
 import uk.betacraft.legacyfix.util.web.Request;
@@ -43,7 +44,8 @@ public class LevelProxyAuthenticator extends Thread {
             return;
         }
 
-//        LegacyFixLauncher.setValue("sessionid", proxyAuthResponse.toString()); TODO
+        LevelHandlerBase.levelToken = proxyAuthResponse.toString();
+        LevelProxyPatch.update();
         Logger.info("Authenticated with level proxy server: " + LevelHandlerBase.ONLINE_LEVEL_SERVER);
     }
 }

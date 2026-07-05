@@ -15,6 +15,7 @@ import java.util.*;
 public class Patcher implements PatchPool {
     public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
         new ProxyPatch(),
+        new LevelProxyPatch(),
         new JavaModulesPatch(),
         new BitDepthPatch(),
         new DisableControllersPatch(),

@@ -2,8 +2,6 @@ package uk.betacraft.legacyfix.applet;
 
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.GameArgs;
-import uk.betacraft.legacyfix.proxy.LevelProxyAuthenticator;
-import uk.betacraft.legacyfix.proxy.handlers.LevelHandlerBase;
 
 import java.applet.Applet;
 import java.util.Arrays;
@@ -16,7 +14,6 @@ public class AppletLauncher {
         "com.mojang.minecraft.MinecraftApplet"
     };
 
-    private static LevelProxyAuthenticator levelProxyAuthenticator = null;
     private static List<String> arguments;
 
     public static void main(String[] args) {
@@ -42,11 +39,6 @@ public class AppletLauncher {
         // c0.30
         if (!hasKey("demo")) {
             addKey("haspaid");
-        }
-
-        if (LevelHandlerBase.ONLINE_LEVEL_SERVER != null) {
-            levelProxyAuthenticator = new LevelProxyAuthenticator();
-            levelProxyAuthenticator.start();
         }
 
         launch();

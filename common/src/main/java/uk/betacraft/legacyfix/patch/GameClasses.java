@@ -14,6 +14,8 @@ public class GameClasses {
 
     private static String appletModeFieldName = null;
     private static String minecraftFieldName = null;
+    private static String sessionClassName = null;
+    private static String sessionFieldName = null;
 
     public static String findMinecraftAppletClass(PatchPool patchPool) {
         if (minecraftAppletClass != null) {
@@ -209,6 +211,99 @@ public class GameClasses {
         }
 
         return appletModeFieldName;
+    }
+
+    public static String findSessionClassName(PatchPool patchPool) throws NotFoundException, BadBytecode {
+        if (sessionClassName != null) {
+            return sessionClassName;
+        }
+
+        findSessionFieldName(patchPool);
+        return sessionClassName;
+    }
+
+    public static String findSessionFieldName(PatchPool patchPool) throws NotFoundException, BadBytecode {
+        if (sessionFieldName != null) {
+            return sessionFieldName;
+        }
+
+        if (minecraftAppletClass == null) {
+            findMinecraftAppletClass(patchPool);
+        }
+
+        if (minecraftClass == null) {
+            findMinecraftClass(patchPool);
+        }
+
+        if (minecraftAppletClass == null || minecraftClass == null) {
+            return null;
+        }
+
+        CtClass appletClass = patchPool.getRawClass(minecraftAppletClass);
+        CtMethod init = appletClass.getDeclaredMethod("init");
+        MethodInfo mi = init.getMethodInfo();
+        CodeAttribute ca = mi.getCodeAttribute();
+        if (ca == null) {
+            return null;
+        }
+
+        CodeIterator it = ca.iterator();
+        ConstPool cp = mi.getConstPool();
+
+        boolean seenUsername = false;
+        boolean seenSessionId = false;
+        String constructedSession = null;
+
+        while (it.hasNext()) {
+            int pos = it.next();
+            int op = it.byteAt(pos);
+
+            if (op == Opcode.LDC || op == Opcode.LDC_W) {
+                int index = op == Opcode.LDC ? it.byteAt(pos + 1) & 0xFF : it.u16bitAt(pos + 1);
+                if (cp.getTag(index) == ConstPool.CONST_String) {
+                    String value = cp.getStringInfo(index);
+                    if ("username".equals(value)) {
+                        seenUsername = true;
+                    } else if (seenUsername && "sessionid".equals(value)) {
+                        seenSessionId = true;
+                    }
+                }
+                continue;
+            }
+
+            if (!seenSessionId) {
+                continue;
+            }
+
+            if (op == Opcode.INVOKESPECIAL) {
+                int index = it.u16bitAt(pos + 1);
+                String methodName = cp.getMethodrefName(index);
+                String methodType = cp.getMethodrefType(index);
+                if ("<init>".equals(methodName)
+                    && "(Ljava/lang/String;Ljava/lang/String;)V".equals(methodType)
+                ) {
+                    constructedSession = cp.getMethodrefClassName(index);
+                }
+                continue;
+            }
+
+            if (op == Opcode.PUTFIELD && constructedSession != null) {
+                int index = it.u16bitAt(pos + 1);
+                String fieldClass = cp.getFieldrefClassName(index);
+                String fieldType = cp.getFieldrefType(index);
+                if (minecraftClass.equals(fieldClass)
+                    && ("L" + constructedSession.replace('.', '/') + ";").equals(fieldType)
+                ) {
+                    sessionClassName = constructedSession.replace('/', '.');
+                    sessionFieldName = cp.getFieldrefName(index);
+                    Logger.debug("Found session field: " + sessionFieldName);
+                    Logger.debug("Found session class: " + sessionClassName);
+                    return sessionFieldName;
+                }
+            }
+        }
+
+        return null;
     }
 
     public static String findMouseHelperClass(PatchPool patchPool) throws NotFoundException {
