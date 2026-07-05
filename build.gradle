@@ -4,13 +4,28 @@ plugins {
 }
 
 group 'uk.betacraft'
-version '2.0'
+
+// Release versions should use yy.month or yy.month.patch
+def releaseVersion = findProperty('releaseVersion') ?: System.getenv('RELEASE_VERSION')
+
+if (releaseVersion) {
+    version releaseVersion
+} else if (System.getenv('CI_NIGHTLY') == 'true') {
+    def runId = System.getenv('GITHUB_RUN_ID')
+    if (!runId) {
+        throw new GradleException('CI_NIGHTLY=true requires GITHUB_RUN_ID to be set')
+    }
+
+    version "nightly-${runId}"
+} else {
+    version "dev-${new Date().format('yyyyMMdd')}"
+}
 
 subprojects {
     apply plugin: 'java'
 
     processResources {
-        def versionString = "${rootProject.version}-${new Date().format('yyyyMMdd')}"
+        def versionString = "${rootProject.version}"
         inputs.property 'version', versionString
 
         def tokens = [version: versionString]
@@ -23,6 +38,7 @@ dependencies {
 }
 
 shadowJar {
+    archiveClassifier.set('')
     configurations = [project(':common').configurations.runtimeClasspath]
     from project(':common').jar
     from project(':fabric').jar
