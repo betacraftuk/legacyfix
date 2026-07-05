@@ -16,7 +16,8 @@ Note: If you don't have a GitHub account, download the zip [here](https://nightl
 
 ### Forge
 LegacyFix acts as a core mod. Depending on the game version:
-* **For Minecraft 1.4 or older**: Drop the `.jar` file into your `.minecraft/coremods` folder.
+* **For Minecraft 1.3 or older**: Follow [Other](#other).
+* **For Minecraft 1.4**: Drop the `.jar` file into your `.minecraft/coremods` folder.
 * **For Minecraft 1.5 or newer**: Drop the `.jar` file into your `.minecraft/mods` folder.
 
 ### Fabric
