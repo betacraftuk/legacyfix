@@ -73,15 +73,6 @@ public class DeAwtPatch extends Patch {
             }
         });
 
-        patchPool.addCtTransformer("java.applet.Applet", new CtTransformer() {
-            public void transform(CtClass ctClass) throws Exception {
-                if (ctClass.isFrozen()) {
-                    ctClass.defrost();
-                }
-                ctClass.getDeclaredMethod("getDocumentBase").setBody("{ return new java.net.URL(\"http://www.minecraft.net/\"); }");
-            }
-        });
-
         patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
                 transformGameClass(ctClass);
