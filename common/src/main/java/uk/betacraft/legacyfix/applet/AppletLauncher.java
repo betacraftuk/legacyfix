@@ -43,6 +43,11 @@ public class AppletLauncher {
             addKey("haspaid");
         }
 
+        if (!hasKey("mppass")) {
+            addKey("mppass");
+            arguments.add("-");
+        }
+
         if (LevelProxyPatch.applied()) {
             LevelProxyConfig.promptIfNeeded();
         }
