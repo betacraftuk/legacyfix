@@ -2,7 +2,7 @@ name: Nightly Build
 
 on:
   push:
-    branches: [ multiloader ]
+    branches: [ v3 ]
 
 jobs:
   build:
