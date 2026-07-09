@@ -87,13 +87,18 @@ public class DeAwtPatch extends Patch {
     }
 
     private void transformGameClass(CtClass gameClass) throws Exception {
-        CtMethod updateMethod = findUpdateMethod(gameClass, gameClass.getDeclaredMethod("run"));
+        CtMethod runMethod = gameClass.getDeclaredMethod("run");
+        CtMethod updateMethod = findUpdateMethod(gameClass, runMethod);
         if (updateMethod == null) {
             throw new PatchException("No update method found");
         }
 
         if (isFinallyBlockEmpty(updateMethod)) {
             updateMethod.insertAfter(SHUTDOWN_HOOK, true);
+        }
+
+        if (updateMethod != runMethod || !isFinallyBlockEmpty(updateMethod)) {
+            runMethod.insertAfter("System.exit(0);", true);
         }
 
         final CtMethod resizeMethod = findResizeMethod(gameClass);
