@@ -29,6 +29,7 @@ public class Patcher implements PatchPool {
         new SeecretSaturdayPatch(),
         new TexturePackFolderPatch(),
         new BetaForgePatch(),
+        new ClassicPerformancePatch(),
         new ClassicResizePatch()
     };
 
@@ -92,7 +93,6 @@ public class Patcher implements PatchPool {
 
         this.ctTransformers.get(className).add(transformer);
     }
-
 
     public List<Transformer> getTransformers() {
         return this.transformers;
