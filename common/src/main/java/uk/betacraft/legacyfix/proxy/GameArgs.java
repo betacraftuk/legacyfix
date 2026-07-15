@@ -129,16 +129,16 @@ public class GameArgs {
                 GameArgs.session = value;
             } else if ("--version".equals(key)) {
                 if (Agent.getSetting("lf.version", null) == null) {
-                    System.setProperty("lf.version", value);
+                    Agent.setSetting("lf.version", value);
                     resolveIndex(value);
                 }
             } else if ("--gameDir".equals(key)) {
                 if (Agent.getSetting("lf.gameDir", null) == null) {
-                    System.setProperty("lf.gameDir", value);
+                    Agent.setSetting("lf.gameDir", value);
                 }
             } else if ("--assetsDir".equals(key)) {
                 if (Agent.getSetting("lf.assetsDir", null) == null) {
-                    System.setProperty("lf.assetsDir", value);
+                    Agent.setSetting("lf.assetsDir", value);
                 }
             } else if ("--assetIndex".equals(key)) {
                 if (isInvalidIndex(value)) {

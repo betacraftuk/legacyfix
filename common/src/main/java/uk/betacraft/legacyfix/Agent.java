@@ -138,6 +138,10 @@ public class Agent {
         return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
     }
 
+    public static void setSetting(String key, Object value) {
+        SETTINGS.put(key, value);
+    }
+
     public static boolean hasSetting(String key) {
         return getSettings().containsKey(key);
     }
