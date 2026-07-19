@@ -31,6 +31,9 @@ uk.betacraft.legacyfix.applet.AppletLauncher
 Try to find an `"appletClass"` property. If it exists - get rid of it by removing the whole line it's located at. If it doesn't exist, you don't have to worry about it.
 ![](../.github/img/prism/mc-component-editor-appletclass.webp)
 
+Search for `${game_assets}` inside the `minecraftArguments` property. If it's present, replace it with `${assets_root}`.
+![](../.github/img/prism/mc-component-editor-minecraftarguments.webp)
+
 ### Update Java
 ### ⚠️ For LegacyFix to function properly, you should also make your instance use up-to-date Java.
 Prism Launcher defaults to outdated Java 8u51 (from July 2015) on Windows, 8u202 (from January 2019) on Linux, and 8u74 (from February 2016) on Intel macOS.
