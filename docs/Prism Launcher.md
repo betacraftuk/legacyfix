@@ -16,12 +16,15 @@ And point the launcher to the `legacyfix` jar file you downloaded earlier:
 ![](../.github/img/prism/file-picker.webp)
 A new entry should appear in the list:
 ![](../.github/img/prism/lf-agent-entry.webp)
-Now, if your Minecraft version is <ins>a1.0.6 or newer</ins>, you can scroll down to the [Update Java section](#update-java).<br>
 Next, select the ***Minecraft*** component, click the **Customize** button, and follow that by clicking the **Edit** button:
 ![](../.github/img/prism/mc-component-customize.webp)
 ![](../.github/img/prism/mc-component-edit.webp)
 
 The json of the Minecraft component should now open in your default text editor.<br>
+Search for `${game_assets}` inside the `minecraftArguments` property. If it's present, replace it with `${assets_root}`.
+![](../.github/img/prism/mc-component-editor-minecraftarguments.webp)
+
+Now, if your Minecraft version is <ins>a1.0.6 or newer</ins>, you can scroll down to the [Update Java section](#update-java).<br>
 Locate the `"mainClass"` property. Change its value to:
 ```
 uk.betacraft.legacyfix.applet.AppletLauncher
@@ -31,8 +34,6 @@ uk.betacraft.legacyfix.applet.AppletLauncher
 Try to find an `"appletClass"` property. If it exists - get rid of it by removing the whole line it's located at. If it doesn't exist, you don't have to worry about it.
 ![](../.github/img/prism/mc-component-editor-appletclass.webp)
 
-Search for `${game_assets}` inside the `minecraftArguments` property. If it's present, replace it with `${assets_root}`.
-![](../.github/img/prism/mc-component-editor-minecraftarguments.webp)
 
 ### Update Java
 ### ⚠️ For LegacyFix to function properly, you should also make your instance use up-to-date Java.
