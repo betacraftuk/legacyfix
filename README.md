@@ -6,11 +6,14 @@
 
 ## Downloads
 
+### Stable releases
+Go to Releases and download the [latest version of LegacyFix](https://github.com/betacraftuk/legacyfix/releases/latest).
+
 ### Nightly builds
 Find the latest (topmost) run in the [Actions tab](https://github.com/betacraftuk/legacyfix/actions/workflows/gradle.yml).
-Scroll down to the **Artifacts** section and download the `artifact.zip` file, in which you can find `legacyfix-2.0-all.jar`.
+Scroll down to the **Artifacts** section and download the zip file, in which you can find the LegacyFix jar.
 
-Note: If you don't have a GitHub account, download the zip [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/multiloader/artifact.zip).
+Note: If you don't have a GitHub account, download the zip [here](https://nightly.link/betacraftuk/legacyfix/workflows/gradle/v3).
 
 ## Installation
 
