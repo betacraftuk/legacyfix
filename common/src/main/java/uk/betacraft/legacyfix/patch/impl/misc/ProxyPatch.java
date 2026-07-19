@@ -108,7 +108,16 @@ public class ProxyPatch extends Patch {
 
         patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
-                CtMethod mainMethod = ctClass.getDeclaredMethod("main");
+                CtMethod mainMethod = null;
+                for (CtMethod method : ctClass.getDeclaredMethods()) {
+                    if (method.getName().equals("main")) {
+                        mainMethod = method;
+                    }
+                }
+                if (mainMethod == null) {
+                    return;
+                }
+
                 mainMethod.insertBefore("" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
                     "boolean initialized = ((java.lang.Boolean) gameArgsClass.getMethod(\"initialized\", null).invoke(null, null)).booleanValue();" +
