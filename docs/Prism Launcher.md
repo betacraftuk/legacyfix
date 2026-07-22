@@ -34,6 +34,11 @@ uk.betacraft.legacyfix.applet.AppletLauncher
 Try to find an `"appletClass"` property. If it exists - get rid of it by removing the whole line it's located at. If it doesn't exist, you don't have to worry about it.
 ![](../.github/img/prism/mc-component-editor-appletclass.webp)
 
+Next, locate the `"+traits"` list and remove the lines `"legacyLaunch"` and `"legacyServices"` from it.
+![](../.github/img/prism/mc-component-editor-traits.webp)
+
+Save the file and close your text editor.
+
 
 ### Update Java
 ### ⚠️ For LegacyFix to function properly, you should also make your instance use up-to-date Java.
