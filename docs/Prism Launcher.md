@@ -24,7 +24,8 @@ The json of the Minecraft component should now open in your default text editor.
 Search for `${game_assets}` inside the `minecraftArguments` property. If it's present, replace it with `${assets_root}`.
 ![](../.github/img/prism/mc-component-editor-minecraftarguments.webp)
 
-Now, if your Minecraft version is <ins>a1.0.6 or newer</ins>, you can scroll down to the [Update Java section](#update-java).<br>
+### ☝️🤓 If your Minecraft version is <ins>a1.0.6 or newer</ins>, you can now skip the steps below and scroll down to the [Update Java section](#update-java).<br>
+
 Locate the `"mainClass"` property. Change its value to:
 ```
 uk.betacraft.legacyfix.applet.AppletLauncher
