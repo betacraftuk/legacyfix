@@ -137,6 +137,10 @@ public class GameArgs {
                     Agent.setSetting("lf.gameDir", value);
                 }
             } else if ("--assetsDir".equals(key)) {
+                if (isInvalidAssetsDir(value)) {
+                    continue;
+                }
+
                 if (Agent.getSetting("lf.assetsDir", null) == null) {
                     Agent.setSetting("lf.assetsDir", value);
                 }
@@ -190,6 +194,10 @@ public class GameArgs {
 
     private static boolean isInvalidIndex(String index) {
         return index == null || index.equals("legacy") || index.equals("pre-1.6");
+    }
+
+    private static boolean isInvalidAssetsDir(String dir) {
+        return dir == null || (dir.contains("virtual") && dir.contains("legacy"));
     }
 
     public static boolean initialized() {
