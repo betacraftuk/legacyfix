@@ -206,7 +206,7 @@ public class GameArgs {
     }
 
     private static boolean isInvalidAssetsDir(String dir) {
-        return dir == null || (dir.contains("virtual") && dir.contains("legacy"));
+        return dir == null || dir.contains("assets/virtual");
     }
 
     public static boolean initialized() {
