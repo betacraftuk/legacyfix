@@ -1,16 +1,17 @@
 package uk.betacraft.legacyfix.util;
 
+import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 
 import java.io.ByteArrayInputStream;
 
 public class SkinUtils {
-    public static final boolean OVERLAY_OUTER_HEAD_LAYER = System.getProperties().containsKey("lf.OVERLAY_OUTER_HEAD_LAYER");
-    public static final boolean OVERLAY_OUTER_BODY_TO_BASE = System.getProperties().containsKey("lf.OVERLAY_OUTER_BODY_TO_BASE");
-    public static final boolean ROTATE_BOTTOM_TEXTURES = System.getProperties().containsKey("lf.ROTATE_BOTTOM_TEXTURES");
-    public static final boolean CONVERT_ALEX_TO_STEVE = System.getProperties().containsKey("lf.CONVERT_ALEX_TO_STEVE");
-    public static final boolean SERVE_AS_64x32 = System.getProperties().containsKey("lf.SERVE_AS_64x32");
+    public static final boolean OVERLAY_OUTER_HEAD_LAYER = Agent.getBooleanSetting("lf.proxy.overlayOuterHeadLayer", false);
+    public static final boolean OVERLAY_OUTER_BODY_TO_BASE = Agent.getBooleanSetting("lf.proxy.overlayOuterBodyToBase", false);
+    public static final boolean ROTATE_BOTTOM_TEXTURES = Agent.getBooleanSetting("lf.proxy.rotateBottomTextures", false);
+    public static final boolean CONVERT_ALEX_TO_STEVE = Agent.getBooleanSetting("lf.proxy.convertAlexToSteve", false);
+    public static final boolean SERVE_AS_64x32 = Agent.getBooleanSetting("lf.proxy.serveAs64x32", false);
 
     public static boolean requiresFixing() {
         return OVERLAY_OUTER_BODY_TO_BASE || OVERLAY_OUTER_HEAD_LAYER || ROTATE_BOTTOM_TEXTURES || CONVERT_ALEX_TO_STEVE || SERVE_AS_64x32;

@@ -12,11 +12,11 @@
         "desc": "1a to 21a_01",
         "assetIndex": "empty",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
-            "lf.OVERLAY_OUTER_HEAD_LAYER",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
+            "lf.proxy.overlayOuterHeadLayer",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -25,11 +25,11 @@
         "desc": "22a to 23a_01",
         "assetIndex": "c0.0.22a_01",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
-            "lf.OVERLAY_OUTER_HEAD_LAYER",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
+            "lf.proxy.overlayOuterHeadLayer",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -38,10 +38,10 @@
         "desc": "c0.24_st to c0.31",
         "assetIndex": "c0.0.22a_01",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -50,10 +50,10 @@
         "desc": "in-1223 to in-1231",
         "assetIndex": "c0.0.22a_01",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -62,10 +62,10 @@
         "desc": "in-0104 to in-0109",
         "assetIndex": "20100104",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -74,10 +74,10 @@
         "desc": "in-0110 to in-0122",
         "assetIndex": "20100110",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -86,10 +86,10 @@
         "desc": "in-0124 to in-0205",
         "assetIndex": "20100124",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -98,10 +98,10 @@
         "desc": "in-0206 to in-0211",
         "assetIndex": "20100206",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -110,10 +110,10 @@
         "desc": "in-0212 to in-0223",
         "assetIndex": "20100212",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -121,10 +121,10 @@
         "version": "^inf-20100[2-4].+",
         "assetIndex": "20100212",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -132,10 +132,10 @@
         "version": "^inf-201006.+",
         "assetIndex": "20100607",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -144,10 +144,10 @@
         "desc": "a1.0.1 to a1.0.2_02",
         "assetIndex": "20100607",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -156,10 +156,10 @@
         "desc": "a1.0.3 to a1.0.7",
         "assetIndex": "a1.0.3",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -168,10 +168,10 @@
         "desc": "a1.0.8 and a1.0.8_01",
         "assetIndex": "a1.0.8",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -180,10 +180,10 @@
         "desc": "a1.0.9 to a1.0.11",
         "assetIndex": "a1.0.9",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -192,10 +192,10 @@
         "desc": "a1.0.12 to a1.0.13_01",
         "assetIndex": "a1.0.12",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -204,10 +204,10 @@
         "desc": "a1.0.14 to a1.1.2_01",
         "assetIndex": "a1.0.14",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -216,10 +216,10 @@
         "desc": "a1.2.0 to b1.1_02",
         "assetIndex": "a1.2.0",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -228,10 +228,10 @@
         "desc": "b1.2 to b1.3_01",
         "assetIndex": "b1.2",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -240,10 +240,10 @@
         "desc": "b1.4 to b1.4_01",
         "assetIndex": "b1.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -252,10 +252,10 @@
         "desc": "b1.5 to b1.6.6",
         "assetIndex": "b1.5",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true"
         ]
     },
@@ -264,10 +264,10 @@
         "desc": "b1.7 to b1.8.1",
         "assetIndex": "b1.7",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.ROTATE_BOTTOM_TEXTURES",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE"
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase"
         ]
     },
     {
@@ -275,9 +275,9 @@
         "desc": "b1.9 prereleases",
         "assetIndex": "b1.7",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -286,9 +286,9 @@
         "desc": "1.0.0-rc1 to 1.1",
         "assetIndex": "1.0.0-rc1",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -297,9 +297,9 @@
         "desc": "11w47a to 12w01a",
         "assetIndex": "1.0.0-rc1",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -308,9 +308,9 @@
         "desc": "1.2-pre to 1.3.2",
         "assetIndex": "1.2",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -319,9 +319,9 @@
         "desc": "12w06a to 12w37a",
         "assetIndex": "1.2",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -330,9 +330,9 @@
         "desc": "1.4-pre to 1.5.2",
         "assetIndex": "1.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -341,9 +341,9 @@
         "desc": "12w38a to 13w12~",
         "assetIndex": "1.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -352,9 +352,9 @@
         "desc": "2.0 april fools",
         "assetIndex": "1.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -363,9 +363,9 @@
         "desc": "1.6-pre to 1.6.4",
         "assetIndex": "1.6",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -374,9 +374,9 @@
         "desc": "13w16a to 13w18c",
         "assetIndex": "13w16a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
@@ -387,9 +387,9 @@
         "desc": "13w19a to 13w21b",
         "assetIndex": "13w19a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
@@ -400,9 +400,9 @@
         "desc": "13w22a",
         "assetIndex": "13w22a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
             "--limit13w16a",
             "--usesWorkDir"
@@ -413,9 +413,9 @@
         "desc": "13w23a",
         "assetIndex": "13w22a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
             "--limit13w23a",
             "--usesWorkDir"
@@ -426,9 +426,9 @@
         "desc": "13w23b",
         "assetIndex": "13w22a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
             "--usesWorkDir"
         ]
@@ -438,9 +438,9 @@
         "desc": "13w24a to 13w26a",
         "assetIndex": "13w24a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -449,9 +449,9 @@
         "desc": "13w36a to 13w41b",
         "assetIndex": "1.6",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -460,9 +460,9 @@
         "desc": "1.7-pre to 1.7.1-pre",
         "assetIndex": "13w42a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -471,9 +471,9 @@
         "desc": "13w42a to 13w43a",
         "assetIndex": "13w42a",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -482,9 +482,9 @@
         "desc": "1.7.2",
         "assetIndex": "1.7.2",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -493,9 +493,9 @@
         "desc": "13w47a to 13w48b",
         "assetIndex": "1.7.2",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -504,9 +504,9 @@
         "desc": "1.7.3",
         "assetIndex": "1.7.3",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -515,9 +515,9 @@
         "desc": "13w49a",
         "assetIndex": "1.7.3",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -526,9 +526,9 @@
         "desc": "1.7.4 to 1.7.10-pre3",
         "assetIndex": "1.7.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -537,9 +537,9 @@
         "desc": "14w02a to 14w02c",
         "assetIndex": "1.7.4",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -548,7 +548,7 @@
         "desc": "14w03a to 14w04b",
         "assetIndex": "1.7.4",
         "settings": [
-            "lf.CONVERT_ALEX_TO_STEVE",
+            "lf.proxy.convertAlexToSteve",
             "lf.intel"
         ]
     },
@@ -557,7 +557,7 @@
         "desc": "14w05a to 14w21b",
         "assetIndex": "1.7.4",
         "settings": [
-            "lf.CONVERT_ALEX_TO_STEVE"
+            "lf.proxy.convertAlexToSteve"
         ]
     },
     {
@@ -565,9 +565,9 @@
         "desc": "1.7.10-pre4 to 1.7.10",
         "assetIndex": "1.7.10",
         "settings": [
-            "lf.SERVE_AS_64x32",
-            "lf.CONVERT_ALEX_TO_STEVE",
-            "lf.OVERLAY_OUTER_BODY_TO_BASE",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.overlayOuterBodyToBase",
             "lf.intel"
         ]
     },
@@ -576,7 +576,7 @@
         "desc": "14w25a to 14w30c",
         "assetIndex": "14w25a",
         "settings": [
-            "lf.CONVERT_ALEX_TO_STEVE"
+            "lf.proxy.convertAlexToSteve"
         ]
     },
     {
@@ -584,7 +584,7 @@
         "desc": "14w31a to 14w34d",
         "assetIndex": "14w31a",
         "settings": [
-            "lf.CONVERT_ALEX_TO_STEVE"
+            "lf.proxy.convertAlexToSteve"
         ]
     }
 ]

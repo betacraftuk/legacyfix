@@ -3,6 +3,7 @@ package uk.betacraft.legacyfix.proxy.assets;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 public class AssetIndexResolver {
     private static final List<Pattern> patterns = new ArrayList<Pattern>();
     private static final List<String> assetIds = new ArrayList<String>();
+    private static final List<List<String>> settings = new ArrayList<List<String>>();
     private static JSONObject assetIndexesRoot = null;
     private static boolean initialized = false;
 
@@ -34,6 +36,15 @@ public class AssetIndexResolver {
                 Pattern p = Pattern.compile(regex);
                 patterns.add(p);
                 assetIds.add(o.optString("assetIndex", null));
+
+                JSONArray settingsArray = o.optJSONArray("settings");
+                List<String> versionSettings = new ArrayList<String>();
+                if (settingsArray != null) {
+                    for (int j = 0; j < settingsArray.length(); j++) {
+                        versionSettings.add(settingsArray.getString(j));
+                    }
+                }
+                settings.add(versionSettings);
             }
         } finally {
             try {
@@ -75,6 +86,34 @@ public class AssetIndexResolver {
         }
 
         return null;
+    }
+
+    public static void applySettings(String version) {
+        if (assetIndexesRoot == null) {
+            init();
+        }
+
+        for (int i = 0; i < patterns.size(); i++) {
+            Pattern p = patterns.get(i);
+            if (!p.matcher(version).matches()) {
+                continue;
+            }
+
+            for (String setting : settings.get(i)) {
+                int separator = setting.indexOf('=');
+                String key = separator == -1 ? setting : setting.substring(0, separator);
+                String value = separator == -1 ? "true" : setting.substring(separator + 1);
+
+                if (key.startsWith("lf.")) {
+                    if (!Agent.hasSetting(key)) {
+                        Agent.setSetting(key, Boolean.valueOf(value));
+                    }
+                } else if (System.getProperty(key) == null) {
+                    System.setProperty(key, value);
+                }
+            }
+            return;
+        }
     }
 
     public static File ensureAssetIndex(String id, File targetFile) throws Exception {

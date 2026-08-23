@@ -128,6 +128,10 @@ public class GameArgs {
             } else if ("--session".equals(key)) {
                 GameArgs.session = value;
             } else if ("--version".equals(key)) {
+                if (isInvalidVersion(value)) {
+                    continue;
+                }
+
                 if (Agent.getSetting("lf.version", null) == null) {
                     Agent.setSetting("lf.version", value);
                     resolveIndex(value);
@@ -182,6 +186,7 @@ public class GameArgs {
     private static String resolveIndex(String version) {
         try {
             GameArgs.assetIndex = AssetIndexResolver.resolve(version);
+            AssetIndexResolver.applySettings(version);
             Logger.debug("Resolved asset index: " + GameArgs.assetIndex);
             return GameArgs.assetIndex;
         } catch (Exception e) {
@@ -190,6 +195,10 @@ public class GameArgs {
         }
 
         return null;
+    }
+
+    private static boolean isInvalidVersion(String version) {
+        return version == null || version.equals("Fabric");
     }
 
     private static boolean isInvalidIndex(String index) {
