@@ -30,7 +30,8 @@ public class Patcher implements PatchPool {
         new TexturePackFolderPatch(),
         new BetaForgePatch(),
         new ClassicPerformancePatch(),
-        new ClassicResizePatch()
+        new ClassicResizePatch(),
+        new DemoPatch()
     };
 
     public final List<Patch> patches = new ArrayList<Patch>();
