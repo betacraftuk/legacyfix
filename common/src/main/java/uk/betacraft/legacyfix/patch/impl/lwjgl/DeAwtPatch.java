@@ -204,7 +204,8 @@ public class DeAwtPatch extends Patch {
         );
 
         displayClass.getDeclaredMethod("setTitle").insertBefore("" +
-            "if ($1 != null && System.getProperty(\"lf.deawt.originalTitle\") == null) {" +
+            "if ($1 == null) { return; }" +
+            "if (System.getProperty(\"lf.deawt.originalTitle\") == null) {" +
             "    System.setProperty(\"lf.deawt.originalTitle\", $1);" +
             "}" +
             "$1 = $1.replace(\"Minecraft Minecraft\", \"Minecraft\");" +
