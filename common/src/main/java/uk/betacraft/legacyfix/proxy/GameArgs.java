@@ -23,6 +23,10 @@ public class GameArgs {
         return session;
     }
 
+    public static String getAssetIndexId() {
+        return Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
+    }
+
     public static String getUuid() {
         if (uuid == null) {
             uuid = MinecraftApi.getUUID(username);
@@ -171,8 +175,9 @@ public class GameArgs {
             .replace("Minecraft", "")
             .replace("Beta ", "b")
             .replace("Alpha ", "a")
-            .replace("Infdev", "inf")
-            .replace("v", "")
+            .replace("Infdev", "inf-(date)")
+            .replace("Indev", "in-(date)")
+            .replaceAll("v([0-9])", "$1")
             .trim();
 
         if (title.startsWith("0.")) {
@@ -180,6 +185,7 @@ public class GameArgs {
         }
 
         Logger.debug("Game version: " + title);
+        Agent.setSetting("lf.version", title);
         resolveIndex(title);
     }
 

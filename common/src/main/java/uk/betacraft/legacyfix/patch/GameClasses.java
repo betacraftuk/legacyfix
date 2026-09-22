@@ -29,7 +29,7 @@ public class GameClasses {
 
         for (String path : typicalPaths) {
             CtClass cls = patchPool.getRawClass(path);
-            if (cls != null) {
+            if (cls != null && cls.getDeclaredFields().length > 0) {
                 minecraftAppletClass = cls.getName();
                 break;
             }
@@ -60,16 +60,29 @@ public class GameClasses {
                     minecraftClass = className;
                 }
             }
-        } else {
+        } else findMain: {
             CtClass clientClass = patchPool.getRawClass("net.minecraft.client.Minecraft");
             if (clientClass != null) {
                 minecraftClass = clientClass.getName();
-            } else {
-                try {
-                    minecraftClass = findMinecraftFromMain(patchPool);
-                } catch (Exception e) {
-                    Logger.error("GameClasses", e);
-                }
+                break findMain;
+            }
+
+            CtClass pcClass1 = patchPool.getRawClass("com.mojang.rubydung.RubyDung");
+            if (pcClass1 != null) {
+                minecraftClass = pcClass1.getName();
+                break findMain;
+            }
+
+            CtClass pcClass2 = patchPool.getRawClass("com.mojang.minecraft.RubyDung");
+            if (pcClass2 != null) {
+                minecraftClass = pcClass2.getName();
+                break findMain;
+            }
+
+            try {
+                minecraftClass = findMinecraftFromMain(patchPool);
+            } catch (Exception e) {
+                Logger.error("GameClasses", e);
             }
         }
 
