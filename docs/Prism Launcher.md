@@ -1,49 +1,9 @@
-# Using LegacyFix with Prism Launcher
+# Using LegacyFix in Prism Launcher
 
-## Download the latest release from GitHub
+## 1. Download the latest release from GitHub
 Head over to the [latest release](https://github.com/betacraftuk/legacyfix/releases/latest) of LegacyFix and download the jar.
 
-## Add LegacyFix to Prism Launcher
-> [!IMPORTANT]
-> Make sure `Enable online fixes` is disabled in instance settings *and* global settings, as LegacyFix does not work with it.
->
-> To do this, edit the instance, go to `Settings` > `Tweaks`, and under `Legacy Tweaks`, turn off `Enable online fixes (experimental)`.
->
-> For Global settings, go to `Settings` > `Minecraft` > `Tweaks`, and under `Legacy Tweaks` turn off `Enable online fixes (experimental)`.
-
-Create a new instance or edit an existing one, then go to the **Version** tab.<br>
-On the sidebar, click the **Add Agents** button:
-![](../.github/img/prism/1.webp)
-
-And point the launcher to the jar file downloaded earlier:
-![](../.github/img/prism/2.webp)
-
-A new entry should appear in the list:
-![](../.github/img/prism/3.webp)
-
-> [!IMPORTANT]
-> The following is needed only for versions **<ins>older than a1.0.6</ins>**.
->
-> **Skip to the [Update Java](#update-java) section for a1.0.6 or newer**.
-
----
-
-Select the **Minecraft** component, click the **Customize** button, followed by **Edit**:
-![](../.github/img/prism/4.webp)
-
-The JSON of the Minecraft component should now open in your default text editor.
-
-Find the `+traits` list and remove `legacyServices` and `legacyLaunch` from it.<br>
-Then, locate the `"mainClass"` property and change the value to:
-```
-uk.betacraft.legacyfix.applet.AppletLauncher
-```
-
-![](../.github/img/prism/5.webp)
-
-Save the file and close your text editor.
-
-### Update Java
+## 2. Update Java for your instance
 > [!IMPORTANT]
 > This is **required** for LegacyFix to work properly.
 
@@ -53,15 +13,33 @@ If you're using Windows 10/11 with Intel HD Graphics and <ins>*you know*</ins> t
 Edit your instance, go to the **Settings** tab, then `Java` tab, then select the "Java Installation" checkbox.
 Click on the **Open Java Downloader** button.
 
-![](../.github/img/prism/6.webp)
+![](../.github/img/prism/1.webp)
 
 Pick Azul Zulu (recommended) or Adoptium, and select the most recent release of Java 8:
 
-![](../.github/img/prism/7.webp)
+![](../.github/img/prism/2.webp)
 
 Click on **Download** and wait for it to finish.
 
 Next, click the **Detect** button and select the Java installation you've just downloaded and click **Ok**:
-![](../.github/img/prism/8.webp)
+![](../.github/img/prism/3.webp)
 
-Done! You're ready to play Minecraft with LegacyFix.
+## 3. Apply LegacyFix to your Prism instance
+Click the `Edit` button for your instance, then go to the **Version** tab.<br>
+On the sidebar, click the **Add Agents** button:
+![](../.github/img/prism/4.webp)
+
+And point the launcher to the jar file downloaded earlier:
+![](../.github/img/prism/5.webp)
+
+A new entry should appear in the list:
+![](../.github/img/prism/6.webp)
+
+Now click the `Launch` button to launch the instance, and wait for this message to appear:
+![](../.github/img/installed-message.webp)
+
+Close the message, and click the `Launch` button again.
+### *And it's done!* You're now ready to play Minecraft with LegacyFix.
+<br>
+
+**Note:** The above message about installing LegacyFix might appear again in the future if you change the Minecraft version of the instance, or edit/revert component json of Minecraft or LWJGL. If you want to prevent LegacyFix from overwriting your intentional changes to `net.minecraft.json` or `org.lwjgl.json`, open the [Additional Settings](Additional%20settings.md) doc at ***Disable patching `net.minecraft.json`/`org.lwjgl.json` when using Prism/MultiMC***.
