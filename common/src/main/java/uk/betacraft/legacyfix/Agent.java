@@ -32,16 +32,19 @@ public class Agent {
 
         if (LaunchWrapperInjector.inject(inst)) {
             Logger.info("Injected LaunchWrapper transformer");
+            runPatches(inst, false);
             return;
         }
 
         if (FmlInjector.inject()) {
             Logger.info("Injected legacy FML transformer");
+            runPatches(inst, false);
             return;
         }
 
         if (FabricInjector.inject()) {
             Logger.info("Injected Fabric mod");
+            runPatches(inst, false);
             return;
         }
 
@@ -50,7 +53,11 @@ public class Agent {
         }
 
         active = true;
-        final Patcher patcher = new Patcher(ClassPool.getDefault());
+        runPatches(inst, true);
+    }
+
+    private static void runPatches(final Instrumentation inst, boolean runClasspathPatches) {
+        final Patcher patcher = new Patcher(ClassPool.getDefault(), true, runClasspathPatches);
         patcher.apply();
 
         Map<String, List<CtTransformer>> ctTransformersMap = patcher.getCtTransformers();
@@ -134,8 +141,8 @@ public class Agent {
         return SETTINGS;
     }
 
-    public static String getSetting(String key, String alt) {
-        return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
+    public static <T> T getSetting(String key, T alt) {
+        return getSettings().containsKey(key) ? (T) getSettings().get(key) : alt;
     }
 
     public static boolean getBooleanSetting(String key, boolean alt) {
@@ -151,6 +158,9 @@ public class Agent {
 
     public static void setSetting(String key, Object value) {
         SETTINGS.put(key, value);
+        // Persist settings established at javaagent stage for when loading LegacyFix as a Forge mod.
+        // Very important for having working sounds and other assets.
+        System.getProperties().put(key, value);
     }
 
     public static boolean hasSetting(String key) {

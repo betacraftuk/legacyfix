@@ -4,8 +4,10 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.GameArgs;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -14,10 +16,11 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class AssetUtils {
     private static File ASSETS_DIR = null;
-    private static File RESOURCES_DIR = null;
+    private static File OVERRIDE_DIR = null;
 
     public static List<AssetObject> assets = new LinkedList<AssetObject>();
 
@@ -29,12 +32,13 @@ public class AssetUtils {
         return ASSETS_DIR;
     }
 
-    private static File getResourcesDir() {
-        if (RESOURCES_DIR == null) {
-            RESOURCES_DIR = new File(GameArgs.getGameDir(), "resources/");
+    private static File getOverrideDir() {
+        if (OVERRIDE_DIR == null) {
+            OVERRIDE_DIR = new File(GameArgs.getGameDir(), "assets-override/");
+            OVERRIDE_DIR.mkdirs();
         }
 
-        return RESOURCES_DIR;
+        return OVERRIDE_DIR;
     }
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
@@ -45,7 +49,7 @@ public class AssetUtils {
 
         return new JSONObject(
             new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))
-        ).getJSONObject("objects");
+        );
     }
 
     public static String generateTxtIndex() {
@@ -133,14 +137,20 @@ public class AssetUtils {
         try {
             List<File> localAssetsToSkip = new LinkedList<File>();
 
-            for (String key : assetIndex.keySet()) {
-                JSONObject assetObject = assetIndex.getJSONObject(key);
+            JSONObject objects = assetIndex.getJSONObject("objects");
+            JSONObject custom = assetIndex.optJSONObject("custom", new JSONObject());
+            for (String customObj : custom.keySet()) {
+                objects.put(customObj, custom.get(customObj));
+            }
+
+            for (String key : objects.keySet()) {
+                JSONObject assetObject = objects.getJSONObject(key);
 
                 final String hash = assetObject.getString("hash");
                 long size;
 
                 // Use local file if it overrides the asset at its path
-                File localAsset = new File(getResourcesDir(), key).getCanonicalFile();
+                File localAsset = new File(getOverrideDir(), key).getCanonicalFile();
                 localAssetsToSkip.add(localAsset);
 
                 final String path;
@@ -156,7 +166,7 @@ public class AssetUtils {
             }
 
             // Add the remaining (additional) local asset files
-            List<File> localAssets = recursePaths(getResourcesDir(), new LinkedList<File>());
+            List<File> localAssets = recursePaths(getOverrideDir(), new LinkedList<File>());
             localAssets.removeAll(localAssetsToSkip);
 
             for (File additionalAsset : localAssets) {
@@ -165,7 +175,7 @@ public class AssetUtils {
                 }
 
                 String key = additionalAsset.getCanonicalPath().substring(
-                    getResourcesDir().getCanonicalPath().length() + 1
+                    getOverrideDir().getCanonicalPath().length() + 1
                 ).replace("\\", "/");
 
                 if (key.indexOf('/') == -1
@@ -182,8 +192,56 @@ public class AssetUtils {
 
             System.setProperty("assets-loaded", "true");
         } catch (Throwable t) {
-            Logger.error("getAssets", t);
+            Logger.error("initAssets", t);
         }
+    }
+
+    public static void downloadAssets() {
+        String assetIndexPath = GameArgs.getAssetIndexPath();
+        if (assetIndexPath == null) {
+            return;
+        }
+
+        File assetIndexFile = new File(assetIndexPath);
+
+        JSONObject assetIndexJson;
+        try {
+            assetIndexJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexFile))));
+        } catch (FileNotFoundException e) {
+            Logger.error("Could not read local asset index json", e);
+            return;
+        }
+
+        File assetsDir = new File(GameArgs.getAssetsDir());
+
+        JSONObject objects = assetIndexJson.optJSONObject("custom", new JSONObject());
+
+        Set<String> assetSet = objects.keySet();
+        for (String assetId : assetSet) {
+            JSONObject asset = objects.getJSONObject(assetId);
+            String hash = asset.getString("hash");
+            String hashPath = "/" + hash.substring(0, 2) + "/" + hash;
+
+            File assetFile = new File(assetsDir, "objects" + hashPath);
+            if (assetFile.exists() && assetFile.length() == asset.getLong("size")) {
+                continue;
+            }
+
+            String url;
+            if (asset.has("url")) {
+                url = asset.getString("url");
+            } else {
+                url = "https://resources.download.minecraft.net" + hashPath;
+            }
+
+            Logger.info("Downloading asset: '" + assetId + "'");
+            if (!RequestUtil.download(url, assetFile)) {
+                Logger.error("launcher", "Failed to download asset '" + assetId + "' from index '" + GameArgs.getAssetIndexId() + "'");
+                return;
+            }
+        }
+
+        Logger.info("All custom assets were downloaded for asset index '" + GameArgs.getAssetIndexId() + "'");
     }
 
     // Used by GameDirPatch
@@ -224,7 +282,7 @@ public class AssetUtils {
 
     // Used by GameDirPatch
     public static boolean isExpectedAssetsDir(String path) {
-        return getExpectedAssetsDir().getPath().equals(path);
+        return getExpectedAssetsDir().getPath().equals(path) || path.equals("./assets");
     }
 
     // Used by GameDirPatch
@@ -235,7 +293,9 @@ public class AssetUtils {
     }
 
     public static File getExpectedAssetsDir() {
-        // TODO 13w16a-13w23b
+        if (Agent.getSetting("lf.usesWorkDir", false)) {
+            return new File(GameArgs.getGameDir(), "assets");
+        }
         return getAssetsDir();
     }
 

@@ -23,7 +23,7 @@ public class CpwTweaker implements IFMLCallHook {
         Tweakers.removeLwjglException(classLoader);
         patchLogger();
 
-        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()));
+        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()), false, true);
         patcher.apply();
 
         classLoader.getClass()

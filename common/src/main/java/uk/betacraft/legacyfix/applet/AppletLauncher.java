@@ -1,22 +1,22 @@
 package uk.betacraft.legacyfix.applet;
 
+import uk.betacraft.legacyfix.Launcher;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.impl.misc.LevelProxyPatch;
 import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.proxy.LevelProxyConfig;
+import uk.betacraft.legacyfix.proxy.assets.AssetUtils;
 
 import java.applet.Applet;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AppletLauncher {
+public class AppletLauncher extends Launcher {
     private static final String[] MAIN_CLASS_CANDIDATES = {
         "net.minecraft.client.MinecraftApplet",
         "com.mojang.minecraft.MinecraftApplet"
     };
-
-    private static List<String> arguments;
 
     public static void main(String[] args) {
         GameArgs.setArgsRaw(args);
@@ -37,6 +37,10 @@ public class AppletLauncher {
         }
 
         arguments = parsedArgs;
+        if (!hasKey("sessionid") && hasKey("session")) {
+            addKey("sessionid");
+            arguments.add(getValue("session", "-"));
+        }
 
         // c0.30
         if (!hasKey("demo")) {
@@ -51,6 +55,8 @@ public class AppletLauncher {
         if (LevelProxyPatch.applied()) {
             LevelProxyConfig.promptIfNeeded();
         }
+
+        AssetUtils.downloadAssets();
 
         launch();
     }
@@ -100,39 +106,5 @@ public class AppletLauncher {
         }
 
         Logger.error("Failed to find the main Minecraft class");
-    }
-
-    public static String getValue(String key, String alt) {
-        if (!hasKey(key)) {
-            Logger.debug("Key " + key + " not found");
-            return alt;
-        }
-
-        if (!hasValue(key)) {
-            return "true";
-        }
-
-        return arguments.get(arguments.indexOf("--" + key) + 1);
-    }
-
-    public static void addKey(String key) {
-        arguments.add("--" + key);
-    }
-
-    public static boolean hasKey(String key) {
-        return arguments.contains("--" + key);
-    }
-
-    public static boolean hasValue(String key) {
-        if (!hasKey(key)) {
-            return false;
-        }
-
-        int nextIndex = arguments.indexOf("--" + key) + 1;
-        if (arguments.size() <= nextIndex) {
-            return false;
-        }
-
-        return !arguments.get(nextIndex).startsWith("--");
     }
 }

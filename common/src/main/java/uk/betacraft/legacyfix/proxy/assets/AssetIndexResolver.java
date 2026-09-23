@@ -116,6 +116,14 @@ public class AssetIndexResolver {
         }
     }
 
+    public static JSONObject getAssetIndexSnippetJson(String id) {
+        if (assetIndexesRoot == null) {
+            init();
+        }
+
+        return assetIndexesRoot.optJSONObject(id);
+    }
+
     public static File ensureAssetIndex(String id, File targetFile) throws Exception {
         if (assetIndexesRoot == null) {
             init();
@@ -123,6 +131,10 @@ public class AssetIndexResolver {
 
         JSONObject entry = assetIndexesRoot.optJSONObject(id);
         if (entry == null) {
+            if (targetFile.exists() && targetFile.length() > 0) {
+                Logger.error("No known asset index entry for '" + id + "', assuming existing index json is fine");
+                return targetFile;
+            }
             throw new RuntimeException("No asset index entry for " + id);
         }
 
