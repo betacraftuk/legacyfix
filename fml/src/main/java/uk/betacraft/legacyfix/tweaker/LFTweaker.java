@@ -30,7 +30,7 @@ public class LFTweaker implements ITweaker {
         Tweakers.removeLwjglException(classLoader);
         patchLogger();
 
-        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()));
+        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()), false, true);
         if (!Agent.loaded) {
             patcher.patches.add(new FmlModContainerPatch());
         }

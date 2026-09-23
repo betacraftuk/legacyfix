@@ -42,7 +42,7 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
         Arguments args = provider.getArguments();
         GameArgs.setArgsRaw(args.toArray());
 
-        this.patcher = new Patcher(this.mainPool);
+        this.patcher = new Patcher(this.mainPool, false, true);
         this.patcher.apply();
     }
 

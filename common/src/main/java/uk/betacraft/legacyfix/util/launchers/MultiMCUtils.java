@@ -35,7 +35,7 @@ public class MultiMCUtils {
     }
 
     protected static void findAssetsDir(MMCVersionInfo mmcVersionInfo) {
-        if (Agent.active || mmcVersionInfo.forgeVersion == null) {
+        if (mmcVersionInfo.forgeVersion == null) {
             // Rely on other, better methods when not running as a Forge mod.
             return;
         }
@@ -43,9 +43,12 @@ public class MultiMCUtils {
         // Try finding ${assets_root} because we will never get it from Prism/MMC if we're running Forge.
         try {
             if (Agent.getSetting("lf.assetsDir", null) == null) {
-                File potentialAssetsDir = new File("../../../assets");
+                File potentialAssetsDir = new File(new File("").getAbsoluteFile().getParentFile().getParentFile().getParentFile(), "assets");
                 if (new File(potentialAssetsDir, "objects").exists()) {
-                    Agent.setSetting("lf.assetsDir", potentialAssetsDir.getCanonicalPath());
+                    String absPath = potentialAssetsDir.getAbsolutePath();
+                    Agent.setSetting("lf.assetsDir", absPath);
+
+                    Logger.debug("Found assets dir: " + absPath);
                 } else {
                     Logger.error("Couldn't find assets root directory! Please specify the path to your assets directory with the -Dlf.assetsDir argument.");
                 }
@@ -109,7 +112,7 @@ public class MultiMCUtils {
 
         boolean changed = false;
 
-        if (!hasForge && netMinecraftJson.has("+traits")) {
+        if (netMinecraftJson.has("+traits")) {
             JSONArray traits = netMinecraftJson.getJSONArray("+traits");
             Iterator<Object> it = traits.iterator();
             while (it.hasNext()) {
@@ -118,7 +121,7 @@ public class MultiMCUtils {
                     continue;
                 }
                 String trait = (String) element;
-                if (trait.equals("legacyServices") || trait.equals("legacyLaunch")) {
+                if (trait.equals("legacyServices") || (!hasForge && trait.equals("legacyLaunch"))) {
                     it.remove();
                     changed = true;
                 }

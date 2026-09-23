@@ -17,7 +17,7 @@ public class FmlInjector {
             return true;
         } catch (Exception e) {
             if (!(e instanceof ClassNotFoundException)) {
-                Logger.error("Error injecting into LaunchWrapper", e);
+                Logger.error("Error injecting into FML", e);
             }
 
             return false;

@@ -29,6 +29,7 @@ public class GameClasses {
 
         for (String path : typicalPaths) {
             CtClass cls = patchPool.getRawClass(path);
+            // check count of fields, to filter out pre-Classic's empty & unusable MinecraftApplet class
             if (cls != null && cls.getDeclaredFields().length > 0) {
                 minecraftAppletClass = cls.getName();
                 break;

@@ -13,7 +13,7 @@ import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
 import java.util.*;
 
 public class Patcher implements PatchPool {
-    public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
+    public static final Patch[] CLASSPATH_BUILT_IN_PATCHES = new Patch[]{
         new ProxyPatch(),
         new LauncherPatch(),
         new LevelProxyPatch(),
@@ -23,7 +23,6 @@ public class Patcher implements PatchPool {
         new DeAwtPatch(),
         new MousePatch(),
         new VSyncPatch(),
-        new GameDirPatch(),
         new IndevSoundPatch(),
         new IntelGraphicsPatch(),
         new ScreenshotPatch(),
@@ -35,14 +34,24 @@ public class Patcher implements PatchPool {
         new DemoPatch()
     };
 
+    public static final Patch[] SYSTEM_BUILT_IN_PATCHES = new Patch[]{
+        new GameDirPatch()
+    };
+
     public final List<Patch> patches = new ArrayList<Patch>();
     private final ClassPool pool;
     private final List<Transformer> transformers = new ArrayList<Transformer>();
     private final Map<String, List<CtTransformer>> ctTransformers = new HashMap<String, List<CtTransformer>>();
 
-    public Patcher(ClassPool pool) {
+    public Patcher(ClassPool pool, boolean patchSystem, boolean patchClasspath) {
         this.pool = pool;
-        this.patches.addAll(Arrays.asList(BUILT_IN_PATCHES));
+        if (patchSystem) {
+            this.patches.addAll(Arrays.asList(SYSTEM_BUILT_IN_PATCHES));
+        }
+
+        if (patchClasspath) {
+            this.patches.addAll(Arrays.asList(CLASSPATH_BUILT_IN_PATCHES));
+        }
     }
 
     public void apply() {

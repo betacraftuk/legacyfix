@@ -17,19 +17,16 @@ Note: If you don't have a GitHub account, download the zip [here](https://nightl
 
 ## Installation
 
-### Forge
-LegacyFix acts as a core mod. Depending on the game version:
-* **For Minecraft 1.3 or older**: Follow [Other](#other).
-* **For Minecraft 1.4**: Drop the `.jar` file into your `.minecraft/coremods` folder.
-* **For Minecraft 1.5 or newer**: Drop the `.jar` file into your `.minecraft/mods` folder.
-
 ### Fabric
 LegacyFix can be installed as a standard mod. Simply drop the `.jar` file into your `.minecraft/mods` folder.
 
 All Fabric-based loaders (Legacy Fabric, Babric, Ornithe, etc.) are supported.
 
+### Forge
+Follow [Other](#other).
+
 ### Other
-If you are playing Vanilla or using an older mod loader (like Risugami's ModLoader), you can run LegacyFix as a Java Agent.
+If you are playing Vanilla, or using Forge or an older mod loader (like Risugami's ModLoader), you can run LegacyFix as a Java Agent.
 * [Tutorial for Prism Launcher](docs/Prism%20Launcher.md)
 * [Tutorial for MultiMC](docs/MultiMC.md)
 
