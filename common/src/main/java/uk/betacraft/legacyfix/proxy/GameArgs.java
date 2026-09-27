@@ -56,11 +56,13 @@ public class GameArgs {
 
     public static String getAssetIndexPath() {
         String index = Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
+        String ver = Agent.getSetting("lf.version", null);
         if (isInvalidIndex(index)) {
-            String ver = Agent.getSetting("lf.version", null);
             if (ver != null) {
                 index = resolveIndex(ver);
             }
+        } else if (ver != null) { // we still need to apply settings even if asset index is valid
+            AssetIndexResolver.applySettings(ver);
         }
 
         if (index == null) {
