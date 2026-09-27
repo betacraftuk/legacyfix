@@ -151,6 +151,7 @@ public class Agent {
 
     public static void setSetting(String key, Object value) {
         SETTINGS.put(key, value);
+        System.getProperties().put(key, value);
     }
 
     public static boolean hasSetting(String key) {

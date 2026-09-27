@@ -1,8 +1,10 @@
 package uk.betacraft.legacyfix.patch.impl.misc;
 
 import javassist.*;
-import javassist.expr.ExprEditor;
-import javassist.expr.MethodCall;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.CodeIterator;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.GameArgs;
@@ -19,35 +21,9 @@ public class ProxyPatch extends Patch {
     public void apply(PatchPool patchPool) throws Exception {
         String version = Agent.getSetting("lf.version", null);
         if (version == null) {
-            String minecraftClass = GameClasses.findMinecraftClass(patchPool);
-            if (minecraftClass != null) {
-                patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
-                    public void transform(CtClass ctClass) throws Exception {
-                        for (CtMethod method : ctClass.getDeclaredMethods()) {
-                            if (!"()V".equals(method.getMethodInfo().getDescriptor())) {
-                                continue;
-                            }
-
-                            method.instrument(new ExprEditor() {
-                                @Override
-                                public void edit(MethodCall m) throws CannotCompileException {
-                                    if ("org.lwjgl.opengl.Display".equals(m.getClassName())
-                                        && "setTitle".equals(m.getMethodName())
-                                    ) {
-                                        m.replace("" +
-                                            "org.lwjgl.opengl.Display.setTitle($1);" +
-                                            "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
-                                            "gameArgsClass.getMethod(\"setVersion\", new Class[]{String.class}).invoke(null, new Object[]{ $1 });"
-                                        );
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-            } else {
-                Logger.error("ProxyPatch", "Couldn't find the main game class! Please specify your game version with the -Dlf.version argument.");
-            }
+            readGameVersion(patchPool);
+        } else {
+            GameArgs.setVersion(version);
         }
 
         // Set by tweakers before patches are applied
@@ -79,6 +55,69 @@ public class ProxyPatch extends Patch {
             "If you experience issues, report this to the LegacyFix GitHub along with info about your game setup.",
             ""
         );
+    }
+
+    private void readGameVersion(PatchPool patchPool) throws Exception {
+        String minecraftClass = GameClasses.findMinecraftClass(patchPool);
+        if (minecraftClass == null) {
+            Logger.error("Couldn't find the main game class! Please specify your game version with the -Dlf.version argument.");
+            return;
+        }
+
+        if (minecraftClass.equals("com.mojang.rubydung.RubyDung") || minecraftClass.equals("com.mojang.minecraft.RubyDung")) {
+            // pre-Classic does not call Display.setTitle
+            GameArgs.setVersion("Minecraft pc-(date)");
+            return;
+        }
+
+        CtClass ctClass = patchPool.getRawClass(minecraftClass);
+        for (CtMethod method : ctClass.getDeclaredMethods()) {
+            try {
+                CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
+                CodeIterator codeIterator = codeAttribute.iterator();
+                ConstPool cp = method.getMethodInfo().getConstPool();
+
+                while (codeIterator.hasNext()) {
+                    int pos = codeIterator.next();
+                    int opcode = codeIterator.byteAt(pos);
+                    if (opcode != Opcode.LDC && opcode != Opcode.LDC_W) {
+                        continue;
+                    }
+
+                    int ldcIndex;
+                    if (opcode == Opcode.LDC_W) {
+                        ldcIndex = codeIterator.u16bitAt(pos + 1);
+                    } else {
+                        ldcIndex = codeIterator.byteAt(pos + 1);
+                    }
+                    if (cp.getTag(ldcIndex) != ConstPool.CONST_String) {
+                        continue;
+                    }
+
+                    String minecraftTitle = cp.getStringInfo(ldcIndex);
+
+                    int posInvoke = pos + 2 + (opcode == Opcode.LDC_W ? 1 : 0);
+                    if (!codeIterator.hasNext() || codeIterator.byteAt(posInvoke) != Opcode.INVOKESTATIC) {
+                        continue;
+                    }
+
+                    int methodIndex = codeIterator.u16bitAt(posInvoke + 1);
+                    if (!"org.lwjgl.opengl.Display".equals(cp.getMethodrefClassName(methodIndex))) {
+                        continue;
+                    }
+
+                    if ("setTitle".equals(cp.getMethodrefName(methodIndex))) {
+                        GameArgs.setVersion(minecraftTitle);
+                        return;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (Agent.getSetting("lf.version", null) == null) {
+            Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
+        }
     }
 
     private boolean findArgsWithApplet(PatchPool patchPool) throws Exception {
