@@ -70,7 +70,7 @@ public class ProfileHandler extends HandlerBase {
         }
 
         JSONObject skinJson = texturesJson.getJSONObject("textures").getJSONObject("SKIN");
-        boolean alex = skinJson.has("metadata") && skinJson.getJSONObject("metadata").getString("model").equals("slim");
+        boolean alex = skinJson.has("metadata") && skinJson.getJSONObject("metadata").optString("model").equals("slim");
         String skinUrl = skinJson.getString("url");
 
         Request req = new Request();
