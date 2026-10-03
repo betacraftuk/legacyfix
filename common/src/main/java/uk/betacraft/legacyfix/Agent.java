@@ -134,8 +134,8 @@ public class Agent {
         return SETTINGS;
     }
 
-    public static String getSetting(String key, String alt) {
-        return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
+    public static <T> T getSetting(String key, T alt) {
+        return getSettings().containsKey(key) ? (T) getSettings().get(key) : alt;
     }
 
     public static boolean getBooleanSetting(String key, boolean alt) {

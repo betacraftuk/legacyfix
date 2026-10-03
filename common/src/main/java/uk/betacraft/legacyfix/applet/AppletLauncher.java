@@ -4,6 +4,7 @@ import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.impl.misc.LevelProxyPatch;
 import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.proxy.LevelProxyConfig;
+import uk.betacraft.legacyfix.proxy.assets.AssetUtils;
 
 import java.applet.Applet;
 
@@ -23,6 +24,8 @@ public class AppletLauncher {
         if (LevelProxyPatch.applied()) {
             LevelProxyConfig.promptIfNeeded();
         }
+
+        AssetUtils.downloadAssets();
 
         launch();
     }

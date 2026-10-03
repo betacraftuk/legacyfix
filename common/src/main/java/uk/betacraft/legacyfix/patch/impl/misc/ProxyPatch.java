@@ -31,9 +31,39 @@ public class ProxyPatch extends Patch {
             return;
         }
 
-        // TODO: Prism Launcher detection
-        //  "org.prismlauncher.launch.mainclass" isn't yet set here
-        if (System.getProperty("sun.java.command") != null && System.getProperty("sun.java.command").contains("uk.betacraft.legacyfix.applet.AppletLauncher")) {
+        String cmd = System.getProperty("sun.java.command");
+        if (cmd != null) {
+            if (cmd.contains("org.prismlauncher.EntryPoint") &&
+                findArgsByMMCLauncher(
+                    patchPool,
+                    "org.prismlauncher.launcher.impl.AbstractLauncher",
+                    "org.prismlauncher.utils.Parameters",
+                    "getList",
+                    "getString"
+                )) {
+                return;
+            }
+
+            if (cmd.contains("org.multimc.EntryPoint") &&
+                findArgsByMMCLauncher(
+                    patchPool,
+                    "org.multimc.onesix.OneSixLauncher",
+                    "org.multimc.ParamBucket",
+                    "allSafe",
+                    "firstSafe"
+                )) {
+                return;
+            }
+
+            if (cmd.contains("uk.betacraft.legacyfix.applet.AppletLauncher")) {
+                return;
+            }
+        }
+
+        String prismArgs = System.getProperty("org.prismlauncher.launch.gameargs");
+        if (!Agent.active && prismArgs != null) {
+            String[] args = prismArgs.split("\u001F");
+            GameArgs.setArgsRaw(args);
             return;
         }
 
@@ -159,9 +189,11 @@ public class ProxyPatch extends Patch {
 
                 mainMethod.insertBefore("" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
+                    "Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "boolean initialized = ((java.lang.Boolean) gameArgsClass.getMethod(\"initialized\", null).invoke(null, null)).booleanValue();" +
                     "if (!initialized) {" +
                     "   gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{$1});" +
+                    "   assetUtilsClass.getMethod(\"downloadAssets\", null).invoke(null, null);" +
                     "}"
                 );
 
@@ -175,6 +207,10 @@ public class ProxyPatch extends Patch {
                     "       applet.getParameter(\"username\")," +
                     "       applet.getParameter(\"sessionid\")" +
                     "   });" +
+                    "}" +
+                    "if (!initialized) {" +
+                    "   Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
+                    "   assetUtilsClass.getMethod(\"downloadAssets\", null).invoke(null, null);" +
                     "}"
                 );
             }
@@ -198,7 +234,43 @@ public class ProxyPatch extends Patch {
                 CtMethod mainMethod = ctClass.getDeclaredMethod("main");
                 mainMethod.insertBefore("" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
-                    "gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{$1});"
+                    "gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{$1});" +
+                    "Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
+                    "assetUtilsClass.getMethod(\"downloadAssets\", null).invoke(null, null);"
+                );
+            }
+        });
+
+        return true;
+    }
+
+    private boolean findArgsByMMCLauncher(final PatchPool patchPool, String mmcLauncherName, final String mmcParamsName, final String mmcParamsGetListName, final String mmcParamsGetStringName) throws Exception {
+        if (!Agent.active) {
+            return false;
+        }
+
+        CtClass launcherClass = patchPool.getRawClass(mmcLauncherName);
+        if (launcherClass == null) {
+            return false;
+        }
+
+        patchPool.addCtTransformer(mmcLauncherName, new CtTransformer() {
+            public void transform(CtClass ctClass) throws Exception {
+                CtClass mmcParamsClass = patchPool.getRawClass(mmcParamsName);
+                if (mmcParamsClass == null) {
+                    return;
+                }
+
+                CtConstructor mainMethod = ctClass.getDeclaredConstructor(new CtClass[]{mmcParamsClass});
+                mainMethod.insertBefore("" +
+                    "String mainClass = $1." + mmcParamsGetStringName + "(\"mainClass\", \"\");" +
+                    "if (!mainClass.equals(\"uk.betacraft.legacyfix.applet.AppletLauncher\") && !mainClass.equals(\"uk.betacraft.legacyfix.OneSixLauncher\")) {" +
+                    "    java.util.List argsList = $1." + mmcParamsGetListName + "(\"param\", new java.util.ArrayList());" +
+                    "    Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
+                    "    gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{argsList.toArray(new String[0])});" +
+                    "    Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
+                    "    assetUtilsClass.getMethod(\"downloadAssets\", null).invoke(null, null);" +
+                    "}"
                 );
             }
         });
@@ -216,7 +288,9 @@ public class ProxyPatch extends Patch {
                 CtMethod mainMethod = ctClass.getDeclaredMethod("setParameter");
                 mainMethod.insertBefore("" +
                     "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
-                    "gameArgsClass.getMethod(\"setParam\", new Class[]{String.class, String.class}).invoke(null, new Object[]{$1, $2});"
+                    "gameArgsClass.getMethod(\"setParam\", new Class[]{String.class, String.class}).invoke(null, new Object[]{$1, $2});" +
+                    "Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
+                    "assetUtilsClass.getMethod(\"downloadAssets\", null).invoke(null, null);"
                 );
             }
         });

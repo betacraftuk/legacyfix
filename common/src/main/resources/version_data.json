@@ -17,7 +17,8 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.proxy.overlayOuterHeadLayer",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -30,113 +31,60 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.proxy.overlayOuterHeadLayer",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
-        "version": "^c0\\.(?:2[4-9]|30|31)(?:.+)?",
-        "desc": "c0.24_st to c0.31",
+        "version": "^c0\\.(?:2[4-9]|30)(?:.+)?",
+        "desc": "c0.24_st to c0.30",
         "assetIndex": "c0.0.22a_01",
         "settings": [
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
-        "version": "^in-2009.+",
-        "desc": "in-1223 to in-1231",
-        "assetIndex": "c0.0.22a_01",
-        "settings": [
-            "lf.proxy.serveAs64x32",
-            "lf.proxy.convertAlexToSteve",
-            "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
-        ]
-    },
-    {
-        "version": "^in-2010010[4-9](.+)?",
-        "desc": "in-0104 to in-0109",
-        "assetIndex": "20100104",
-        "settings": [
-            "lf.proxy.serveAs64x32",
-            "lf.proxy.convertAlexToSteve",
-            "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
-        ]
-    },
-    {
-        "version": "^in-201001(?:1[0-9]|2[0-3])(.+)?",
-        "desc": "in-0110 to in-0122",
-        "assetIndex": "20100110",
-        "settings": [
-            "lf.proxy.serveAs64x32",
-            "lf.proxy.convertAlexToSteve",
-            "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
-        ]
-    },
-    {
-        "version": "^in-20100(?:1(?:2[4-9]|3[0-1])|20[1-5])(.+)?",
-        "desc": "in-0124 to in-0205",
+        "version": "^c0\\.31(?:.+)?",
+        "desc": "in-1223 to in-0206",
         "assetIndex": "20100124",
         "settings": [
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
-        "version": "^in-201002(?:0[6-9]|1[0-1])(.+)?",
-        "desc": "in-0206 to in-0211",
-        "assetIndex": "20100206",
-        "settings": [
-            "lf.proxy.serveAs64x32",
-            "lf.proxy.convertAlexToSteve",
-            "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
-        ]
-    },
-    {
-        "version": "^in-201002(?:1[2-9]|2[0-3])(.+)?",
-        "desc": "in-0212 to in-0223",
+        "version": "^in-.+",
+        "desc": "in-0206 to in-0223",
         "assetIndex": "20100212",
         "settings": [
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
-        "version": "^inf-20100[2-4].+",
-        "assetIndex": "20100212",
-        "settings": [
-            "lf.proxy.serveAs64x32",
-            "lf.proxy.convertAlexToSteve",
-            "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
-        ]
-    },
-    {
-        "version": "^inf-201006.+",
+        "version": "^inf-.+",
+        "desc": "all infdev versions",
         "assetIndex": "20100607",
         "settings": [
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -148,7 +96,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -160,7 +109,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -172,7 +122,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -184,7 +135,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -196,7 +148,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -208,19 +161,34 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
-        "version": "^(?:a1\\.2\\.[0-6](?:_0[1-5])?(?:[a-b])?(?:-[0-9]{4,6})?|b1\\.[0-1](?:.+)?)$",
-        "desc": "a1.2.0 to b1.1_02",
+        "version": "^a1\\.2\\.0(?:_01)?(?:-[0-9]{4})?$",
+        "desc": "a1.2.0 to a1.2.0_01",
         "assetIndex": "a1.2.0",
         "settings": [
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
+        ]
+    },
+    {
+        "version": "^(?:a1\\.2\\.[0-6](?:_0[1-5])?(?:[a-b])?(?:-[0-9]{4,6})?|b1\\.[0-1](?:.+)?)$",
+        "desc": "a1.2.0_02 to b1.1_02",
+        "assetIndex": "a1.2.0_02",
+        "settings": [
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -232,7 +200,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -244,7 +213,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -256,7 +226,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
-            "java.util.Arrays.useLegacyMergeSort=true"
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
         ]
     },
     {
@@ -267,7 +238,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.rotateBottomTextures",
-            "lf.proxy.overlayOuterBodyToBase"
+            "lf.proxy.overlayOuterBodyToBase",
+            "lf.applet"
         ]
     },
     {
@@ -278,7 +250,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -289,7 +262,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -300,7 +274,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -311,7 +286,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -322,7 +298,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -333,7 +310,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -344,7 +322,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -355,7 +334,8 @@
             "lf.proxy.serveAs64x32",
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
-            "lf.intel"
+            "lf.intel",
+            "lf.applet"
         ]
     },
     {
@@ -378,8 +358,9 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
-            "--limit13w16a",
-            "--usesWorkDir"
+            "lf.limit13w16a",
+            "lf.usesWorkDir",
+            "lf.onesix"
         ]
     },
     {
@@ -391,8 +372,9 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
-            "--limit13w16a",
-            "--usesWorkDir"
+            "lf.limit13w16a",
+            "lf.usesWorkDir",
+            "lf.onesix"
         ]
     },
     {
@@ -404,8 +386,9 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
-            "--limit13w16a",
-            "--usesWorkDir"
+            "lf.limit13w16a",
+            "lf.usesWorkDir",
+            "lf.onesix"
         ]
     },
     {
@@ -417,8 +400,9 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
-            "--limit13w23a",
-            "--usesWorkDir"
+            "lf.limit13w23a",
+            "lf.usesWorkDir",
+            "lf.onesix"
         ]
     },
     {
@@ -430,7 +414,8 @@
             "lf.proxy.convertAlexToSteve",
             "lf.proxy.overlayOuterBodyToBase",
             "lf.intel",
-            "--usesWorkDir"
+            "lf.limit13w23a",
+            "lf.usesWorkDir"
         ]
     },
     {

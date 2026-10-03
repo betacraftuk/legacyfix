@@ -1,6 +1,7 @@
 package uk.betacraft.legacyfix.util.web;
 
 import org.json.JSONObject;
+import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 
 import java.io.*;
@@ -119,7 +120,11 @@ public class RequestUtil {
         try {
             URL url = RequestUtil.createDirectURL(sourceUrl);
 
-            BufferedInputStream bin = new BufferedInputStream(url.openStream());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", "LegacyFix " + Agent.VERSION);
+
+            BufferedInputStream bin = new BufferedInputStream(con.getInputStream());
             FileOutputStream fos = new FileOutputStream(destination);
             byte[] buffer = new byte[1024];
             int bytesRead;

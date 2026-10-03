@@ -42,6 +42,10 @@ public class GameArgs {
         return Agent.hasSetting("lf.demo");
     }
 
+    public static String getAssetIndexId() {
+        return Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
+    }
+
     @SuppressWarnings("unused")
     public static String getServerAddress() {
         return getValue("server", null);
@@ -74,7 +78,28 @@ public class GameArgs {
     }
 
     public static String getAssetsDir() {
-        return Agent.getSetting("lf.assetsDir", "assets");
+        if (Agent.getSetting("lf.assetsDir", null) != null) {
+            return Agent.getSetting("lf.assetsDir", null);
+        }
+
+        try {
+            File potentialAssetsDir = new File(new File("").getAbsoluteFile().getParentFile().getParentFile().getParentFile(), "assets");
+            File potentialObjectsDir = new File(potentialAssetsDir, "objects");
+            if (potentialObjectsDir.isDirectory()) {
+                String absPath = potentialAssetsDir.getAbsolutePath();
+                Agent.setSetting("lf.assetsDir", absPath);
+
+                Logger.debug("Found assets dir: " + absPath);
+                return absPath;
+            } else {
+                Logger.error("getAssetsDir", "Couldn't find assets root directory! Please specify the path to your assets directory with the -Dlf.assetsDir argument.");
+            }
+        } catch (Throwable ignored) {
+            if (Agent.getSetting("lf.assetsDir", null) == null) {
+                Logger.error("getAssetsDir", "Couldn't get assets root directory! Please specify the path to your assets directory with the -Dlf.assetsDir argument.");
+            }
+        }
+        return "assets";
     }
 
     public static String getAssetIndexPath() {
@@ -213,8 +238,9 @@ public class GameArgs {
             .replace("Minecraft", "")
             .replace("Beta ", "b")
             .replace("Alpha ", "a")
-            .replace("Infdev", "inf")
-            .replace("v", "")
+            .replace("Infdev", "inf-(date)")
+            .replace("Indev", "in-(date)")
+            .replaceAll("v([0-9])", "$1")
             .trim();
 
         if (title.startsWith("0.")) {
@@ -249,7 +275,7 @@ public class GameArgs {
     }
 
     private static boolean isInvalidAssetsDir(String dir) {
-        return dir == null || dir.contains("assets/virtual");
+        return dir == null || dir.contains("assets/virtual") || dir.contains("/resources");
     }
 
     public static boolean initialized() {
@@ -304,18 +330,73 @@ public class GameArgs {
         if ("sessionid".equals(key) && GameArgs.getSession() != null) {
             return GameArgs.getSession();
         }
+        if ("demo".equals(key) && GameArgs.isDemo()) {
+            return "true";
+        }
 
         String value = getValue(key, null);
         if (value != null) {
             return value;
         }
 
-        if (fallback != null && !(fallback instanceof uk.betacraft.legacyfix.applet.AppletStub)) {
+        if (fallback != null && !(fallback instanceof uk.betacraft.legacyfix.applet.AppletStub) &&
+                !"demo".equals(key)) { // don't ask fallback for "demo" because Prism will always provide it, even if it shouldn't
             try {
                 return fallback.getParameter(key);
             } catch (Exception ignored) {}
         }
 
         return null;
+    }
+
+    // Used by OneSixSnapMainPatch
+    @SuppressWarnings("unused")
+    public static String[] getOneSixArguments() {
+        if (Agent.getSetting("lf.limit13w16a", false) ||
+                Agent.getSetting("lf.limit13w23a", false)) {
+            List<String> args = new LinkedList<String>();
+
+            if (hasKey("demo")) {
+                args.add("--demo");
+            }
+
+            if (hasKey("fullscreen")) {
+                args.add("--fullscreen");
+            }
+
+            if (hasKey("gameDir")) {
+                args.add("--workDir");
+                args.add(GameArgs.getGameDir());
+            }
+
+            if (hasKey("server")) {
+                args.add("--server");
+                args.add(getValue("server", null));
+            }
+
+            if (hasKey("port")) {
+                args.add("--port");
+                args.add(getValue("port", null));
+            }
+
+            if (hasKey("username")) {
+                args.add("--username");
+                args.add(getUsername());
+            }
+
+            if (hasKey("session")) {
+                args.add("--session");
+                args.add(getSession());
+            }
+
+            if (Agent.getSetting("lf.limit13w23a", false)) {
+                if (hasKey("version")) {
+                    args.add("--version");
+                    args.add(getValue("version", "unknown"));
+                }
+            }
+            return args.toArray(new String[0]);
+        }
+        return arguments.toArray(new String[0]);
     }
 }

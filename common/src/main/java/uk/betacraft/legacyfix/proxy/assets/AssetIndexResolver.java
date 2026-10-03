@@ -5,10 +5,10 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.util.FileUtils;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.io.*;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -123,6 +123,10 @@ public class AssetIndexResolver {
 
         JSONObject entry = assetIndexesRoot.optJSONObject(id);
         if (entry == null) {
+            if (targetFile.exists() && targetFile.length() > 0) {
+                Logger.error("ensureAssetIndex", "No known asset index entry for '" + id + "', assuming existing index json is fine");
+                return targetFile;
+            }
             throw new RuntimeException("No asset index entry for " + id);
         }
 
@@ -135,7 +139,7 @@ public class AssetIndexResolver {
         }
 
         if (targetFile.exists() && sha1.length() > 0) {
-            String present = sha1OfFile(targetFile);
+            String present = FileUtils.sha1OfFile(targetFile);
             if (sha1.equalsIgnoreCase(present)) {
                 return targetFile;
             }
@@ -145,14 +149,14 @@ public class AssetIndexResolver {
             return targetFile;
         }
 
-        Logger.info("Downloading the asset index (" + id + ")...");
+        Logger.debug("ensureAssetIndex", "Downloading the asset index (" + id + ")...");
         if (!RequestUtil.download(url, targetFile)) {
             throw new RuntimeException("Failed to download the asset index (" + id + ")");
         }
-        Logger.info("Download finished");
+        Logger.debug("ensureAssetIndex", "Download finished");
 
         if (sha1.length() > 0) {
-            String got = sha1OfFile(targetFile);
+            String got = FileUtils.sha1OfFile(targetFile);
             if (!sha1.equalsIgnoreCase(got)) {
                 targetFile.delete();
                 throw new RuntimeException(
@@ -162,33 +166,5 @@ public class AssetIndexResolver {
         }
 
         return targetFile;
-    }
-
-    private static String sha1OfFile(File f) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        InputStream is = null;
-        try {
-            is = new BufferedInputStream(new FileInputStream(f));
-            byte[] buf = new byte[8192];
-            int r;
-            while ((r = is.read(buf)) != -1) {
-                md.update(buf, 0, r);
-            }
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (Exception ignored) {}
-        }
-
-        byte[] digest = md.digest();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            int v = b & 0xff;
-            if (v < 16) sb.append('0');
-            sb.append(Integer.toHexString(v));
-        }
-        return sb.toString();
     }
 }
