@@ -2,6 +2,7 @@ package uk.betacraft.legacyfix.applet;
 
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.proxy.GameArgs;
 
 import javax.swing.JFrame;
 import java.applet.Applet;
@@ -20,8 +21,8 @@ public class AppletFrame extends JFrame {
         this.add(this.appletStub);
 
         try {
-            int width = Integer.parseInt(AppletLauncher.getValue("width", "640"));
-            int height = Integer.parseInt(AppletLauncher.getValue("height", "480"));
+            int width = Integer.parseInt(GameArgs.getValue("width", "640"));
+            int height = Integer.parseInt(GameArgs.getValue("height", "480"));
             this.appletStub.setPreferredSize(new Dimension(width, height));
         } catch (Exception e) {
             Logger.error("Failed to parse window size", e);

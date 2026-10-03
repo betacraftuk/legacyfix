@@ -5,8 +5,13 @@ import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.assets.AssetIndexResolver;
 import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 
+import java.applet.Applet;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GameArgs {
     private static String username = null;
@@ -14,6 +19,8 @@ public class GameArgs {
     private static String uuid = null;
     private static String assetIndex = null;
     private static boolean paramsApplied = false;
+
+    private static List<String> arguments;
 
     public static String getUsername() {
         return username;
@@ -33,6 +40,22 @@ public class GameArgs {
 
     public static boolean isDemo() {
         return Agent.hasSetting("lf.demo");
+    }
+
+    @SuppressWarnings("unused")
+    public static String getServerAddress() {
+        return getValue("server", null);
+    }
+
+    @SuppressWarnings("unused")
+    public static int getServerPort() {
+        String portStr = getValue("port", "-1");
+        try {
+            return Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            Logger.error("getServerPort", "Failed to parse server port: '" + portStr + "'");
+        }
+        return -1;
     }
 
     public static String getGameDir() {
@@ -105,16 +128,26 @@ public class GameArgs {
             return;
         }
 
-        if (!args[0].startsWith("--")) {
-            GameArgs.username = args[0];
-            if (args.length > 1 && !args[1].startsWith("--")) {
-                GameArgs.session = args[1];
+        arguments = new ArrayList<String>(Arrays.asList(args));
+
+        List<String> parsedArgs = new LinkedList<String>();
+        if (args.length > 1 && !args[0].startsWith("--")) {
+            parsedArgs.add("--username");
+            parsedArgs.add(args[0]);
+
+            if (!args[1].startsWith("--")) {
+                parsedArgs.add("--session");
+                parsedArgs.add(args[1]);
             }
+
+            parsedArgs.addAll(Arrays.asList(args).subList(2, args.length));
+        } else {
+            parsedArgs = arguments;
         }
 
-        for (int i = 0; i < args.length - 1; i++) {
-            String key = args[i];
-            String value = args[i + 1];
+        for (int i = 0; i < parsedArgs.size() - 1; i++) {
+            String key = parsedArgs.get(i);
+            String value = parsedArgs.get(i + 1);
 
             if (key.startsWith("--") && value.startsWith("--")) {
                 Logger.debug("setArgsRaw", "Argument " + key + " has no value, skipping");
@@ -157,6 +190,15 @@ public class GameArgs {
                     GameArgs.assetIndex = value;
                 }
             }
+        }
+
+        // c0.30
+        if (!hasKey("demo")) {
+            addKey("haspaid");
+        }
+
+        if (!hasKey("mppass")) {
+            setValue("mppass", "-");
         }
 
         if (!Agent.hasSetting("lf.proxy.disable")) {
@@ -212,5 +254,68 @@ public class GameArgs {
 
     public static boolean initialized() {
         return username != null || session != null;
+    }
+
+    public static String getValue(String key, String alt) {
+        if (!hasKey(key)) {
+            Logger.debug("Key " + key + " not found");
+            return alt;
+        }
+
+        if (!hasValue(key)) {
+            return "true";
+        }
+
+        return arguments.get(arguments.indexOf("--" + key) + 1);
+    }
+
+    public static void addKey(String key) {
+        arguments.add("--" + key);
+    }
+
+    public static boolean hasKey(String key) {
+        return arguments.contains("--" + key);
+    }
+
+    public static boolean hasValue(String key) {
+        if (!hasKey(key)) {
+            return false;
+        }
+
+        int nextIndex = arguments.indexOf("--" + key) + 1;
+        if (arguments.size() <= nextIndex) {
+            return false;
+        }
+
+        return !arguments.get(nextIndex).startsWith("--");
+    }
+
+    public static void setValue(String key, String value) {
+        arguments.add("--" + key);
+        arguments.add(value);
+    }
+
+    public static String getValueForApplet(Applet fallback, String key) {
+        Logger.debug("Getting applet param value: " + key);
+        // 'username' and 'sessionid' params are special because their values can be passed without keys
+        if ("username".equals(key) && GameArgs.getUsername() != null) {
+            return GameArgs.getUsername();
+        }
+        if ("sessionid".equals(key) && GameArgs.getSession() != null) {
+            return GameArgs.getSession();
+        }
+
+        String value = getValue(key, null);
+        if (value != null) {
+            return value;
+        }
+
+        if (fallback != null && !(fallback instanceof uk.betacraft.legacyfix.applet.AppletStub)) {
+            try {
+                return fallback.getParameter(key);
+            } catch (Exception ignored) {}
+        }
+
+        return null;
     }
 }

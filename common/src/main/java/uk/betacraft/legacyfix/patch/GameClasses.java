@@ -17,6 +17,8 @@ public class GameClasses {
     private static String sessionClassName = null;
     private static String sessionFieldName = null;
 
+    private static String setServerMethodName = null;
+
     public static String findMinecraftAppletClass(PatchPool patchPool) {
         if (minecraftAppletClass != null) {
             return minecraftAppletClass;
@@ -301,6 +303,59 @@ public class GameClasses {
                     return sessionFieldName;
                 }
             }
+        }
+
+        return null;
+    }
+
+    public static String findSetServerMethodName(PatchPool patchPool) throws NotFoundException, BadBytecode {
+        if (setServerMethodName != null) {
+            return setServerMethodName;
+        }
+
+        if (minecraftAppletClass == null) {
+            findMinecraftAppletClass(patchPool);
+        }
+
+        if (minecraftClass == null) {
+            findMinecraftClass(patchPool);
+        }
+
+        if (minecraftAppletClass == null || minecraftClass == null) {
+            return null;
+        }
+
+        CtClass appletClass = patchPool.getRawClass(minecraftAppletClass);
+        CtMethod init = appletClass.getDeclaredMethod("init");
+        MethodInfo mi = init.getMethodInfo();
+        CodeAttribute ca = mi.getCodeAttribute();
+        if (ca == null) {
+            return null;
+        }
+
+        CodeIterator it = ca.iterator();
+        ConstPool cp = mi.getConstPool();
+
+        while (it.hasNext()) {
+            int pos = it.next();
+            int opcode = it.byteAt(pos);
+
+            if (opcode != Opcode.INVOKEVIRTUAL) {
+                continue;
+            }
+
+            int methodIndex = it.u16bitAt(pos + 1);
+            if (!minecraftClass.equals(cp.getMethodrefClassName(methodIndex))) {
+                continue;
+            }
+
+            if (!"(Ljava/lang/String;I)V".equals(cp.getMethodrefType(methodIndex))) {
+                continue;
+            }
+
+            setServerMethodName = cp.getMethodrefName(methodIndex);
+            Logger.debug("Found setServer method: " + setServerMethodName);
+            return setServerMethodName;
         }
 
         return null;

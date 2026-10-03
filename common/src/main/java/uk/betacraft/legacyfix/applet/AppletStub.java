@@ -1,5 +1,7 @@
 package uk.betacraft.legacyfix.applet;
 
+import uk.betacraft.legacyfix.proxy.GameArgs;
+
 import java.applet.Applet;
 import java.awt.*;
 import java.net.MalformedURLException;
@@ -50,16 +52,7 @@ public class AppletStub extends Applet implements java.applet.AppletStub {
 
     @Override
     public String getParameter(String name) {
-        String value = AppletLauncher.getValue(name, null);
-        if (value != null) {
-            return value;
-        }
-
-        try {
-            return super.getParameter(name);
-        } catch (Exception ignored) {}
-
-        return null;
+        return GameArgs.getValueForApplet(null, name);
     }
 
     @Override

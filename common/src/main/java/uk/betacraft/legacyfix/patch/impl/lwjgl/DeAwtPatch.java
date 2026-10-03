@@ -66,8 +66,10 @@ public class DeAwtPatch extends Patch {
                     cleanupMethod.insertAfter(SHUTDOWN_HOOK);
                 }
 
+                CtMethod initMethod = ctClass.getDeclaredMethod("init");
+                transformAppletInitMethod(initMethod, patchPool);
+
                 if (appletModeFieldName != null) {
-                    CtMethod initMethod = ctClass.getDeclaredMethod("init");
                     initMethod.insertAfter("$0." + minecraftFieldName + "." + appletModeFieldName + " = false;");
                 }
             }
@@ -75,7 +77,7 @@ public class DeAwtPatch extends Patch {
 
         patchPool.addCtTransformer(minecraftClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
-                transformGameClass(ctClass);
+                transformGameClass(ctClass, patchPool);
             }
         });
 
@@ -86,8 +88,112 @@ public class DeAwtPatch extends Patch {
         });
     }
 
-    private void transformGameClass(CtClass gameClass) throws Exception {
+    private void transformAppletInitMethod(CtMethod initMethod, PatchPool pool) throws Exception {
+        String minecraftAppletClassName = initMethod.getDeclaringClass().getName();
+        String minecraftClassName = GameClasses.findMinecraftClass(pool);
+        String setServerMethodName = GameClasses.findSetServerMethodName(pool);
+
+        CodeAttribute codeAttribute = initMethod.getMethodInfo().getCodeAttribute();
+        if (codeAttribute == null) {
+            return;
+        }
+
+        CodeIterator codeIterator = codeAttribute.iterator();
+        ConstPool cp = initMethod.getMethodInfo().getConstPool();
+
+        int lastGetFieldPos = -1;
+
+        while (codeIterator.hasNext()) {
+            int pos = codeIterator.next();
+            int opcode = codeIterator.byteAt(pos);
+
+            if (opcode == Opcode.GETFIELD) {
+                lastGetFieldPos = pos;
+                continue;
+            }
+
+            if (opcode != Opcode.INVOKEVIRTUAL) {
+                continue;
+            }
+
+            int methodIndex = codeIterator.u16bitAt(pos + 1);
+            String methodClassName = cp.getMethodrefClassName(methodIndex);
+            findSetServerMethodName: {
+                if (lastGetFieldPos == -1) {
+                    break findSetServerMethodName;
+                }
+
+                if (setServerMethodName == null) {
+                    break findSetServerMethodName;
+                }
+
+                if (minecraftClassName == null || !minecraftClassName.equals(methodClassName)) {
+                    break findSetServerMethodName;
+                }
+
+                if (!"(Ljava/lang/String;I)V".equals(cp.getMethodrefType(methodIndex))) {
+                    break findSetServerMethodName;
+                }
+
+                if (!setServerMethodName.equals(cp.getMethodrefName(methodIndex))) {
+                    break findSetServerMethodName;
+                }
+
+                // Remove the call. We add it at the beginning of Minecraft.run() instead, if server and port are set.
+                // Doing this also fixes c0.0.15a being stuck on launch, trying to connect to long-dead Notchian test server.
+                for (int i = -1; i < (pos - lastGetFieldPos); i++) {
+                    codeIterator.writeByte(Opcode.NOP, lastGetFieldPos + i);
+                }
+
+                codeIterator.writeByte(Opcode.NOP, pos);
+                codeIterator.writeByte(Opcode.NOP, pos + 1);
+                codeIterator.writeByte(Opcode.NOP, pos + 2);
+                codeAttribute.computeMaxStack();
+                Logger.debug("DeAwtPatch", "Removed setServer method call in MinecraftApplet.init");
+
+                continue;
+            }
+
+            if (!minecraftAppletClassName.equals(methodClassName)) {
+                continue;
+            }
+
+            if (!"getParameter".equals(cp.getMethodrefName(methodIndex))) {
+                continue;
+            }
+
+            int classIndex = cp.addClassInfo("uk.betacraft.legacyfix.proxy.GameArgs");
+            int nameAndTypeIndex = cp.addNameAndTypeInfo("getValueForApplet", "(Ljava/applet/Applet;Ljava/lang/String;)Ljava/lang/String;");
+            int newMethodIndex = cp.addMethodrefInfo(classIndex, nameAndTypeIndex);
+
+            byte[] code = new byte[] {
+                (byte) Opcode.INVOKESTATIC,
+                (byte) (newMethodIndex >>> 8),
+                (byte) (newMethodIndex)
+            };
+
+            codeIterator.write(code, pos);
+        }
+        Logger.debug("DeAwtPatch", "Patched MinecraftApplet.getParameter calls");
+    }
+
+    private void transformGameClass(CtClass gameClass, PatchPool pool) throws Exception {
         CtMethod runMethod = gameClass.getDeclaredMethod("run");
+        String setServerMethodName = GameClasses.findSetServerMethodName(pool);
+        if (setServerMethodName != null) {
+            // We need to do this because versions a1.0.6 - 1.5.2 won't read server quick join params
+            // when being run with Minecraft.main(String[])
+            runMethod.insertBefore("" +
+                "Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
+                "String serverAddress = (String) gameArgsClass.getMethod(\"getServerAddress\", null).invoke(null, null);" +
+                "int serverPort = ((Integer) gameArgsClass.getMethod(\"getServerPort\", null).invoke(null, null)).intValue();" +
+                "if (serverAddress != null && serverPort > 0) {" +
+                "    $0." + setServerMethodName + "(serverAddress, serverPort);" +
+                "}"
+            );
+            Logger.debug("DeAwtPatch", "setServer() injected into Minecraft.run()");
+        }
+
         CtMethod updateMethod = findUpdateMethod(gameClass, runMethod);
         if (updateMethod == null) {
             throw new PatchException("No update method found");
