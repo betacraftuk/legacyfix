@@ -10,17 +10,22 @@ import uk.betacraft.legacyfix.patch.api.Transformer;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.List;
 
 public class Agent {
     public static final boolean DEBUG;
     public static final String VERSION;
+    public static final ImageIcon ICON;
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
 
     public static boolean loaded = false;
@@ -201,12 +206,28 @@ public class Agent {
 
     static {
         String version;
+        ImageIcon icon;
+
         try {
             version = new BufferedReader(new InputStreamReader(Agent.class.getResourceAsStream("/version.txt"))).readLine();
         } catch (Throwable ignored) {
             version = "unknown";
         }
+        try {
+            URL url = Agent.class.getResource("/assets/legacyfix/icon-outlined.png");
+
+            if (url != null) {
+                Image image = new ImageIcon(url).getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+                icon = new ImageIcon(image);
+            } else {
+                icon = new ImageIcon();
+            }
+        } catch (Throwable t) {
+            icon = new ImageIcon();
+        }
+
         VERSION = version;
+        ICON = icon;
 
         for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
             String propertyKey = String.valueOf(property.getKey());

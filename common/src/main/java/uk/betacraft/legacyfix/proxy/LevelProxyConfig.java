@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
-import java.awt.Image;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.URI;
-import java.net.URL;
 
 public class LevelProxyConfig {
     private static final String DEFAULT_SERVER = "https://betacraft.uk";
@@ -65,7 +63,7 @@ public class LevelProxyConfig {
             serverPanel.add(server, BorderLayout.CENTER);
             choices.add(serverPanel);
 
-            ImageIcon icon = getIcon();
+            ImageIcon icon = Agent.ICON;
             JPanel panel = new JPanel(new BorderLayout(0, 8));
             panel.add(getDescription(), BorderLayout.NORTH);
             panel.add(choices, BorderLayout.CENTER);
@@ -198,16 +196,6 @@ public class LevelProxyConfig {
         } catch (Exception e) {
             Logger.error("LevelProxyConfig", e);
         }
-    }
-
-    private static ImageIcon getIcon() {
-        URL url = LevelProxyConfig.class.getResource("/assets/legacyfix/icon-outlined.png");
-        if (url == null) {
-            return null;
-        }
-
-        Image image = new ImageIcon(url).getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
-        return new ImageIcon(image);
     }
 
     private static File getConfigFile() {

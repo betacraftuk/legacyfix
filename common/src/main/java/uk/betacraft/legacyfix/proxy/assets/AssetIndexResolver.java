@@ -116,6 +116,14 @@ public class AssetIndexResolver {
         }
     }
 
+    public static JSONObject getAssetIndexSnippetJson(String id) {
+        if (assetIndexesRoot == null) {
+            init();
+        }
+
+        return assetIndexesRoot.optJSONObject(id);
+    }
+
     public static File ensureAssetIndex(String id, File targetFile) throws Exception {
         if (assetIndexesRoot == null) {
             init();
