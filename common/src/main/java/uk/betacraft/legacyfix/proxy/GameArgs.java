@@ -356,7 +356,7 @@ public class GameArgs {
                 Agent.getSetting("lf.limit13w23a", false)) {
             List<String> args = new LinkedList<String>();
 
-            if (hasKey("demo")) {
+            if (hasKey("demo") || GameArgs.isDemo()) {
                 args.add("--demo");
             }
 
