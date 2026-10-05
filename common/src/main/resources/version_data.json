@@ -18,7 +18,8 @@
             "lf.proxy.overlayOuterBodyToBase",
             "lf.proxy.overlayOuterHeadLayer",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -32,7 +33,8 @@
             "lf.proxy.overlayOuterBodyToBase",
             "lf.proxy.overlayOuterHeadLayer",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -45,7 +47,8 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -110,7 +113,8 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -123,7 +127,8 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -136,7 +141,8 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
@@ -149,11 +155,26 @@
             "lf.proxy.rotateBottomTextures",
             "lf.proxy.overlayOuterBodyToBase",
             "java.util.Arrays.useLegacyMergeSort=true",
-            "lf.applet"
+            "lf.applet",
+            "lf.auth-on-server-join"
         ]
     },
     {
-        "version": "^a1\\.(?:0\\.1[4-7]|1\\.[0-2])(?:_0[1-4])?(?:-[0-9]{4,6})?$",
+        "version": "^a1\\.0\\.1[4-5](?:.*)?$",
+        "desc": "a1.0.14 to a1.0.15",
+        "assetIndex": "a1.0.14",
+        "settings": [
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet",
+            "lf.auth-on-server-join"
+        ]
+    },
+    {
+        "version": "^a1\\.(?:0\\.1[6-7]|1\\.[0-2])(?:_0[1-4])?(?:-[0-9]{4,6})?$",
         "desc": "a1.0.14 to a1.1.2_01",
         "assetIndex": "a1.0.14",
         "settings": [

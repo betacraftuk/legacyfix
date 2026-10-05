@@ -8,6 +8,10 @@ Settings of LegacyFix can be altered through Java arguments.
 ```
 -Dlf.levelServer=<server address>
 ```
+## Joining a server on launch
+```
+-Dlf.server=<server address>
+```
 ## VSync
 ```
 -Dlf.vsync
@@ -66,6 +70,16 @@ You may want to do that if LegacyFix conflicts with some skin mods
 Some skin mods might get skins from Mojang's skin API, so disabling profile handling might also be necessary:
 ```
 -Dlf.profile.disable
+```
+## Disable proxy
+```
+-Dlf.proxy.disable
+```
+Note: The proxy handles all http/https requests. Disabling it will make some fixes unavailable.
+## Disable server join authentication
+LegacyFix will authenticate you with Mojang if particular versions of the Minecraft client are about to join a server on launch. This feature brings online-mode verification to Minecraft versions **c0.0.15a-c0.30** and **a1.0.5-a1.0.15**. You can disable it with:
+```
+-Dlf.auth-on-server-join.disable
 ```
 ## Enable/disable usage of Bouncy Castle
 Force enable Bouncy Castle (requires `bcprov`, `bcutil` and `bctls` in classpath):

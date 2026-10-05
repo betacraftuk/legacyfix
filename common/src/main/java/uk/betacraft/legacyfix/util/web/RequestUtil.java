@@ -3,12 +3,10 @@ package uk.betacraft.legacyfix.util.web;
 import org.json.JSONObject;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.util.HashUtils;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLStreamHandler;
+import java.net.*;
 
 public class RequestUtil {
     public static String webDataToString(WebData data) {
@@ -161,6 +159,34 @@ public class RequestUtil {
                         .put("selectedProfile", uuid)
                 )
         );
+    }
+
+    public static void performServerJoinAuth(String uuid, String sessionId, String serverAddress) {
+        String serverId = null;
+        try {
+            InetAddress addr = InetAddress.getByName(serverAddress);
+
+            if (!addr.isAnyLocalAddress() && !addr.isLoopbackAddress())
+                serverId = getIPFromAmazon();
+            else if (serverAddress.equals("localhost"))
+                serverId = "127.0.0.1";
+
+        } catch (UnknownHostException e) {
+            Logger.error("performServerJoinAuth", "Failed to resolve address of " + serverAddress + ", assuming it's non-local.");
+            serverId = getIPFromAmazon();
+        }
+
+        WebData data = performJoinServer(uuid, sessionId, HashUtils.sha1(serverId));
+
+        if (data.getResponseCode() == -2) {
+            Logger.error("performServerJoinAuth", "Failed to send joinServer request to Mojang - your Java is probably too old.");
+        }
+
+        if (data.successful()) {
+            Logger.info("performServerJoinAuth", "Successfully authenticated with Mojang for server joining");
+        } else {
+            Logger.error("performServerJoinAuth", "Failed to authenticate with Mojang for server joining");
+        }
     }
 
     public static String getIPFromAmazon() {

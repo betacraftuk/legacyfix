@@ -4,6 +4,7 @@ import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.assets.AssetIndexResolver;
 import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
+import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.applet.Applet;
 import java.io.File;
@@ -19,6 +20,7 @@ public class GameArgs {
     private static String uuid = null;
     private static String assetIndex = null;
     private static boolean paramsApplied = false;
+    private static boolean authedOnJoin = false;
 
     private static List<String> arguments;
 
@@ -48,18 +50,31 @@ public class GameArgs {
 
     @SuppressWarnings("unused")
     public static String getServerAddress() {
-        return getValue("server", null);
+        if (Agent.getSetting("lf.server", null) != null) {
+            readServer(Agent.getSetting("lf.server", (String) null));
+
+            Agent.removeSetting("lf.server");
+        }
+
+        String socket = Agent.getSetting("lf.server.addr", null);
+
+        if (!authedOnJoin && socket != null && Agent.hasSetting("lf.auth-on-server-join") && !Agent.hasSetting("lf.auth-on-server-join.disable")) {
+            RequestUtil.performServerJoinAuth(GameArgs.getUuid(), GameArgs.getSession(), socket);
+            authedOnJoin = true;
+        }
+
+        return socket;
     }
 
     @SuppressWarnings("unused")
     public static int getServerPort() {
-        String portStr = getValue("port", "-1");
-        try {
-            return Integer.parseInt(portStr);
-        } catch (NumberFormatException e) {
-            Logger.error("getServerPort", "Failed to parse server port: '" + portStr + "'");
+        if (Agent.getSetting("lf.server", null) != null) {
+            readServer(Agent.getSetting("lf.server", (String) null));
+
+            Agent.setSetting("lf.server", null);
         }
-        return -1;
+
+        return Agent.getSetting("lf.server.port", -1);
     }
 
     public static String getGameDir() {
@@ -214,6 +229,22 @@ public class GameArgs {
                 if (Agent.getSetting("lf.assetIndex", null) == null) {
                     GameArgs.assetIndex = value;
                 }
+            } else if ("--server".equals(key)) {
+                if (Agent.getSetting("lf.server.addr", null) == null) {
+                    Agent.setSetting("lf.server.addr", value);
+                }
+            } else if ("--port".equals(key)) {
+                if (Agent.getSetting("lf.server.port", null) == null) {
+                    try {
+                        Agent.setSetting("lf.server.port", Integer.parseInt(value));
+                    } catch (NumberFormatException e) {
+                        Logger.error("setArgsRaw", "Failed to parse server port at '--port': '" + value + "'");
+                    }
+                }
+            } else if ("--quickPlayMultiplayer".equals(key)) {
+                if (Agent.getSetting("lf.server.addr", null) == null) {
+                    readServer(value);
+                }
             }
         }
 
@@ -231,6 +262,27 @@ public class GameArgs {
         }
 
         GameArgs.paramsApplied = true;
+    }
+
+    private static void readServer(String value) {
+        String serverSocket;
+        int serverPort;
+        if (value.contains(":")) {
+            String[] split = value.split(":");
+            serverSocket = split[0];
+            try {
+                serverPort = Integer.parseInt(split[1]);
+            } catch (NumberFormatException e) {
+                Logger.error("setArgsRaw", "Failed to parse server port: '" + split[1] + "'");
+                return;
+            }
+        } else {
+            serverSocket = value;
+            serverPort = 25565;
+        }
+
+        Agent.setSetting("lf.server.addr", serverSocket);
+        Agent.setSetting("lf.server.port", serverPort);
     }
 
     public static void setVersion(String title) {
@@ -330,8 +382,15 @@ public class GameArgs {
         if ("sessionid".equals(key) && GameArgs.getSession() != null) {
             return GameArgs.getSession();
         }
+        // user-settable values (via JVM args)
         if ("demo".equals(key) && GameArgs.isDemo()) {
             return "true";
+        }
+        if ("server".equals(key) && GameArgs.getServerAddress() != null) {
+            return GameArgs.getServerAddress();
+        }
+        if ("port".equals(key) && GameArgs.getServerPort() != -1) {
+            return Integer.toString(GameArgs.getServerPort());
         }
 
         String value = getValue(key, null);
@@ -369,14 +428,14 @@ public class GameArgs {
                 args.add(GameArgs.getGameDir());
             }
 
-            if (hasKey("server")) {
+            if (getServerAddress() != null) {
                 args.add("--server");
-                args.add(getValue("server", null));
+                args.add(getServerAddress());
             }
 
-            if (hasKey("port")) {
+            if (getServerPort() != -1) {
                 args.add("--port");
-                args.add(getValue("port", null));
+                args.add(Integer.toString(getServerPort()));
             }
 
             if (hasKey("username")) {

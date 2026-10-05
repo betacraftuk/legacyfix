@@ -159,6 +159,11 @@ public class Agent {
         System.getProperties().put(key, value);
     }
 
+    public static void removeSetting(String key) {
+        SETTINGS.remove(key);
+        System.getProperties().remove(key);
+    }
+
     public static boolean hasSetting(String key) {
         return getSettings().containsKey(key);
     }

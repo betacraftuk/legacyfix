@@ -264,8 +264,16 @@ public class ProxyPatch extends Patch {
                 CtConstructor mainMethod = ctClass.getDeclaredConstructor(new CtClass[]{mmcParamsClass});
                 mainMethod.insertBefore("" +
                     "String mainClass = $1." + mmcParamsGetStringName + "(\"mainClass\", \"\");" +
-                    "if (!mainClass.equals(\"uk.betacraft.legacyfix.applet.AppletLauncher\") && !mainClass.equals(\"uk.betacraft.legacyfix.OneSixLauncher\")) {" +
+                    "if (!mainClass.equals(\"uk.betacraft.legacyfix.applet.AppletLauncher\")) {" +
                     "    java.util.List argsList = $1." + mmcParamsGetListName + "(\"param\", new java.util.ArrayList());" +
+                    "    String serverAddress = $1." + mmcParamsGetStringName + "(\"serverAddress\", null);" +
+                    "    String serverPort = $1." + mmcParamsGetStringName + "(\"serverPort\", null);" +
+                    "    if (serverAddress != null) {" +
+                    "        argsList.add(\"--server\");" +
+                    "        argsList.add(serverAddress);" +
+                    "        argsList.add(\"--port\");" +
+                    "        argsList.add(serverAddress);" +
+                    "    }" +
                     "    Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
                     "    gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{argsList.toArray(new String[0])});" +
                     "    Class assetUtilsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
