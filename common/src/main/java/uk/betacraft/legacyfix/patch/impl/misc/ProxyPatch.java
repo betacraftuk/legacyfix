@@ -272,7 +272,7 @@ public class ProxyPatch extends Patch {
                     "        argsList.add(\"--server\");" +
                     "        argsList.add(serverAddress);" +
                     "        argsList.add(\"--port\");" +
-                    "        argsList.add(serverAddress);" +
+                    "        argsList.add(serverPort);" +
                     "    }" +
                     "    Class gameArgsClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.GameArgs\");" +
                     "    gameArgsClass.getMethod(\"setArgsRaw\", new Class[]{String[].class}).invoke(null, new Object[]{argsList.toArray(new String[0])});" +
