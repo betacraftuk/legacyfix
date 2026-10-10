@@ -3,6 +3,7 @@ package uk.betacraft.legacyfix.proxy.api;
 import org.json.JSONObject;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.util.Base64Utils;
+import uk.betacraft.legacyfix.util.StreamUtils;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 
 import java.io.FileNotFoundException;
@@ -52,7 +53,7 @@ public class MinecraftApi {
         try {
             URL uuidLookup = RequestUtil.createDirectURL(UUID_LOOKUP_URL + name);
 
-            return new JSONObject(new String(RequestUtil.readInputStream(uuidLookup.openStream()), "UTF-8"));
+            return new JSONObject(new String(StreamUtils.readInputStream(uuidLookup.openStream()), "UTF-8"));
         } catch (Throwable t) {
             String message = t.getMessage();
 
@@ -77,7 +78,7 @@ public class MinecraftApi {
         try {
             URL profileLookup = RequestUtil.createDirectURL(PROFILE_LOOKUP_URL + uuid);
 
-            JSONObject profile = new JSONObject(new String(RequestUtil.readInputStream(profileLookup.openStream()), "UTF-8"));
+            JSONObject profile = new JSONObject(new String(StreamUtils.readInputStream(profileLookup.openStream()), "UTF-8"));
             String base64tex = profile.getJSONArray("properties").getJSONObject(0).getString("value");
 
             JSONObject textures = new JSONObject(new String(Base64Utils.decode(base64tex), "UTF-8")).getJSONObject("textures");
@@ -86,13 +87,13 @@ public class MinecraftApi {
             URL skinUrl = RequestUtil.createDirectURL(skinObj.getString("url"));
 
             byte[] cape;
-            byte[] skin = RequestUtil.readInputStream(skinUrl.openStream());
+            byte[] skin = StreamUtils.readInputStream(skinUrl.openStream());
 
             if (textures.has("CAPE")) {
                 JSONObject capeObj = textures.getJSONObject("CAPE");
                 URL capeUrl = RequestUtil.createDirectURL(capeObj.getString("url"));
 
-                cape = RequestUtil.readInputStream(capeUrl.openStream());
+                cape = StreamUtils.readInputStream(capeUrl.openStream());
             } else {
                 cape = null;
             }

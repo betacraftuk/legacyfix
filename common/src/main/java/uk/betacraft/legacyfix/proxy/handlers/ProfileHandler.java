@@ -7,6 +7,7 @@ import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.util.Base64Utils;
 import uk.betacraft.legacyfix.proxy.api.MinecraftApi;
 import uk.betacraft.legacyfix.util.SkinUtils;
+import uk.betacraft.legacyfix.util.StreamUtils;
 import uk.betacraft.legacyfix.util.web.Request;
 import uk.betacraft.legacyfix.util.web.RequestUtil;
 import uk.betacraft.legacyfix.util.web.WebData;
@@ -39,7 +40,7 @@ public class ProfileHandler extends HandlerBase {
     private void prepare() throws IOException {
         InputStream input = RequestUtil.createDirectURL(this.url.toString()).openStream();
 
-        byte[] profileData = RequestUtil.readInputStream(input);
+        byte[] profileData = StreamUtils.readInputStream(input);
 
         this.inputStream = new ByteArrayInputStream(profileData);
 

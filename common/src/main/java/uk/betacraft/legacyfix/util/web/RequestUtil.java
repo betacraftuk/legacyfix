@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.util.HashUtils;
+import uk.betacraft.legacyfix.util.StreamUtils;
 
 import java.io.*;
 import java.net.*;
@@ -54,9 +55,9 @@ public class RequestUtil {
             byte[] data;
 
             if (http >= 400 && http < 600) {
-                data = readInputStream(con.getErrorStream());
+                data = StreamUtils.readInputStream(con.getErrorStream());
             } else {
-                data = readInputStream(con.getInputStream());
+                data = StreamUtils.readInputStream(con.getInputStream());
             }
 
             return new WebData(data, http);
@@ -99,9 +100,9 @@ public class RequestUtil {
                 if (con.getErrorStream() == null) {
                     return new WebData(null, http);
                 }
-                data = readInputStream(con.getErrorStream());
+                data = StreamUtils.readInputStream(con.getErrorStream());
             } else {
-                data = readInputStream(con.getInputStream());
+                data = StreamUtils.readInputStream(con.getInputStream());
             }
 
             return new WebData(data, http);
@@ -211,21 +212,6 @@ public class RequestUtil {
         } else if (url.startsWith("http")) {
             return new sun.net.www.protocol.http.Handler();
         } else {
-            return null;
-        }
-    }
-
-    public static byte[] readInputStream(InputStream in) {
-        try {
-            byte[] buffer = new byte[4096];
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int count;
-            while ((count = in.read(buffer)) > 0) {
-                baos.write(buffer, 0, count);
-            }
-            return baos.toByteArray();
-        } catch (Throwable t) {
-            Logger.error("readInputStream", t);
             return null;
         }
     }

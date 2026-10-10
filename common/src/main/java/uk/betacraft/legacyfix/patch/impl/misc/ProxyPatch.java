@@ -5,6 +5,7 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.Opcode;
+import org.json.JSONObject;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.GameArgs;
@@ -12,6 +13,9 @@ import uk.betacraft.legacyfix.patch.GameClasses;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.util.StreamUtils;
+
+import java.io.InputStream;
 
 public class ProxyPatch extends Patch {
     public ProxyPatch() {
@@ -145,8 +149,37 @@ public class ProxyPatch extends Patch {
             }
         }
 
+        String failVersionReadMsg = "Couldn't read the game version! Please specify your game version with the -Dlf.version argument.";
         if (Agent.getSetting("lf.version", null) == null) {
-            Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
+            // read 'version.json' featured in Minecraft versions 18w47b and later
+            String versionJson;
+            try {
+                InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("version.json");
+                if (stream == null) {
+                    Logger.error(failVersionReadMsg);
+                    return;
+                }
+
+                byte[] bytes = StreamUtils.readInputStream(stream);
+                if (bytes == null) {
+                    Logger.error(failVersionReadMsg);
+                    return;
+                }
+
+                versionJson = new String(bytes, "UTF-8");
+            } catch (Throwable t) {
+                Logger.error(this, t);
+                return;
+            }
+
+            JSONObject version = new JSONObject(versionJson);
+            String verId =  version.optString("name", null);
+            if (verId == null) {
+                Logger.error(failVersionReadMsg);
+                return;
+            }
+
+            GameArgs.setVersion(verId);
         }
     }
 
