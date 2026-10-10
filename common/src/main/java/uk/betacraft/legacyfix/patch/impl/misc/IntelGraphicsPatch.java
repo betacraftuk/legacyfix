@@ -15,7 +15,7 @@ import uk.betacraft.legacyfix.patch.api.Transformer;
 
 public class IntelGraphicsPatch extends Patch {
     public IntelGraphicsPatch() {
-        super("intel", "Fixes rendering issues on older Intel GPUs", true);
+        super("intel", "Fixes rendering issues on older Intel GPUs", false);
     }
 
     @Override
