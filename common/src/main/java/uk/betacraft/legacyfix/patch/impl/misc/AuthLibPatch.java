@@ -3,6 +3,7 @@ package uk.betacraft.legacyfix.patch.impl.misc;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Logger;
@@ -27,8 +28,10 @@ public class AuthLibPatch extends Patch {
 
         patchPool.addCtTransformer(yggSessionServiceClass, new CtTransformer() {
             public void transform(CtClass ctClass) throws Exception {
-                CtMethod getTexturesMethod = ctClass.getDeclaredMethod("getTextures", new CtClass[]{gameProfileClass, CT_BOOLEAN});
-                if (getTexturesMethod == null) {
+                CtMethod getTexturesMethod;
+                try {
+                    getTexturesMethod = ctClass.getDeclaredMethod("getTextures", new CtClass[]{gameProfileClass, CT_BOOLEAN});
+                } catch (NotFoundException e) {
                     Logger.error("AuthLibPatch", "getTextures method not found");
                     return;
                 }
