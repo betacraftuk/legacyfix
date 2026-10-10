@@ -208,5 +208,12 @@
         "size": 75061,
         "id": "1.7.2",
         "url": "https://files.betacraft.uk/launcher/v2/assets/indexes/v2/1.7.2.json"
+    },
+    "24w20a": {
+        "id": "24w20a",
+        "sha1": "d2db1ecca63a6f52b8342135edcd16052019ca54",
+        "size": 446905,
+        "totalSize": 799014789,
+        "url": "https://piston-meta.mojang.com/v1/packages/d2db1ecca63a6f52b8342135edcd16052019ca54/17.json"
     }
 }

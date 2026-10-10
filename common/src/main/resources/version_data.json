@@ -592,5 +592,11 @@
         "settings": [
             "lf.proxy.convertAlexToSteve"
         ]
+    },
+    {
+        "version": "^24w20a$",
+        "desc": "piston sounds for 24w20a",
+        "assetIndex": "24w20a",
+        "settings": []
     }
 ]
