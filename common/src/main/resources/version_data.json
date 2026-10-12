@@ -594,6 +594,13 @@
         ]
     },
     {
+        "version": "^((17w[4-5]|18w[0-2])[0-9][a-z]|1\\.13-pre[1-3])(?:.*)?$",
+        "desc": "17w43a to 1.13-pre3",
+        "settings": [
+            "lf.lwjgl3-patch"
+        ]
+    },
+    {
         "version": "^24w20a$",
         "desc": "piston sounds for 24w20a",
         "assetIndex": "24w20a",

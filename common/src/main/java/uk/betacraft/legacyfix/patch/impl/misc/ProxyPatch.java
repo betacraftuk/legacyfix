@@ -105,7 +105,22 @@ public class ProxyPatch extends Patch {
         }
 
         CtClass ctClass = patchPool.getRawClass(minecraftClass);
-        for (CtMethod method : ctClass.getDeclaredMethods()) {
+        readGameVersionPre1_13(ctClass);
+
+        if (Agent.getSetting("lf.version", null) == null) {
+            readGameVersionFromVersionJson();
+        }
+
+        if (Agent.getSetting("lf.version", null) == null) {
+            readGameVersion1_13(ctClass, patchPool);
+        }
+
+        Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
+    }
+
+    // reads game version from calling Display.setTitle. useful for c0.0.2a - 1.12.2
+    private void readGameVersionPre1_13(CtClass minecraftClass) {
+        for (CtMethod method : minecraftClass.getDeclaredMethods()) {
             try {
                 CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
                 CodeIterator codeIterator = codeAttribute.iterator();
@@ -148,39 +163,202 @@ public class ProxyPatch extends Patch {
             } catch (Exception ignored) {
             }
         }
+    }
 
-        String failVersionReadMsg = "Couldn't read the game version! Please specify your game version with the -Dlf.version argument.";
-        if (Agent.getSetting("lf.version", null) == null) {
-            // read 'version.json' featured in Minecraft versions 18w47b and later
-            String versionJson;
+    // reads game version from calling GLFW.glfwCreateWindow. useful for 17w43a (1.13) - 18w47a (1.14)
+    private void readGameVersion1_13(CtClass minecraftClass, PatchPool patchPool) {
+        String windowClassName = null;
+        for (CtMethod method : minecraftClass.getDeclaredMethods()) {
+            boolean isInitMethod = false;
             try {
-                InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("version.json");
-                if (stream == null) {
-                    Logger.error(failVersionReadMsg);
-                    return;
+                CodeAttribute codeAttribute = method.getMethodInfo().getCodeAttribute();
+                CodeIterator codeIterator = codeAttribute.iterator();
+                ConstPool cp = method.getMethodInfo().getConstPool();
+
+                while (codeIterator.hasNext()) {
+                    int pos = codeIterator.next();
+                    int opcode = codeIterator.byteAt(pos);
+                    if (opcode != Opcode.LDC && opcode != Opcode.LDC_W) {
+                        continue;
+                    }
+
+                    int ldcIndex;
+                    if (opcode == Opcode.LDC_W) {
+                        ldcIndex = codeIterator.u16bitAt(pos + 1);
+                    } else {
+                        ldcIndex = codeIterator.byteAt(pos + 1);
+                    }
+                    if (cp.getTag(ldcIndex) != ConstPool.CONST_String) {
+                        continue;
+                    }
+
+                    if (!codeIterator.hasNext() || codeIterator.byteAt(codeIterator.next()) != Opcode.INVOKESTATIC) {
+                        continue;
+                    }
+
+                    if (!codeIterator.hasNext() || codeIterator.byteAt(pos = codeIterator.next()) != Opcode.INVOKEINTERFACE) {
+                        continue;
+                    }
+
+                    int methodIndex = codeIterator.u16bitAt(pos + 1);
+                    if (!"org.apache.logging.log4j.Logger".equals(cp.getMethodrefClassName(methodIndex))) {
+                        continue;
+                    }
+
+                    if (!"info".equals(cp.getMethodrefName(methodIndex))) {
+                        continue;
+                    }
+
+                    if (!"LWJGL Version: {}".equals(cp.getStringInfo(ldcIndex))) {
+                        continue;
+                    }
+
+                    isInitMethod = true;
+                    break;
                 }
 
-                byte[] bytes = StreamUtils.readInputStream(stream);
-                if (bytes == null) {
-                    Logger.error(failVersionReadMsg);
-                    return;
+                if (!isInitMethod) {
+                    continue;
                 }
 
-                versionJson = new String(bytes, "UTF-8");
-            } catch (Throwable t) {
-                Logger.error(this, t);
-                return;
-            }
+                Logger.debug("Found Minecraft.init() method: " + method.getName());
 
-            JSONObject version = new JSONObject(versionJson);
-            String verId =  version.optString("name", null);
-            if (verId == null) {
-                Logger.error(failVersionReadMsg);
-                return;
-            }
+                while (codeIterator.hasNext()) {
+                    int pos = codeIterator.next();
+                    int opcode = codeIterator.byteAt(pos);
+                    if (opcode == Opcode.LDC || opcode == Opcode.LDC_W) {
+                        int ldcIndex;
+                        if (opcode == Opcode.LDC_W) {
+                            ldcIndex = codeIterator.u16bitAt(pos + 1);
+                        } else {
+                            ldcIndex = codeIterator.byteAt(pos + 1);
+                        }
+                        if (cp.getTag(ldcIndex) != ConstPool.CONST_String) {
+                            continue;
+                        }
 
-            GameArgs.setVersion(verId);
+                        String ldcString = cp.getStringInfo(ldcIndex);
+                        if (ldcString != null && ldcString.startsWith("Minecraft ")) {
+                            // 18w44a - 18w47a
+                            GameArgs.setVersion(ldcString);
+                            return;
+                        }
+                    }
+
+                    // 17w43a - 18w43a
+                    if (codeIterator.byteAt(pos) != Opcode.INVOKEVIRTUAL) {
+                        continue;
+                    }
+
+                    int methodIndex = codeIterator.u16bitAt(pos + 1);
+                    String signature = cp.getMethodrefType(methodIndex);
+                    if (signature == null) {
+                        continue;
+                    }
+
+                    String paramTypes = signature.substring(signature.indexOf('(') + 1, signature.lastIndexOf(')'));
+
+                    if (!paramTypes.contains(";")) {
+                        continue;
+                    }
+
+                    String[] split = paramTypes.split(";");
+
+                    if (split.length != 2) {
+                        continue;
+                    }
+
+                    if (!"Ljava/lang/String".equals(split[1])) {
+                        continue;
+                    }
+
+                    String returnType = signature.substring(signature.lastIndexOf(')') + 1);
+
+                    if (!returnType.startsWith("L") || !returnType.endsWith(";")) {
+                        continue;
+                    }
+
+                    windowClassName = returnType.substring(1, returnType.lastIndexOf(";"));
+                    break;
+                }
+
+                if (windowClassName != null) {
+                    break;
+                }
+            } catch (Exception ignored) {
+            }
         }
+
+        if (windowClassName == null) {
+            return;
+        }
+
+        CtClass windowClass = patchPool.getRawClass(windowClassName);
+        for (CtConstructor constructor : windowClass.getDeclaredConstructors()) {
+            try {
+                CodeAttribute codeAttribute = constructor.getMethodInfo().getCodeAttribute();
+                CodeIterator codeIterator = codeAttribute.iterator();
+                ConstPool cp = constructor.getMethodInfo().getConstPool();
+
+                while (codeIterator.hasNext()) {
+                    int pos = codeIterator.next();
+                    int opcode = codeIterator.byteAt(pos);
+                    if (opcode != Opcode.LDC && opcode != Opcode.LDC_W) {
+                        continue;
+                    }
+
+                    int ldcIndex;
+                    if (opcode == Opcode.LDC_W) {
+                        ldcIndex = codeIterator.u16bitAt(pos + 1);
+                    } else {
+                        ldcIndex = codeIterator.byteAt(pos + 1);
+                    }
+                    if (cp.getTag(ldcIndex) != ConstPool.CONST_String) {
+                        continue;
+                    }
+
+                    String ldcString = cp.getStringInfo(ldcIndex);
+                    if (ldcString != null && ldcString.startsWith("Minecraft ")) {
+                        GameArgs.setVersion(ldcString);
+                        return;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    // reads game version from 'version.json' featured in Minecraft client jars of 18w47b (1.14) and later
+    private void readGameVersionFromVersionJson() {
+        String versionJson;
+        try {
+            InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("version.json");
+            if (stream == null) {
+                return;
+            }
+
+            byte[] bytes = StreamUtils.readInputStream(stream);
+            if (bytes == null) {
+                return;
+            }
+
+            versionJson = new String(bytes, "UTF-8");
+        } catch (Throwable t) {
+            Logger.error(this, t);
+            return;
+        }
+
+        JSONObject version = new JSONObject(versionJson);
+        String verId = version.optString("id", null);
+        if (verId == null) {
+            return;
+        }
+
+        if (verId.contains(" / ")) {
+            verId = verId.split(" / ")[0];
+        }
+
+        GameArgs.setVersion(verId);
     }
 
     private boolean findArgsWithApplet(PatchPool patchPool) throws Exception {

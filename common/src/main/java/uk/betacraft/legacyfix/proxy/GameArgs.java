@@ -293,6 +293,7 @@ public class GameArgs {
             .replace("Infdev", "inf-(date)")
             .replace("Indev", "in-(date)")
             .replaceAll("v([0-9])", "$1")
+            .replace(" Pre-Release ", "-pre")
             .trim();
 
         if (title.startsWith("0.")) {
