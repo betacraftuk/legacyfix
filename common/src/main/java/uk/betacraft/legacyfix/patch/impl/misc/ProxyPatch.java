@@ -115,7 +115,9 @@ public class ProxyPatch extends Patch {
             readGameVersion1_13(ctClass, patchPool);
         }
 
-        Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
+        if (Agent.getSetting("lf.version", null) == null) {
+            Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
+        }
     }
 
     // reads game version from calling Display.setTitle. useful for c0.0.2a - 1.12.2
