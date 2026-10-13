@@ -21,12 +21,12 @@ public class ClassicResizePatch extends Patch {
     public void apply(PatchPool patchPool) throws Exception {
         final String minecraftClassName = GameClasses.findMinecraftClass(patchPool);
         if (minecraftClassName == null) {
-            throw new PatchException("No minecraft class found");
+            throw new PatchException("No Minecraft class name found");
         }
 
         final CtClass minecraftClass = patchPool.getRawClass(minecraftClassName);
         if (minecraftClass == null) {
-            throw new PatchException("No minecraft class found");
+            throw new PatchException("No Minecraft class found");
         }
 
         for (CtMethod method : minecraftClass.getDeclaredMethods()) {

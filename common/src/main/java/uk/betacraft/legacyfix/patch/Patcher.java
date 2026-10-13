@@ -23,6 +23,7 @@ public class Patcher implements PatchPool {
         new BitDepthPatch(),
         new DisableControllersPatch(),
         new LWJGL3MethodsPatch(),
+        new Classic15aServerPortPatch(),
         new DeAwtPatch(),
         new MousePatch(),
         new VSyncPatch(),
