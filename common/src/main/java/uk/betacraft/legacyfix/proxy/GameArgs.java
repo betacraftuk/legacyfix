@@ -74,7 +74,7 @@ public class GameArgs {
             Agent.setSetting("lf.server", null);
         }
 
-        return Agent.getSetting("lf.server.port", -1);
+        return Agent.getIntSetting("lf.server.port", -1);
     }
 
     public static String getGameDir() {
@@ -412,8 +412,8 @@ public class GameArgs {
     // Used by OneSixSnapMainPatch
     @SuppressWarnings("unused")
     public static String[] getOneSixArguments() {
-        if (Agent.getSetting("lf.limit13w16a", false) ||
-                Agent.getSetting("lf.limit13w23a", false)) {
+        if (Agent.getBooleanSetting("lf.limit13w16a", false) ||
+                Agent.getBooleanSetting("lf.limit13w23a", false)) {
             List<String> args = new LinkedList<String>();
 
             if (hasKey("demo") || GameArgs.isDemo()) {
@@ -449,7 +449,7 @@ public class GameArgs {
                 args.add(getSession());
             }
 
-            if (Agent.getSetting("lf.limit13w23a", false)) {
+            if (Agent.getBooleanSetting("lf.limit13w23a", false)) {
                 if (hasKey("version")) {
                     args.add("--version");
                     args.add(getValue("version", "unknown"));

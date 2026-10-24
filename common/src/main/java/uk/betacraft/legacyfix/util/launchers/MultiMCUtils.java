@@ -83,7 +83,7 @@ public class MultiMCUtils {
             changed = true;
         }
 
-        boolean usesApplet = Agent.getSetting("lf.applet", false);
+        boolean usesApplet = Agent.getBooleanSetting("lf.applet", false);
 
         if (!hasLoader && usesApplet && !netMinecraftJson.optString("mainClass").equals("uk.betacraft.legacyfix.applet.AppletLauncher")) {
             netMinecraftJson.put("mainClass", "uk.betacraft.legacyfix.applet.AppletLauncher");

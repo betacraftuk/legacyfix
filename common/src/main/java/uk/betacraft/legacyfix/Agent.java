@@ -139,8 +139,19 @@ public class Agent {
         return SETTINGS;
     }
 
-    public static <T> T getSetting(String key, T alt) {
-        return getSettings().containsKey(key) ? (T) getSettings().get(key) : alt;
+    public static String getSetting(String key, String alt) {
+        return getSettings().containsKey(key) ? (String) getSettings().get(key) : alt;
+    }
+
+    public static int getIntSetting(String key, int alt) {
+        Object value = getSettings().get(key);
+        if (value == null) {
+            return alt;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        return Integer.parseInt(String.valueOf(value));
     }
 
     public static boolean getBooleanSetting(String key, boolean alt) {

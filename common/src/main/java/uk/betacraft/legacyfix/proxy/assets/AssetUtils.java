@@ -393,7 +393,7 @@ public class AssetUtils {
     }
 
     public static File getExpectedAssetsDir() {
-        if (Agent.getSetting("lf.usesWorkDir", false)) {
+        if (Agent.getBooleanSetting("lf.usesWorkDir", false)) {
             return new File(GameArgs.getGameDir(), "assets");
         }
         return getAssetsDir();
