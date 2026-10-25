@@ -25,9 +25,9 @@ public class LauncherPatch extends Patch {
     public void apply(PatchPool patchPool) throws Exception {
         boolean changed;
         if (prism) {
-            changed = PrismLauncherUtils.setup();
+            changed = new PrismLauncherUtils().setup();
         } else if (multimc) {
-            changed = MultiMCUtils.setup();
+            changed = new MultiMCUtils().setup();
         } else {
             return;
         }

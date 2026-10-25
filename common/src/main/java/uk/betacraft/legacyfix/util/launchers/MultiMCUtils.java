@@ -13,22 +13,31 @@ import java.io.*;
 import java.util.Iterator;
 
 public class MultiMCUtils {
+    protected static final String MMC_LAUNCHER_PATH = Agent.getSetting("lf.mmc-launcher.path");
     protected static final String LWJGL_LEGACYFABRIC_VERSION = "2.9.4+legacyfabric.18";
 
     public static boolean detect() {
         return System.getProperty("sun.java.command") != null && System.getProperty("sun.java.command").contains("org.multimc.EntryPoint");
     }
 
-    public static boolean setup() throws Exception {
-        MMCVersionInfo mmcInfo = readMMCVersion();
+    public boolean setup() throws Exception {
+        MMCVersionInfo mmcInfo = this.readMMCVersion();
         if (mmcInfo == null) {
             throw new Exception("Failed to read MMC version info");
         }
 
-        return patchMinecraftJson(mmcInfo);
+        boolean mcJson = this.patchMinecraftJson(mmcInfo);
+        boolean lwjglJson = this.patchLwjglJson(mmcInfo);
+
+        return mcJson || lwjglJson;
     }
 
-    protected static MMCVersionInfo readMMCVersion() {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    protected boolean shouldPatchLwjgl(MMCVersionInfo mmcVersionInfo) {
+        return false;
+    }
+
+    protected MMCVersionInfo readMMCVersion() {
         File mmcPackJsonFile = new File("../mmc-pack.json");
         if (!mmcPackJsonFile.exists()) {
             Logger.error("readMMCPackJson", "Could not find mmc-pack.json of this instance, can't download assets");
@@ -46,7 +55,7 @@ public class MultiMCUtils {
         return new MMCVersionInfo(mmcPackJson);
     }
 
-    protected static boolean patchMinecraftJson(MMCVersionInfo mmcVersionInfo) {
+    protected boolean patchMinecraftJson(MMCVersionInfo mmcVersionInfo) {
         // don't mess with loaders.
         boolean hasLoader = mmcVersionInfo.forgeVersion != null || mmcVersionInfo.fabricVersion != null;
 
@@ -55,7 +64,7 @@ public class MultiMCUtils {
         }
 
         File netMinecraftJsonFile = new File("../patches/net.minecraft.json");
-        JSONObject netMinecraftJson = readMMCJson(netMinecraftJsonFile, new File("../../../meta/net.minecraft/" + mmcVersionInfo.minecraftVersion + ".json"));
+        JSONObject netMinecraftJson = this.readMMCJson(netMinecraftJsonFile, "meta/net.minecraft/" + mmcVersionInfo.minecraftVersion + ".json");
         if (netMinecraftJson == null) {
             return false;
         }
@@ -117,7 +126,7 @@ public class MultiMCUtils {
         }
 
         replaceLwjglRequires: {
-            if (!PrismLauncherUtils.shouldPatchLwjgl(mmcVersionInfo)) {
+            if (!this.shouldPatchLwjgl(mmcVersionInfo)) {
                 break replaceLwjglRequires;
             }
 
@@ -148,7 +157,7 @@ public class MultiMCUtils {
         }
 
         if (changed) {
-            saveMMCJson(netMinecraftJsonFile, netMinecraftJson);
+            this.saveMMCJson(netMinecraftJsonFile, netMinecraftJson);
 
             Logger.debug("patchMinecraftJson", "Patched 'net.minecraft.json'");
         } else {
@@ -158,10 +167,47 @@ public class MultiMCUtils {
         return changed;
     }
 
-    protected static JSONObject readMMCJson(File mmcJsonFile, File srcMMCJsonFile) {
+    protected boolean patchLwjglJson(MMCVersionInfo mmcVersionInfo) {
+        return false;
+    }
+
+    protected File getFileAtDefaultPath(String path) {
+        if (MMC_LAUNCHER_PATH != null) {
+            return new File(MMC_LAUNCHER_PATH, path);
+        }
+
+        switch (OSUtils.getOS()) {
+            case MACOS:
+                File globalApps = new File("/Applications/MultiMC.app/Data/", path);
+                if (globalApps.isFile()) {
+                    return globalApps;
+                }
+                return new File(System.getProperty("user.home", "."),
+                    "Applications/MultiMC.app/Data/" + path);
+            case LINUX:
+            case OTHER:
+                return new File(System.getProperty("user.home", "."),
+                    ".local/share/multimc/" + path);
+        }
+        return null;
+    }
+
+    protected JSONObject readMMCJson(File mmcJsonFile, String srcMMCJsonPath) {
         JSONObject mmcJson;
         if (!mmcJsonFile.exists()) {
             try {
+                File srcMMCJsonFile = new File("../../../" + srcMMCJsonPath);
+                if (!srcMMCJsonFile.isFile()) {
+                    srcMMCJsonFile = this.getFileAtDefaultPath(srcMMCJsonPath);
+                }
+
+                if (srcMMCJsonFile == null || !srcMMCJsonFile.isFile()) {
+                    Logger.error("readMMCJson", "Failed to find MMC json at: "  + srcMMCJsonPath,
+                        "Please set the -Dlf.mmc-launcher.path JVM argument to the launcher's data directory.");
+                    System.exit(-1);
+                    return null;
+                }
+
                 mmcJson = new JSONObject(new JSONTokener(new InputStreamReader(new FileInputStream(srcMMCJsonFile))));
             } catch (FileNotFoundException e) {
                 Logger.error("readMMCJson", e);
@@ -179,7 +225,7 @@ public class MultiMCUtils {
         return mmcJson;
     }
 
-    protected static void saveMMCJson(File mmcJsonFile, JSONObject mmcJson) {
+    protected void saveMMCJson(File mmcJsonFile, JSONObject mmcJson) {
         try {
             mmcJsonFile.getParentFile().mkdirs();
 
@@ -199,13 +245,6 @@ public class MultiMCUtils {
         public String forgeVersion;
         public String fabricVersion;
         private JSONObject mmcPackJson;
-
-        public MMCVersionInfo(String minecraftVersion, String lwjglVersion, String forgeVersion, String fabricVersion) {
-            this.minecraftVersion = minecraftVersion;
-            this.lwjglVersion = lwjglVersion;
-            this.forgeVersion = forgeVersion;
-            this.fabricVersion = fabricVersion;
-        }
 
         public MMCVersionInfo(JSONObject mmcPackJson) {
             this.mmcPackJson =  mmcPackJson;

@@ -16,20 +16,8 @@ public class PrismLauncherUtils extends MultiMCUtils {
         return System.getProperty("sun.java.command") != null && System.getProperty("sun.java.command").equals("org.prismlauncher.EntryPoint");
     }
 
-    public static boolean setup() throws Exception {
-        MMCVersionInfo mmcInfo = readMMCVersion();
-        if (mmcInfo == null) {
-            throw new Exception("Failed to read MMC version info");
-        }
-
-        boolean mcJson = patchMinecraftJson(mmcInfo);
-        boolean lwjglJson = patchLwjglJson(mmcInfo);
-
-        return mcJson || lwjglJson;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    protected static boolean shouldPatchLwjgl(MMCVersionInfo mmcVersionInfo) {
+    @Override
+    protected boolean shouldPatchLwjgl(MMCVersionInfo mmcVersionInfo) {
         if (!detect()) {
             return false;
         }
@@ -51,13 +39,14 @@ public class PrismLauncherUtils extends MultiMCUtils {
         return OSUtils.getPlatform().is(OSUtils.OS.MACOS, OSUtils.Arch.AARCH64);
     }
 
-    protected static boolean patchLwjglJson(MMCVersionInfo mmcVersionInfo) {
-        if (!shouldPatchLwjgl(mmcVersionInfo)) {
+    @Override
+    protected boolean patchLwjglJson(MMCVersionInfo mmcVersionInfo) {
+        if (!this.shouldPatchLwjgl(mmcVersionInfo)) {
             return false;
         }
 
         File orgLwjglJsonFile = new File("../patches/org.lwjgl.json");
-        JSONObject orgLwjglJson = readMMCJson(orgLwjglJsonFile, new File("../../../meta/org.lwjgl/" + mmcVersionInfo.lwjglVersion + ".json"));
+        JSONObject orgLwjglJson = this.readMMCJson(orgLwjglJsonFile, "meta/org.lwjgl/" + mmcVersionInfo.lwjglVersion + ".json");
         if (orgLwjglJson == null) {
             return false;
         }
@@ -118,9 +107,29 @@ public class PrismLauncherUtils extends MultiMCUtils {
         orgLwjglJson.put("libraries", libraries);
         orgLwjglJson.put("version", LWJGL_LEGACYFABRIC_VERSION);
 
-        saveMMCJson(orgLwjglJsonFile, orgLwjglJson);
+        this.saveMMCJson(orgLwjglJsonFile, orgLwjglJson);
 
         Logger.debug("patchLwjglJson", "Patched Prism to use LWJGL2 " + LWJGL_LEGACYFABRIC_VERSION);
         return true;
+    }
+
+    @Override
+    protected File getFileAtDefaultPath(String path) {
+        if (MMC_LAUNCHER_PATH != null) {
+            return new File(MMC_LAUNCHER_PATH, path);
+        }
+
+        switch (OSUtils.getOS()) {
+            case WINDOWS:
+                return new File(System.getenv("APPDATA"), "PrismLauncher/" + path);
+            case MACOS:
+                return new File(System.getProperty("user.home", "."),
+                    "Library/Application Support/PrismLauncher/" + path);
+            case LINUX:
+            case OTHER:
+                return new File(System.getProperty("user.home", "."),
+                    ".local/share/PrismLauncher/" + path);
+        }
+        return null;
     }
 }
