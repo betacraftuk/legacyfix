@@ -6,11 +6,10 @@ import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.GameClasses;
+import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.*;
 
 public class MousePatch extends Patch {
-    private boolean mouseDeltaFound = false;
-
     public MousePatch() {
         super("mouse", "Fixes mouse handling, required for deAWT", true);
     }
@@ -40,13 +39,20 @@ public class MousePatch extends Patch {
         });
 
         patchPool.addTransformer(new Transformer() {
+            private boolean mouseDeltaFound = false;
+
             public byte[] transform(String name, byte[] bytecode) {
-                if (mouseDeltaFound) {
+                if (this.mouseDeltaFound || name == null) {
                     return null;
                 }
 
                 if (name.startsWith("org.lwjgl") || name.equals(mouseHelperClassName)) {
                     return null;
+                }
+                for (String ignore : Patcher.JVM_CLASS_IGNORES) {
+                    if (name.startsWith(ignore)) {
+                        return null;
+                    }
                 }
 
                 CtClass clas = patchPool.getRawClass(name);

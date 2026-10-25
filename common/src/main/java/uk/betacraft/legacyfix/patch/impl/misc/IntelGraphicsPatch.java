@@ -9,6 +9,7 @@ import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.Opcode;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.patch.api.Transformer;
@@ -24,8 +25,14 @@ public class IntelGraphicsPatch extends Patch {
             private boolean applied = false;
 
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (applied || name == null) {
+                if (this.applied || name == null) {
                     return null;
+                }
+
+                for (String ignore : Patcher.JVM_CLASS_IGNORES) {
+                    if (name.startsWith(ignore)) {
+                        return null;
+                    }
                 }
 
                 CtClass clas = ctFromBytes(bytecode);

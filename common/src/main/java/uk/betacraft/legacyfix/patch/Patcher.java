@@ -41,6 +41,12 @@ public class Patcher implements PatchPool {
         new DemoPatch()
     };
 
+    public static final String[] JVM_CLASS_IGNORES = new String[]{
+        "java.", "javax.", "jdk.", "com.sun.", "sun.",
+        "apple.", "com.apple.",
+        "uk.betacraft."
+    };
+
     public final List<Patch> patches = new ArrayList<Patch>();
     private final ClassPool pool;
     private final List<Transformer> transformers = new ArrayList<Transformer>();
