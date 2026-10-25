@@ -49,7 +49,7 @@ public class Classic15aServerPortPatch extends Patch {
                         }
 
                         int provided = codeIterator.s16bitAt(pos + 1);
-                        if (provided != 5565) {
+                        if (provided != 5565 && !Agent.getBooleanSetting("lf." + Classic15aServerPortPatch.this.getId() + ".force", false)) {
                             Logger.debug("c0.0.15a-server-port",
                                 "SIPUSH does not provide 5565, instead " + provided + ". The client is very likely modified.",
                                 "The patch did not apply."
