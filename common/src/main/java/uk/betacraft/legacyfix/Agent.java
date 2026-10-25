@@ -93,28 +93,34 @@ public class Agent {
 
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-                if (className == null) return null;
-                String dotName = className.replace('/', '.');
+                String dotName;
+                if (className != null) {
+                    dotName = className.replace('/', '.');
+                } else {
+                    dotName = null;
+                }
 
                 byte[] currentBuffer = classfileBuffer;
                 boolean modified = false;
 
-                List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
-                if (ctTransformers != null && !ctTransformers.isEmpty()) {
-                    try {
-                        ClassPool ctPool = new ClassPool(true);
-                        ctPool.appendClassPath(new ByteArrayClassPath(dotName, currentBuffer));
-                        CtClass ctClass = ctPool.get(dotName);
+                if (dotName != null) {
+                    List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
+                    if (ctTransformers != null && !ctTransformers.isEmpty()) {
+                        try {
+                            ClassPool ctPool = new ClassPool(true);
+                            ctPool.appendClassPath(new ByteArrayClassPath(dotName, currentBuffer));
+                            CtClass ctClass = ctPool.get(dotName);
 
-                        for (CtTransformer ctTransformer : ctTransformers) {
-                            ctTransformer.transform(ctClass);
+                            for (CtTransformer ctTransformer : ctTransformers) {
+                                ctTransformer.transform(ctClass);
+                            }
+
+                            currentBuffer = ctClass.toBytecode();
+                            ctClass.detach();
+                            modified = true;
+                        } catch (Exception e) {
+                            Logger.error("Failed to apply CtTransformers on class \"" + dotName + "\"", e);
                         }
-
-                        currentBuffer = ctClass.toBytecode();
-                        ctClass.detach();
-                        modified = true;
-                    } catch (Exception e) {
-                        Logger.error("Failed to apply CtTransformers on class \"" + dotName + "\"", e);
                     }
                 }
 
