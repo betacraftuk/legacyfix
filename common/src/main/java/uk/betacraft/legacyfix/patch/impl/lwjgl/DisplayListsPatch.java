@@ -8,7 +8,8 @@ import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 
 public class DisplayListsPatch extends Patch {
-    public static final int DISPLAY_LISTS_SIZE = Agent.getIntSetting("lf.lwjgl-genlists.size", -1);
+    // Set to 202800 to avoid issues with Extreme render distance mods (32 chunks)
+    private static final int DISPLAY_LISTS_SIZE = Agent.getIntSetting("lf.lwjgl-genlists.size", 202800);
 
     public DisplayListsPatch() {
         super("lwjgl-genlists", "Patches calls to glGenLists to make the lists size reasonable", true);
@@ -26,16 +27,13 @@ public class DisplayListsPatch extends Patch {
                 // b1.7.3: 16224
                 // 1.7.10: 52272
 
-                // Set to 202800 to avoid issues with Extreme render distance mods (32 chunks)
-                int size = DISPLAY_LISTS_SIZE != -1 ? DISPLAY_LISTS_SIZE : 202800;
-
                 CtMethod glGenListsMethod = ctClass.getDeclaredMethod("glGenLists");
                 glGenListsMethod.insertBefore("" +
                     (Agent.DEBUG ?
                     "System.out.println(\"[LF] glGenLists got called with: \" + $1);" : ""
                     ) +
                     "if ($1 >= 524288) {" +
-                    "    $1 = " + size + ";" +
+                    "    $1 = " + DISPLAY_LISTS_SIZE + ";" +
                     "}"
                 );
             }
