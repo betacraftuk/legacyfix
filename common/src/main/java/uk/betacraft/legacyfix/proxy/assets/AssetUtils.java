@@ -290,7 +290,7 @@ public class AssetUtils {
         sha1Map.put("12w19a", "b134d6e290c3d6fcdb1b42b459cee728b3f1f2e8");
         sha1Map.put("12w21a", "fab5807aee92c487ba6b823a22792fd3774fe682");
 
-        String minecraftVersion = Agent.getSetting("lf.version", null);
+        String minecraftVersion = Agent.getSetting("lf.version");
         if (minecraftVersion == null || !minecraftVersion.startsWith("12w18a") && !minecraftVersion.startsWith("12w19a") && !minecraftVersion.startsWith("12w21a")) {
             return;
         }

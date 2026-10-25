@@ -50,13 +50,13 @@ public class GameArgs {
 
     @SuppressWarnings("unused")
     public static String getServerAddress() {
-        if (Agent.getSetting("lf.server", null) != null) {
-            readServer(Agent.getSetting("lf.server", (String) null));
+        if (Agent.getSetting("lf.server") != null) {
+            readServer(Agent.getSetting("lf.server"));
 
             Agent.removeSetting("lf.server");
         }
 
-        String socket = Agent.getSetting("lf.server.addr", null);
+        String socket = Agent.getSetting("lf.server.addr");
 
         if (!authedOnJoin && socket != null && Agent.hasSetting("lf.auth-on-server-join") && !Agent.hasSetting("lf.auth-on-server-join.disable")) {
             RequestUtil.performServerJoinAuth(GameArgs.getUuid(), GameArgs.getSession(), socket);
@@ -68,8 +68,8 @@ public class GameArgs {
 
     @SuppressWarnings("unused")
     public static int getServerPort() {
-        if (Agent.getSetting("lf.server", null) != null) {
-            readServer(Agent.getSetting("lf.server", (String) null));
+        if (Agent.getSetting("lf.server") != null) {
+            readServer(Agent.getSetting("lf.server"));
 
             Agent.setSetting("lf.server", null);
         }
@@ -78,7 +78,7 @@ public class GameArgs {
     }
 
     public static String getGameDir() {
-        String gameDir = Agent.getSetting("lf.gameDir", null);
+        String gameDir = Agent.getSetting("lf.gameDir");
 
         if (gameDir == null) {
             try {
@@ -93,8 +93,8 @@ public class GameArgs {
     }
 
     public static String getAssetsDir() {
-        if (Agent.getSetting("lf.assetsDir", null) != null) {
-            return Agent.getSetting("lf.assetsDir", null);
+        if (Agent.getSetting("lf.assetsDir") != null) {
+            return Agent.getSetting("lf.assetsDir");
         }
 
         try {
@@ -110,7 +110,7 @@ public class GameArgs {
                 Logger.error("getAssetsDir", "Couldn't find assets root directory! Please specify the path to your assets directory with the -Dlf.assetsDir argument.");
             }
         } catch (Throwable ignored) {
-            if (Agent.getSetting("lf.assetsDir", null) == null) {
+            if (Agent.getSetting("lf.assetsDir") == null) {
                 Logger.error("getAssetsDir", "Couldn't get assets root directory! Please specify the path to your assets directory with the -Dlf.assetsDir argument.");
             }
         }
@@ -120,7 +120,7 @@ public class GameArgs {
     public static String getAssetIndexPath() {
         String index = Agent.getSetting("lf.assetIndex", GameArgs.assetIndex);
         if (isInvalidIndex(index)) {
-            String ver = Agent.getSetting("lf.version", null);
+            String ver = Agent.getSetting("lf.version");
             if (ver != null) {
                 index = resolveIndex(ver);
             }
@@ -205,12 +205,12 @@ public class GameArgs {
                     continue;
                 }
 
-                if (Agent.getSetting("lf.version", null) == null) {
+                if (Agent.getSetting("lf.version") == null) {
                     Agent.setSetting("lf.version", value);
                     resolveIndex(value);
                 }
             } else if ("--gameDir".equals(key)) {
-                if (Agent.getSetting("lf.gameDir", null) == null) {
+                if (Agent.getSetting("lf.gameDir") == null) {
                     Agent.setSetting("lf.gameDir", value);
                 }
             } else if ("--assetsDir".equals(key)) {
@@ -218,7 +218,7 @@ public class GameArgs {
                     continue;
                 }
 
-                if (Agent.getSetting("lf.assetsDir", null) == null) {
+                if (Agent.getSetting("lf.assetsDir") == null) {
                     Agent.setSetting("lf.assetsDir", value);
                 }
             } else if ("--assetIndex".equals(key)) {
@@ -226,15 +226,15 @@ public class GameArgs {
                     continue;
                 }
 
-                if (Agent.getSetting("lf.assetIndex", null) == null) {
+                if (Agent.getSetting("lf.assetIndex") == null) {
                     GameArgs.assetIndex = value;
                 }
             } else if ("--server".equals(key)) {
-                if (Agent.getSetting("lf.server.addr", null) == null) {
+                if (Agent.getSetting("lf.server.addr") == null) {
                     Agent.setSetting("lf.server.addr", value);
                 }
             } else if ("--port".equals(key)) {
-                if (Agent.getSetting("lf.server.port", null) == null) {
+                if (Agent.getSetting("lf.server.port") == null) {
                     try {
                         Agent.setSetting("lf.server.port", Integer.parseInt(value));
                     } catch (NumberFormatException e) {
@@ -242,7 +242,7 @@ public class GameArgs {
                     }
                 }
             } else if ("--quickPlayMultiplayer".equals(key)) {
-                if (Agent.getSetting("lf.server.addr", null) == null) {
+                if (Agent.getSetting("lf.server.addr") == null) {
                     readServer(value);
                 }
             }

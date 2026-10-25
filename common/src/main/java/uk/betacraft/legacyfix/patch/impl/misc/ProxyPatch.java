@@ -23,7 +23,7 @@ public class ProxyPatch extends Patch {
     }
 
     public void apply(PatchPool patchPool) throws Exception {
-        String version = Agent.getSetting("lf.version", null);
+        String version = Agent.getSetting("lf.version");
         if (version == null) {
             readGameVersion(patchPool);
         } else {
@@ -107,15 +107,15 @@ public class ProxyPatch extends Patch {
         CtClass ctClass = patchPool.getRawClass(minecraftClass);
         readGameVersionPre1_13(ctClass);
 
-        if (Agent.getSetting("lf.version", null) == null) {
+        if (Agent.getSetting("lf.version") == null) {
             readGameVersionFromVersionJson();
         }
 
-        if (Agent.getSetting("lf.version", null) == null) {
+        if (Agent.getSetting("lf.version") == null) {
             readGameVersion1_13(ctClass, patchPool);
         }
 
-        if (Agent.getSetting("lf.version", null) == null) {
+        if (Agent.getSetting("lf.version") == null) {
             Logger.error("Couldn't read the game version! Please specify your game version with the -Dlf.version argument.");
         }
     }

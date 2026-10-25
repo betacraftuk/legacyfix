@@ -90,7 +90,7 @@ public class LevelProxyConfig {
     }
 
     public static synchronized String getOnlineLevelServer() {
-        String explicit = Agent.getSetting("lf.proxy.levelServer", null);
+        String explicit = Agent.getSetting("lf.proxy.levelServer");
         if (explicit != null) {
             return normalize(explicit);
         }

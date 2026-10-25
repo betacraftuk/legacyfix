@@ -69,6 +69,6 @@ public class Classic15aServerPortPatch extends Patch {
 
     @Override
     public boolean shouldApply(PatchPool patchPool) {
-        return super.shouldApply(patchPool) && Agent.getSetting("lf.version", "").equals("c0.0.15a");
+        return super.shouldApply(patchPool) && "c0.0.15a".equals(Agent.getSetting("lf.version"));
     }
 }

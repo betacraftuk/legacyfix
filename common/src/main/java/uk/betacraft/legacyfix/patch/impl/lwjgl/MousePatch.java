@@ -129,7 +129,7 @@ public class MousePatch extends Patch {
             "}"
         );
 
-        boolean invert = "invert".equals(Agent.getSetting("lf.mouse", null));
+        boolean invert = "invert".equals(Agent.getSetting("lf.mouse"));
         if (usesRobot) {
             invert = !invert;
         }
