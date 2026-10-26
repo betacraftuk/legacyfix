@@ -55,7 +55,7 @@ public class LauncherPatch extends Patch {
             description.add(new JLabel(LINE1));
             description.add(new JLabel(LINE2));
 
-            ImageIcon icon = Agent.ICON;
+            ImageIcon icon = Agent.getIcon();
             JPanel panel = new JPanel(new BorderLayout(0, 8));
             panel.add(description, BorderLayout.NORTH);
 

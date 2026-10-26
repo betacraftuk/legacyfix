@@ -25,7 +25,6 @@ import java.util.List;
 public class Agent {
     public static final boolean DEBUG;
     public static final String VERSION;
-    public static final ImageIcon ICON;
     private static final Map<String, Object> SETTINGS = new HashMap<String, Object>();
 
     public static boolean loaded = false;
@@ -141,6 +140,24 @@ public class Agent {
         });
     }
 
+    private static ImageIcon icon;
+    public static synchronized ImageIcon getIcon() {
+        if (icon != null) {
+            return icon;
+        }
+
+        try {
+            URL url = Agent.class.getResource("/assets/legacyfix/icon-outlined.png");
+
+            if (url != null) {
+                Image image = new ImageIcon(url).getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+                return icon = new ImageIcon(image);
+            }
+        } catch (Throwable ignored) {
+        }
+        return icon = new ImageIcon();
+    }
+
     public static Map<String, Object> getSettings() {
         return SETTINGS;
     }
@@ -232,28 +249,13 @@ public class Agent {
 
     static {
         String version;
-        ImageIcon icon;
 
         try {
             version = new BufferedReader(new InputStreamReader(Agent.class.getResourceAsStream("/version.txt"))).readLine();
         } catch (Throwable ignored) {
             version = "unknown";
         }
-        try {
-            URL url = Agent.class.getResource("/assets/legacyfix/icon-outlined.png");
-
-            if (url != null) {
-                Image image = new ImageIcon(url).getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
-                icon = new ImageIcon(image);
-            } else {
-                icon = new ImageIcon();
-            }
-        } catch (Throwable t) {
-            icon = new ImageIcon();
-        }
-
         VERSION = version;
-        ICON = icon;
 
         for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
             String propertyKey = String.valueOf(property.getKey());

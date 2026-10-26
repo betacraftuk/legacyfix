@@ -63,7 +63,7 @@ public class LevelProxyConfig {
             serverPanel.add(server, BorderLayout.CENTER);
             choices.add(serverPanel);
 
-            ImageIcon icon = Agent.ICON;
+            ImageIcon icon = Agent.getIcon();
             JPanel panel = new JPanel(new BorderLayout(0, 8));
             panel.add(getDescription(), BorderLayout.NORTH);
             panel.add(choices, BorderLayout.CENTER);
