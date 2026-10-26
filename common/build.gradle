@@ -13,5 +13,5 @@ dependencies {
     implementation files('../libs/json-java5-20240303-SNAPSHOT2.jar')
     implementation files('../libs/javassist-java5.jar')
 
-    compileOnly('org.bouncycastle:bctls-jdk15to18:1.82')
+    compileOnly('org.bouncycastle:bctls-jdk15to18:1.86')
 }
