@@ -45,6 +45,11 @@ shadowJar {
     from project(':fml').jar
     from project(':risugami').jar
 
+    exclude 'javassist/tools/**'
+    exclude 'javassist/scopedpool/**'
+    exclude 'javassist/convert/**'
+    exclude 'javassist/bytecode/analysis/**'
+
     manifest {
         attributes(
             'TweakClass': 'uk.betacraft.legacyfix.tweaker.LFTweaker',
