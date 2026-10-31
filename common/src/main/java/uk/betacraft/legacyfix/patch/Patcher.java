@@ -17,6 +17,7 @@ public class Patcher implements PatchPool {
         new VisualizerPatch(),
         new ProxyPatch(),
         new LauncherPatch(),
+        new WindowOwnerPatch(),
         new LevelProxyPatch(),
         new Java6RefsPatch(),
         new JavaModulesPatch(),
