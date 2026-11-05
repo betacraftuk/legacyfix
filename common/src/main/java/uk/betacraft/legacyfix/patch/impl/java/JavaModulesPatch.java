@@ -1,11 +1,13 @@
 package uk.betacraft.legacyfix.patch.impl.java;
 
+import sun.misc.Unsafe;
 import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -15,41 +17,88 @@ public class JavaModulesPatch extends Patch {
     }
 
     @Override
-    public void apply(PatchPool patchPool) throws Exception {
-        String args = JvmUtils.getJvmArguments();
-        if (!args.contains("--add-opens=java.base/java.lang=ALL-UNNAMED")) {
-            Logger.error(
-                "",
-                "LegacyFix can't launch because a required JVM argument is missing.",
-                "Please add the following to your JVM options and try again:",
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                ""
-            );
+    public void apply(PatchPool patchPool) throws PatchException {
+        try {
+            Class<?> moduleClass = Class.forName("java.lang.Module");
+            Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer");
 
-            throw new PatchException("Conditions not met");
-        }
+            Object unnamedModule = ClassLoader.class.getMethod("getUnnamedModule").invoke(this.getClass().getClassLoader());
 
-        Class<?> moduleClass = Class.forName("java.lang.Module");
-        Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer");
+            Object bootLayer = moduleLayerClass.getMethod("boot").invoke(null);
+            Set<?> modules = (Set<?>) moduleLayerClass.getMethod("modules").invoke(bootLayer);
 
-        Method getUnnamedModule = ClassLoader.class.getMethod("getUnnamedModule");
-        Object unnamedModule = getUnnamedModule.invoke(this.getClass().getClassLoader());
+            Method getPackages = moduleClass.getMethod("getPackages");
 
-        Method implAddExportsOrOpens = moduleClass.getDeclaredMethod("implAddExportsOrOpens", String.class, moduleClass, boolean.class, boolean.class);
-        implAddExportsOrOpens.setAccessible(true);
+            Object handle = implAddExportsOrOpens(moduleClass);
+            Method invokeWithArguments = Class.forName("java.lang.invoke.MethodHandle").getMethod("invokeWithArguments", Object[].class);
 
-        Method boot = moduleLayerClass.getMethod("boot");
-        Object bootLayer = boot.invoke(null);
-
-        Method getPackages = moduleClass.getMethod("getPackages");
-        Method modules = moduleLayerClass.getMethod("modules");
-        Set<?> moduleSet = (Set<?>) modules.invoke(bootLayer);
-
-        for (Object module : moduleSet) {
-            Set<String> packages = (Set<String>) getPackages.invoke(module);
-            for (String pkg : packages) {
-                implAddExportsOrOpens.invoke(module, pkg, unnamedModule, true, true);
+            for (Object module : modules) {
+                Set<?> packages = (Set<?>) getPackages.invoke(module);
+                for (Object pkg : packages) {
+                    open(invokeWithArguments, handle, module, (String) pkg, unnamedModule);
+                }
             }
+        } catch (PatchException e) {
+            throw e;
+        } catch (Exception e) {
+            Logger.error(this, e);
+            throw new PatchException("Failed to open boot modules");
+        }
+    }
+
+    private Object implAddExportsOrOpens(Class<?> moduleClass) throws PatchException {
+        try {
+            Class<?> methodTypeClass = Class.forName("java.lang.invoke.MethodType");
+            Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
+
+            Object methodType = methodTypeClass
+                .getMethod("methodType", Class.class, Class[].class)
+                .invoke(null, void.class, new Class<?>[] {
+                    String.class, moduleClass, boolean.class, boolean.class
+                });
+
+            Object lookup = readImplLookup();
+            Method findVirtual = lookupClass.getMethod("findVirtual", Class.class, String.class, methodTypeClass);
+            return findVirtual.invoke(lookup, moduleClass, "implAddExportsOrOpens", methodType);
+        } catch (PatchException e) {
+            throw e;
+        } catch (Exception e) {
+            Logger.error(this, e);
+            throw new PatchException("Module.implAddExportsOrOpens is not available");
+        }
+    }
+
+    private Object readImplLookup() throws PatchException {
+        try {
+            Class.forName("java.lang.invoke.MethodHandles").getMethod("lookup").invoke(null);
+
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            Unsafe unsafe = (Unsafe) theUnsafe.get(null);
+
+            Class<?> mhLookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
+            Field implLookup = mhLookupClass.getDeclaredField("IMPL_LOOKUP");
+            Object base = unsafe.staticFieldBase(implLookup);
+            return unsafe.getObject(base, unsafe.staticFieldOffset(implLookup));
+        } catch (Exception e) {
+            Logger.error(this, e);
+            throw new PatchException("Could not obtain IMPL_LOOKUP");
+        }
+    }
+
+    private void open(Method invokeWithArguments, Object handle, Object module, String pkg, Object unnamedModule) throws PatchException {
+        try {
+            Object[] args = {module, pkg, unnamedModule, Boolean.TRUE, Boolean.TRUE};
+            invokeWithArguments.invoke(handle, new Object[] {args});
+        } catch (Exception e) {
+            Logger.error(this, e);
+            String moduleName;
+            try {
+                moduleName = (String) module.getClass().getMethod("getName").invoke(module);
+            } catch (Exception ignored) {
+                moduleName = String.valueOf(module);
+            }
+            throw new PatchException("Failed to open " + moduleName + "/" + pkg);
         }
     }
 
