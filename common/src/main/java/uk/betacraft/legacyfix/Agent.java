@@ -62,7 +62,7 @@ public class Agent {
 
         for (String className : ctTransformersMap.keySet()) {
             try {
-                Class<?> loadedClass = Class.forName(className);
+                Class<?> loadedClass = Class.forName(className, false, ClassLoader.getSystemClassLoader());
 
                 ClassPool pool = ClassPool.getDefault();
                 CtClass ctClass = pool.get(className);
@@ -74,7 +74,8 @@ public class Agent {
                     transformer.transform(ctClass);
                 }
 
-                definitions.add(new ClassDefinition(loadedClass, ctClass.toBytecode()));
+                byte[] redefined = applyTransformers(patcher, className, ctClass.toBytecode());
+                definitions.add(new ClassDefinition(loadedClass, redefined));
                 ctClass.detach();
             } catch (ClassNotFoundException ignored) {
             } catch (Exception e) {
@@ -107,7 +108,7 @@ public class Agent {
                     if (ctTransformers != null && !ctTransformers.isEmpty()) {
                         try {
                             ClassPool ctPool = new ClassPool(true);
-                            ctPool.appendClassPath(new ByteArrayClassPath(dotName, currentBuffer));
+                            ctPool.insertClassPath(new ByteArrayClassPath(dotName, currentBuffer));
                             CtClass ctClass = ctPool.get(dotName);
 
                             for (CtTransformer ctTransformer : ctTransformers) {
@@ -123,21 +124,32 @@ public class Agent {
                     }
                 }
 
-                for (Transformer transformer : patcher.getTransformers()) {
-                    try {
-                        byte[] result = transformer.transform(dotName, currentBuffer);
-                        if (result != null) {
-                            currentBuffer = result;
-                            modified = true;
-                        }
-                    } catch (Exception e) {
-                        Logger.error("Failed to apply Transformer on class \"" + dotName + "\"", e);
-                    }
+                byte[] transformed = applyTransformers(patcher, dotName, currentBuffer);
+                if (transformed != currentBuffer) {
+                    currentBuffer = transformed;
+                    modified = true;
                 }
 
                 return modified ? currentBuffer : null;
             }
         });
+    }
+
+    private static byte[] applyTransformers(Patcher patcher, String dotName, byte[] bytecode) {
+        byte[] currentBuffer = bytecode;
+
+        for (Transformer transformer : patcher.getTransformers()) {
+            try {
+                byte[] result = transformer.transform(dotName, currentBuffer);
+                if (result != null) {
+                    currentBuffer = result;
+                }
+            } catch (Exception e) {
+                Logger.error("Failed to apply Transformer on class \"" + dotName + "\"", e);
+            }
+        }
+
+        return currentBuffer;
     }
 
     private static ImageIcon icon;

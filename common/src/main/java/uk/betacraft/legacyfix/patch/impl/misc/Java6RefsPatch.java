@@ -38,7 +38,7 @@ public class Java6RefsPatch extends Patch {
 
                 try {
                     ClassPool ctPool = new ClassPool(true);
-                    ctPool.appendClassPath(new ByteArrayClassPath(name, bytecode));
+                    ctPool.insertClassPath(new ByteArrayClassPath(name, bytecode));
                     CtClass clas = ctPool.get(name);
 
                     final String finalName = name;

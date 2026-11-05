@@ -1,13 +1,12 @@
 package uk.betacraft.legacyfix.patch.impl.java;
 
-import sun.misc.Unsafe;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.jvm.TrustedLookup;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -57,32 +56,14 @@ public class JavaModulesPatch extends Patch {
                     String.class, moduleClass, boolean.class, boolean.class
                 });
 
-            Object lookup = readImplLookup();
+            Object lookup = TrustedLookup.get();
             Method findVirtual = lookupClass.getMethod("findVirtual", Class.class, String.class, methodTypeClass);
             return findVirtual.invoke(lookup, moduleClass, "implAddExportsOrOpens", methodType);
         } catch (PatchException e) {
             throw e;
-        } catch (Exception e) {
-            Logger.error(this, e);
+        } catch (Throwable t) {
+            Logger.error(this, t);
             throw new PatchException("Module.implAddExportsOrOpens is not available");
-        }
-    }
-
-    private Object readImplLookup() throws PatchException {
-        try {
-            Class.forName("java.lang.invoke.MethodHandles").getMethod("lookup").invoke(null);
-
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            Unsafe unsafe = (Unsafe) theUnsafe.get(null);
-
-            Class<?> mhLookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
-            Field implLookup = mhLookupClass.getDeclaredField("IMPL_LOOKUP");
-            Object base = unsafe.staticFieldBase(implLookup);
-            return unsafe.getObject(base, unsafe.staticFieldOffset(implLookup));
-        } catch (Exception e) {
-            Logger.error(this, e);
-            throw new PatchException("Could not obtain IMPL_LOOKUP");
         }
     }
 

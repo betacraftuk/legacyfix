@@ -21,6 +21,8 @@ public class Patcher implements PatchPool {
         new LevelProxyPatch(),
         new Java6RefsPatch(),
         new JavaModulesPatch(),
+        new URLClassLoaderPatch(),
+        new ThreadTargetPatch(),
         new AuthLibPatch(),
         new OneSixSnapMainPatch(),
         new DisplayListsPatch(),
@@ -39,9 +41,12 @@ public class Patcher implements PatchPool {
         new SeecretSaturdayPatch(),
         new TexturePackFolderPatch(),
         new BetaForgePatch(),
+        new ForgeEnumHelperPatch(),
+        new ModLoaderPackagePatch(),
         new ClassicPerformancePatch(),
         new ClassicResizePatch(),
-        new DemoPatch()
+        new DemoPatch(),
+        new UnfinalFieldsPatch()
     };
 
     public static final String[] JVM_CLASS_IGNORES = new String[]{

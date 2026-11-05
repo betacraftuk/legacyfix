@@ -5,6 +5,14 @@ plugins {
 targetCompatibility = 5
 sourceCompatibility = 5
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src/jvm/java'
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
