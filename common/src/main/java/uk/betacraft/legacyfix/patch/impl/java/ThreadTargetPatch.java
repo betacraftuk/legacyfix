@@ -1,13 +1,9 @@
 package uk.betacraft.legacyfix.patch.impl.java;
 
-import javassist.ByteArrayClassPath;
 import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.patch.api.Transformer;
@@ -29,22 +25,12 @@ public class ThreadTargetPatch extends Patch {
     public void apply(PatchPool patchPool) {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (name == null || !mentions(bytecode, "java/lang/reflect/Field") || !mentions(bytecode, "target")) {
+                if (!mentions(bytecode, "java/lang/reflect/Field") || !mentions(bytecode, "java/lang/Thread")
+                    || !mentions(bytecode, "target")) {
                     return null;
                 }
 
-                for (String ignore : Patcher.JVM_CLASS_IGNORES) {
-                    if (name.startsWith(ignore)) {
-                        return null;
-                    }
-                }
-
-                ClassPool ctPool = new ClassPool(true);
-                ctPool.insertClassPath(new ByteArrayClassPath(name, bytecode));
-                CtClass ctClass = ctPool.get(name);
-
-                final boolean[] modified = {false};
-                ctClass.instrument(new ExprEditor() {
+                byte[] result = instrument(name, bytecode, new ExprEditor() {
                     public void edit(MethodCall m) throws CannotCompileException {
                         String cls = m.getClassName();
                         String method = m.getMethodName();
@@ -57,7 +43,6 @@ public class ThreadTargetPatch extends Patch {
                                 "    $_ = $proceed($$);" +
                                 "}"
                             );
-                            modified[0] = true;
                             return;
                         }
 
@@ -70,19 +55,13 @@ public class ThreadTargetPatch extends Patch {
                                 "    $_ = $proceed($$);" +
                                 "}"
                             );
-                            modified[0] = true;
                         }
                     }
                 });
 
-                if (!modified[0]) {
-                    ctClass.detach();
-                    return null;
+                if (result != null) {
+                    Logger.debug("thread-target", "Redirected Thread#target access in class " + name);
                 }
-
-                Logger.debug("thread-target", "Redirected Thread#target access in class " + name);
-                byte[] result = ctClass.toBytecode();
-                ctClass.detach();
                 return result;
             }
         });

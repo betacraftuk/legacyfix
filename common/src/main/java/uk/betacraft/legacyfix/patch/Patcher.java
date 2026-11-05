@@ -13,16 +13,26 @@ import uk.betacraft.legacyfix.patch.impl.thirdparty.*;
 import java.util.*;
 
 public class Patcher implements PatchPool {
-    public static final Patch[] BUILT_IN_PATCHES = new Patch[]{
+    public static final Patch[] JVM_PATCHES = new Patch[]{
+        new JavaModulesPatch(),
+        new URLClassLoaderPatch(),
+        new ThreadTargetPatch(),
+        new UnfinalFieldsPatch(),
+        new SecurityManagerPatch(),
+        new SunReflectPatch(),
+        new Pack200Patch(),
+        new CommonsLangVersionPatch(),
+        new AsmClassVersionPatch(),
+        new InterfaceMethodRefPatch()
+    };
+
+    public static final Patch[] GAME_PATCHES = new Patch[]{
         new VisualizerPatch(),
         new ProxyPatch(),
         new LauncherPatch(),
         new WindowOwnerPatch(),
         new LevelProxyPatch(),
         new Java6RefsPatch(),
-        new JavaModulesPatch(),
-        new URLClassLoaderPatch(),
-        new ThreadTargetPatch(),
         new AuthLibPatch(),
         new OneSixSnapMainPatch(),
         new DisplayListsPatch(),
@@ -41,12 +51,11 @@ public class Patcher implements PatchPool {
         new SeecretSaturdayPatch(),
         new TexturePackFolderPatch(),
         new BetaForgePatch(),
-        new ForgeEnumHelperPatch(),
+        new ForgeJavaVersionPatch(),
         new ModLoaderPackagePatch(),
         new ClassicPerformancePatch(),
         new ClassicResizePatch(),
-        new DemoPatch(),
-        new UnfinalFieldsPatch()
+        new DemoPatch()
     };
 
     public static final String[] JVM_CLASS_IGNORES = new String[]{
@@ -61,8 +70,14 @@ public class Patcher implements PatchPool {
     private final Map<String, List<CtTransformer>> ctTransformers = new HashMap<String, List<CtTransformer>>();
 
     public Patcher(ClassPool pool) {
+        this(pool, JVM_PATCHES, GAME_PATCHES);
+    }
+
+    public Patcher(ClassPool pool, Patch[]... patchSets) {
         this.pool = pool;
-        this.patches.addAll(Arrays.asList(BUILT_IN_PATCHES));
+        for (Patch[] patchSet : patchSets) {
+            this.patches.addAll(Arrays.asList(patchSet));
+        }
     }
 
     public void apply() {
@@ -116,8 +131,30 @@ public class Patcher implements PatchPool {
         this.ctTransformers.get(className).add(transformer);
     }
 
-    public List<Transformer> getTransformers() {
-        return this.transformers;
+    public byte[] applyTransformers(String className, byte[] bytecode) {
+        if (className == null) {
+            return bytecode;
+        }
+
+        for (String ignore : JVM_CLASS_IGNORES) {
+            if (className.startsWith(ignore)) {
+                return bytecode;
+            }
+        }
+
+        byte[] current = bytecode;
+        for (Transformer transformer : this.transformers) {
+            try {
+                byte[] result = transformer.transform(className, current);
+                if (result != null) {
+                    current = result;
+                }
+            } catch (Exception e) {
+                Logger.error("Failed to apply Transformer on class \"" + className + "\"", e);
+            }
+        }
+
+        return current;
     }
 
     public Map<String, List<CtTransformer>> getCtTransformers() {

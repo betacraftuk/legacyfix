@@ -1,15 +1,11 @@
 package uk.betacraft.legacyfix.patch.impl.java;
 
-import javassist.ByteArrayClassPath;
 import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
 import javassist.expr.Cast;
 import javassist.expr.ExprEditor;
 import javassist.expr.Instanceof;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.patch.api.Transformer;
@@ -27,22 +23,11 @@ public class URLClassLoaderPatch extends Patch {
     public void apply(PatchPool patchPool) {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (name == null || !mentions(bytecode, "java/net/URLClassLoader")) {
+                if (!mentions(bytecode, "java/net/URLClassLoader")) {
                     return null;
                 }
 
-                for (String ignore : Patcher.JVM_CLASS_IGNORES) {
-                    if (name.startsWith(ignore)) {
-                        return null;
-                    }
-                }
-
-                ClassPool ctPool = new ClassPool(true);
-                ctPool.insertClassPath(new ByteArrayClassPath(name, bytecode));
-                CtClass ctClass = ctPool.get(name);
-
-                final boolean[] modified = {false};
-                ctClass.instrument(new ExprEditor() {
+                byte[] result = instrument(name, bytecode, new ExprEditor() {
                     public void edit(Instanceof i) throws CannotCompileException {
                         if (!isURLClassLoader(i)) {
                             return;
@@ -50,7 +35,6 @@ public class URLClassLoaderPatch extends Patch {
 
                         i.replace("$_ = $proceed($1) || ((java.lang.Boolean) " + invokeStatic(HELPER, "isSystemLoader",
                             new String[] {"java.lang.Object.class"}, new String[] {"$1"}) + ").booleanValue();");
-                        modified[0] = true;
                     }
 
                     public void edit(Cast c) throws CannotCompileException {
@@ -60,7 +44,6 @@ public class URLClassLoaderPatch extends Patch {
 
                         c.replace("$_ = (" + URL_CLASS_LOADER + ") " + invokeStatic(HELPER, "asURLClassLoader",
                             new String[] {"java.lang.Object.class"}, new String[] {"$1"}) + ";");
-                        modified[0] = true;
                     }
 
                     public void edit(MethodCall m) throws CannotCompileException {
@@ -80,18 +63,12 @@ public class URLClassLoaderPatch extends Patch {
                             "    $_ = $proceed($$);" +
                             "}"
                         );
-                        modified[0] = true;
                     }
                 });
 
-                if (!modified[0]) {
-                    ctClass.detach();
-                    return null;
+                if (result != null) {
+                    Logger.debug("url-classloader", "Redirected URLClassLoader usage in class " + name);
                 }
-
-                Logger.debug("url-classloader", "Redirected URLClassLoader usage in class " + name);
-                byte[] result = ctClass.toBytecode();
-                ctClass.detach();
                 return result;
             }
         });

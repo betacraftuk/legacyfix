@@ -10,7 +10,6 @@ import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.proxy.GameArgs;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
-import uk.betacraft.legacyfix.patch.api.Transformer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -78,16 +77,7 @@ public class LFMixinTransformer<T extends TreeTransformer & IMixinTransformer> e
             }
         }
 
-        for (Transformer transformer : this.patcher.getTransformers()) {
-            try {
-                byte[] transformed = transformer.transform(name, bytecode);
-                if (transformed != null) {
-                    bytecode = transformed;
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to apply transformer on class \"" + name + "\"", e);
-            }
-        }
+        bytecode = this.patcher.applyTransformers(name, bytecode);
 
         return super.transformClassBytes(name, transformedName, bytecode);
     }

@@ -4,7 +4,6 @@ import javassist.*;
 import javassist.bytecode.*;
 import uk.betacraft.legacyfix.Agent;
 import uk.betacraft.legacyfix.Logger;
-import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
 import uk.betacraft.legacyfix.patch.api.Transformer;
@@ -31,17 +30,8 @@ public class AutoSavePatch extends Patch {
                     return null;
                 }
 
-                if (name == null) {
-                    name = clas.getName();
-                }
-
                 if (name.startsWith("org.lwjgl") || clas.isFrozen()) {
                     return null;
-                }
-                for (String ignore : Patcher.JVM_CLASS_IGNORES) {
-                    if (name.startsWith(ignore)) {
-                        return null;
-                    }
                 }
 
                 try {

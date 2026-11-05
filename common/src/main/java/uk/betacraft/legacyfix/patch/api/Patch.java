@@ -1,8 +1,12 @@
 package uk.betacraft.legacyfix.patch.api;
 
+import javassist.ByteArrayClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.NotFoundException;
 import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
+import javassist.expr.ExprEditor;
 import uk.betacraft.legacyfix.Agent;
 
 @SuppressWarnings("unused")
@@ -81,6 +85,25 @@ public abstract class Patch {
 
     public static CtClass ctFromBytes(byte[] classBytes) throws Exception {
         return new ClassPool().makeClass(new java.io.ByteArrayInputStream(classBytes));
+    }
+
+    public static CtClass ctFromBytes(String className, byte[] classBytes) throws NotFoundException {
+        ClassPool pool = new ClassPool(true);
+        pool.insertClassPath(new ByteArrayClassPath(className, classBytes));
+        return pool.get(className);
+    }
+
+    public static byte[] instrument(String className, byte[] classBytes, ExprEditor editor) throws Exception {
+        CtClass ctClass = ctFromBytes(className, classBytes);
+        try {
+            boolean modified = false;
+            for (MethodInfo method : ctClass.getClassFile().getMethods()) {
+                modified |= editor.doit(ctClass, method);
+            }
+            return modified ? ctClass.toBytecode() : null;
+        } finally {
+            ctClass.detach();
+        }
     }
 
     public static String invokeStatic(String className, String methodName, String[] paramTypes, String[] args) {

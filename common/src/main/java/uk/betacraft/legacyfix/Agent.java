@@ -6,7 +6,6 @@ import uk.betacraft.legacyfix.agent.FmlInjector;
 import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
-import uk.betacraft.legacyfix.patch.api.Transformer;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 
@@ -29,6 +28,7 @@ public class Agent {
 
     public static boolean loaded = false;
     public static boolean active = false;
+    private static final String JVM_PATCHES_PROPERTY = "legacyfix.agent.jvmPatches";
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         loaded = true;
@@ -36,6 +36,8 @@ public class Agent {
 
         if (LaunchWrapperInjector.inject(inst)) {
             Logger.info("Injected LaunchWrapper transformer");
+            System.setProperty(JVM_PATCHES_PROPERTY, "true");
+            install(inst, new Patcher(ClassPool.getDefault(), Patcher.JVM_PATCHES));
             return;
         }
 
@@ -54,7 +56,10 @@ public class Agent {
         }
 
         active = true;
-        final Patcher patcher = new Patcher(ClassPool.getDefault());
+        install(inst, new Patcher(ClassPool.getDefault()));
+    }
+
+    private static void install(Instrumentation inst, final Patcher patcher) {
         patcher.apply();
 
         Map<String, List<CtTransformer>> ctTransformersMap = patcher.getCtTransformers();
@@ -74,7 +79,7 @@ public class Agent {
                     transformer.transform(ctClass);
                 }
 
-                byte[] redefined = applyTransformers(patcher, className, ctClass.toBytecode());
+                byte[] redefined = patcher.applyTransformers(className, ctClass.toBytecode());
                 definitions.add(new ClassDefinition(loadedClass, redefined));
                 ctClass.detach();
             } catch (ClassNotFoundException ignored) {
@@ -93,63 +98,39 @@ public class Agent {
 
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-                String dotName;
-                if (className != null) {
-                    dotName = className.replace('/', '.');
-                } else {
-                    dotName = null;
+                if (className == null) {
+                    return null;
                 }
 
+                String dotName = className.replace('/', '.');
                 byte[] currentBuffer = classfileBuffer;
-                boolean modified = false;
 
-                if (dotName != null) {
-                    List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
-                    if (ctTransformers != null && !ctTransformers.isEmpty()) {
-                        try {
-                            ClassPool ctPool = new ClassPool(true);
-                            ctPool.insertClassPath(new ByteArrayClassPath(dotName, currentBuffer));
-                            CtClass ctClass = ctPool.get(dotName);
+                List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
+                if (ctTransformers != null && !ctTransformers.isEmpty()) {
+                    try {
+                        ClassPool ctPool = new ClassPool(true);
+                        ctPool.insertClassPath(new ByteArrayClassPath(dotName, currentBuffer));
+                        CtClass ctClass = ctPool.get(dotName);
 
-                            for (CtTransformer ctTransformer : ctTransformers) {
-                                ctTransformer.transform(ctClass);
-                            }
-
-                            currentBuffer = ctClass.toBytecode();
-                            ctClass.detach();
-                            modified = true;
-                        } catch (Exception e) {
-                            Logger.error("Failed to apply CtTransformers on class \"" + dotName + "\"", e);
+                        for (CtTransformer ctTransformer : ctTransformers) {
+                            ctTransformer.transform(ctClass);
                         }
+
+                        currentBuffer = ctClass.toBytecode();
+                        ctClass.detach();
+                    } catch (Exception e) {
+                        Logger.error("Failed to apply CtTransformers on class \"" + dotName + "\"", e);
                     }
                 }
 
-                byte[] transformed = applyTransformers(patcher, dotName, currentBuffer);
-                if (transformed != currentBuffer) {
-                    currentBuffer = transformed;
-                    modified = true;
-                }
-
-                return modified ? currentBuffer : null;
+                currentBuffer = patcher.applyTransformers(dotName, currentBuffer);
+                return currentBuffer == classfileBuffer ? null : currentBuffer;
             }
         });
     }
 
-    private static byte[] applyTransformers(Patcher patcher, String dotName, byte[] bytecode) {
-        byte[] currentBuffer = bytecode;
-
-        for (Transformer transformer : patcher.getTransformers()) {
-            try {
-                byte[] result = transformer.transform(dotName, currentBuffer);
-                if (result != null) {
-                    currentBuffer = result;
-                }
-            } catch (Exception e) {
-                Logger.error("Failed to apply Transformer on class \"" + dotName + "\"", e);
-            }
-        }
-
-        return currentBuffer;
+    public static boolean appliesJvmPatches() {
+        return System.getProperty(JVM_PATCHES_PROPERTY) != null;
     }
 
     private static ImageIcon icon;

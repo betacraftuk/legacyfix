@@ -21,7 +21,7 @@ public class JavaModulesPatch extends Patch {
             Class<?> moduleClass = Class.forName("java.lang.Module");
             Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer");
 
-            Object unnamedModule = ClassLoader.class.getMethod("getUnnamedModule").invoke(this.getClass().getClassLoader());
+            Object unnamedModule = allUnnamedModule(moduleClass);
 
             Object bootLayer = moduleLayerClass.getMethod("boot").invoke(null);
             Set<?> modules = (Set<?>) moduleLayerClass.getMethod("modules").invoke(bootLayer);
@@ -42,6 +42,20 @@ public class JavaModulesPatch extends Patch {
         } catch (Exception e) {
             Logger.error(this, e);
             throw new PatchException("Failed to open boot modules");
+        }
+    }
+
+    private Object allUnnamedModule(Class<?> moduleClass) throws PatchException {
+        try {
+            Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
+            Method findStaticGetter = lookupClass.getMethod("findStaticGetter", Class.class, String.class, Class.class);
+            Object getter = findStaticGetter.invoke(TrustedLookup.get(), moduleClass, "ALL_UNNAMED_MODULE", moduleClass);
+
+            Method invokeWithArguments = Class.forName("java.lang.invoke.MethodHandle").getMethod("invokeWithArguments", Object[].class);
+            return invokeWithArguments.invoke(getter, new Object[] {new Object[0]});
+        } catch (Throwable t) {
+            Logger.error(this, t);
+            throw new PatchException("Module.ALL_UNNAMED_MODULE is not available");
         }
     }
 

@@ -13,6 +13,10 @@ sourceSets {
     }
 }
 
+configurations {
+    pack200
+}
+
 repositories {
     mavenCentral()
 }
@@ -22,4 +26,18 @@ dependencies {
     implementation files('../libs/javassist-java5.jar')
 
     compileOnly('org.bouncycastle:bctls-jdk15to18:1.86')
+
+    // 1.26+ depends on commons-io and commons-lang3
+    compileOnly('org.apache.commons:commons-compress:1.21')
+    pack200('org.apache.commons:commons-compress:1.21')
+}
+
+task pack200Jar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    dependsOn classes
+    archiveClassifier.set('pack200')
+    configurations = [project.configurations.pack200]
+    minimize()
+
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/MANIFEST.MF'
 }
