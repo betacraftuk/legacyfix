@@ -21,20 +21,18 @@ public class JavaModulesPatch extends Patch {
             Class<?> moduleClass = Class.forName("java.lang.Module");
             Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer");
 
-            Object unnamedModule = allUnnamedModule(moduleClass);
-
             Object bootLayer = moduleLayerClass.getMethod("boot").invoke(null);
             Set<?> modules = (Set<?>) moduleLayerClass.getMethod("modules").invoke(bootLayer);
 
             Method getPackages = moduleClass.getMethod("getPackages");
 
-            Object handle = implAddExportsOrOpens(moduleClass);
+            Object handle = implAddOpensToAllUnnamed(moduleClass);
             Method invokeWithArguments = Class.forName("java.lang.invoke.MethodHandle").getMethod("invokeWithArguments", Object[].class);
 
             for (Object module : modules) {
                 Set<?> packages = (Set<?>) getPackages.invoke(module);
                 for (Object pkg : packages) {
-                    open(invokeWithArguments, handle, module, (String) pkg, unnamedModule);
+                    open(invokeWithArguments, handle, module, (String) pkg);
                 }
             }
         } catch (PatchException e) {
@@ -45,46 +43,29 @@ public class JavaModulesPatch extends Patch {
         }
     }
 
-    private Object allUnnamedModule(Class<?> moduleClass) throws PatchException {
-        try {
-            Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
-            Method findStaticGetter = lookupClass.getMethod("findStaticGetter", Class.class, String.class, Class.class);
-            Object getter = findStaticGetter.invoke(TrustedLookup.get(), moduleClass, "ALL_UNNAMED_MODULE", moduleClass);
-
-            Method invokeWithArguments = Class.forName("java.lang.invoke.MethodHandle").getMethod("invokeWithArguments", Object[].class);
-            return invokeWithArguments.invoke(getter, new Object[] {new Object[0]});
-        } catch (Throwable t) {
-            Logger.error(this, t);
-            throw new PatchException("Module.ALL_UNNAMED_MODULE is not available");
-        }
-    }
-
-    private Object implAddExportsOrOpens(Class<?> moduleClass) throws PatchException {
+    private Object implAddOpensToAllUnnamed(Class<?> moduleClass) throws PatchException {
         try {
             Class<?> methodTypeClass = Class.forName("java.lang.invoke.MethodType");
             Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
 
             Object methodType = methodTypeClass
                 .getMethod("methodType", Class.class, Class[].class)
-                .invoke(null, void.class, new Class<?>[] {
-                    String.class, moduleClass, boolean.class, boolean.class
-                });
+                .invoke(null, void.class, new Class<?>[] {String.class});
 
             Object lookup = TrustedLookup.get();
             Method findVirtual = lookupClass.getMethod("findVirtual", Class.class, String.class, methodTypeClass);
-            return findVirtual.invoke(lookup, moduleClass, "implAddExportsOrOpens", methodType);
+            return findVirtual.invoke(lookup, moduleClass, "implAddOpensToAllUnnamed", methodType);
         } catch (PatchException e) {
             throw e;
         } catch (Throwable t) {
             Logger.error(this, t);
-            throw new PatchException("Module.implAddExportsOrOpens is not available");
+            throw new PatchException("Module.implAddOpensToAllUnnamed is not available");
         }
     }
 
-    private void open(Method invokeWithArguments, Object handle, Object module, String pkg, Object unnamedModule) throws PatchException {
+    private void open(Method invokeWithArguments, Object handle, Object module, String pkg) throws PatchException {
         try {
-            Object[] args = {module, pkg, unnamedModule, Boolean.TRUE, Boolean.TRUE};
-            invokeWithArguments.invoke(handle, new Object[] {args});
+            invokeWithArguments.invoke(handle, new Object[] {new Object[] {module, pkg}});
         } catch (Exception e) {
             Logger.error(this, e);
             String moduleName;
