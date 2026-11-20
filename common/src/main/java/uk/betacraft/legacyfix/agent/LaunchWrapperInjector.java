@@ -1,9 +1,12 @@
 package uk.betacraft.legacyfix.agent;
 
 import javassist.*;
+import javassist.expr.Cast;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import uk.betacraft.legacyfix.Logger;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.util.JvmUtils;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
@@ -13,11 +16,18 @@ public class LaunchWrapperInjector {
         try {
             CtClass launchClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.Launch");
 
+            boolean modified = patchSystemLoaderCast(launchClass);
+
             try {
                 launchClass.getDeclaredField("blackboard");
-                patchNewLw(launchClass, inst);
+                patchNewLw(launchClass);
+                modified = true;
             } catch (NotFoundException e) {
                 patchOldLw(inst);
+            }
+
+            if (modified) {
+                inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
             }
 
             return true;
@@ -30,7 +40,32 @@ public class LaunchWrapperInjector {
         }
     }
 
-    private static void patchNewLw(CtClass launchClass, Instrumentation inst) throws Exception {
+    private static boolean patchSystemLoaderCast(CtClass launchClass) throws Exception {
+        if (JvmUtils.getJvmVersion() < 9) {
+            return false;
+        }
+
+        final boolean[] modified = {false};
+        launchClass.instrument(new ExprEditor() {
+            public void edit(Cast c) throws CannotCompileException {
+                try {
+                    if (!"java.net.URLClassLoader".equals(c.getType().getName())) {
+                        return;
+                    }
+                } catch (NotFoundException e) {
+                    return;
+                }
+
+                c.replace("$_ = (java.net.URLClassLoader) " + Patch.invokeStatic("uk.betacraft.legacyfix.jvm.ClassLoaderHelper",
+                    "asURLClassLoader", new String[] {"java.lang.Object.class"}, new String[] {"$1"}) + ";");
+                modified[0] = true;
+            }
+        });
+
+        return modified[0];
+    }
+
+    private static void patchNewLw(CtClass launchClass) throws Exception {
         CtMethod m = launchClass.getDeclaredMethod("launch");
         m.instrument(new ExprEditor() {
             public void edit(MethodCall m) throws CannotCompileException {
@@ -46,8 +81,6 @@ public class LaunchWrapperInjector {
                 }
             }
         });
-
-        inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
     }
 
     private static void patchOldLw(Instrumentation inst) throws  Exception {

@@ -1,5 +1,6 @@
 package uk.betacraft.legacyfix.tweaker;
 
+import javassist.ClassPool;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import uk.betacraft.legacyfix.Agent;
@@ -30,7 +31,8 @@ public class LFTweaker implements ITweaker {
         Tweakers.removeLwjglException(classLoader);
         patchLogger();
 
-        patcher = new Patcher(Tweakers.createClassPool(classLoader.getURLs()));
+        ClassPool pool = Tweakers.createClassPool(classLoader.getURLs());
+        patcher = Agent.appliesJvmPatches() ? new Patcher(pool, Patcher.GAME_PATCHES) : new Patcher(pool);
         if (!Agent.loaded) {
             patcher.patches.add(new FmlModContainerPatch());
         }

@@ -4,7 +4,6 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import net.minecraft.launchwrapper.IClassTransformer;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
-import uk.betacraft.legacyfix.patch.api.Transformer;
 import uk.betacraft.legacyfix.tweaker.LFTweaker;
 
 import java.util.List;
@@ -46,16 +45,7 @@ public class LFTransformer implements IClassTransformer {
             }
         }
 
-        for (Transformer transformer : LFTweaker.patcher.getTransformers()) {
-            try {
-                byte[] transformed = transformer.transform(name, bytecode);
-                if (transformed != null) {
-                    bytecode = transformed;
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to apply transformer on class \"" + name + "\"", e);
-            }
-        }
+        bytecode = LFTweaker.patcher.applyTransformers(name, bytecode);
 
         return bytecode;
     }

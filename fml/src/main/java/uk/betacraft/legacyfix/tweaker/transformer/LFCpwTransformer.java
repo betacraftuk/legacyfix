@@ -5,7 +5,6 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.tweaker.CpwTweaker;
-import uk.betacraft.legacyfix.patch.api.Transformer;
 
 import java.util.List;
 
@@ -46,16 +45,7 @@ public class LFCpwTransformer implements IClassTransformer {
             }
         }
 
-        for (Transformer transformer : CpwTweaker.patcher.getTransformers()) {
-            try {
-                byte[] transformed = transformer.transform(name, bytes);
-                if (transformed != null) {
-                    bytes = transformed;
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to apply transformer on class \"" + name + "\"", e);
-            }
-        }
+        bytes = CpwTweaker.patcher.applyTransformers(name, bytes);
 
         return bytes;
     }

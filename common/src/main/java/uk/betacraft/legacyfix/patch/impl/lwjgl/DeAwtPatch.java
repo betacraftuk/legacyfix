@@ -317,10 +317,10 @@ public class DeAwtPatch extends Patch {
             "$1 = $1.replace(\"Minecraft Minecraft\", \"Minecraft\");" +
             "java.lang.reflect.Field f16 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels16\");" +
             "f16.setAccessible(true);" +
-            "java.nio.ByteBuffer pix16 = f16.get(null);" +
+            "java.nio.ByteBuffer pix16 = (java.nio.ByteBuffer) f16.get(null);" +
             "java.lang.reflect.Field f32 = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.lwjgl.DeAwtPatch$Icons\").getDeclaredField(\"pixels32\");" +
             "f32.setAccessible(true);" +
-            "java.nio.ByteBuffer pix32 = f32.get(null);" +
+            "java.nio.ByteBuffer pix32 = (java.nio.ByteBuffer) f32.get(null);" +
             "if (pix16 != null && pix32 != null) {" +
             "    org.lwjgl.opengl.Display.setIcon(new java.nio.ByteBuffer[] {pix16, pix32});" +
             "}"

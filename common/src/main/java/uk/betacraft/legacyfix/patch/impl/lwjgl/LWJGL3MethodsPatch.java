@@ -19,10 +19,6 @@ public class LWJGL3MethodsPatch extends Patch {
     public void apply(final PatchPool patchPool) throws Exception {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (name == null) {
-                    return null;
-                }
-
                 CtClass clas = ctFromBytes(bytecode);
                 if (clas == null || name.startsWith("org.lwjgl") || clas.isFrozen()) {
                     return null;
