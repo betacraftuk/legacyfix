@@ -50,9 +50,6 @@ shadowJar {
     from project(':fabric').jar
     from project(':fml').jar
     from project(':risugami').jar
-    from project(':common').pack200Jar
-
-    relocate 'org.apache.commons.compress', 'uk.betacraft.legacyfix.shadow.compress'
 
     exclude 'javassist/tools/**'
     exclude 'javassist/scopedpool/**'

@@ -1,7 +1,5 @@
 package uk.betacraft.legacyfix.jvm;
 
-import org.apache.commons.compress.harmony.unpack200.Segment;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.jar.JarOutputStream;
@@ -57,18 +54,14 @@ public class Pack200 {
                 }
 
                 String deflateHint = properties.get(DEFLATE_HINT);
-                boolean overrideDeflateHint = TRUE.equals(deflateHint) || FALSE.equals(deflateHint);
+                Boolean deflateOverride = null;
+                if (TRUE.equals(deflateHint) || FALSE.equals(deflateHint)) {
+                    deflateOverride = TRUE.equals(deflateHint);
+                }
 
                 out.setComment("PACK200");
                 while (available(data)) {
-                    Segment segment = new Segment();
-                    segment.setLogLevel(Segment.LOG_LEVEL_QUIET);
-                    segment.setLogStream(new DiscardingOutputStream());
-                    segment.setPreRead(false);
-                    if (overrideDeflateHint) {
-                        segment.overrideDeflateHint(TRUE.equals(deflateHint));
-                    }
-                    segment.unpack(data, out);
+                    ResourceUnpacker.unpackSegment(data, out, deflateOverride);
                     out.flush();
                 }
 
@@ -116,14 +109,6 @@ public class Pack200 {
             }
 
             unpack(new BufferedInputStream(new FileInputStream(in), 8192), out);
-        }
-    }
-
-    private static class DiscardingOutputStream extends OutputStream {
-        public void write(int b) {
-        }
-
-        public void write(byte[] b, int off, int len) {
         }
     }
 }
