@@ -18,12 +18,22 @@ public class LaunchWrapperInjector {
 
             boolean modified = patchSystemLoaderCast(launchClass);
 
+            // for pre-1.6 FML patching needs to be left to FmlInjector's coremod
+            if (ClassLoader.getSystemResource("cpw/mods/fml/relauncher/RelaunchClassLoader.class") != null) {
+                if (modified) {
+                    inst.redefineClasses(new ClassDefinition(Class.forName(launchClass.getName()), launchClass.toBytecode()));
+                }
+
+                return false;
+            }
+
             try {
                 launchClass.getDeclaredField("blackboard");
                 patchNewLw(launchClass);
                 modified = true;
             } catch (NotFoundException e) {
-                patchOldLw(inst);
+                patchOldLw(launchClass, inst);
+                modified = true;
             }
 
             if (modified) {
@@ -83,17 +93,39 @@ public class LaunchWrapperInjector {
         });
     }
 
-    private static void patchOldLw(Instrumentation inst) throws  Exception {
+    private static void patchOldLw(CtClass launchClass, Instrumentation inst) throws Exception {
+        CtMethod launch = launchClass.getDeclaredMethod("launch");
+        launch.instrument(new ExprEditor() {
+            public void edit(MethodCall m) throws CannotCompileException {
+                if (!"net.minecraft.launchwrapper.ITweaker".equals(m.getClassName())) {
+                    return;
+                }
+
+                if ("acceptOptions".equals(m.getMethodName())) {
+                    m.replace("" +
+                        "{" +
+                        "   $proceed($$);" +
+                        "   Class tweakerClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
+                        "   tweakerClass.getMethod(\"acceptOptions\", new Class[] { java.util.List.class, java.io.File.class, java.io.File.class, String.class })" +
+                        "       .invoke(tweakerClass.newInstance(), new Object[] { $1, $2, $3, $4 });" +
+                        "}"
+                    );
+                } else if ("injectIntoClassLoader".equals(m.getMethodName())) {
+                    m.replace("" +
+                        "{" +
+                        "   $proceed($$);" +
+                        "   Class clClass = Thread.currentThread().getContextClassLoader().loadClass(\"net.minecraft.launchwrapper.LaunchClassLoader\");" +
+                        "   Class tweakerClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
+                        "   tweakerClass.getMethod(\"injectIntoClassLoader\", new Class[] { clClass }).invoke(tweakerClass.newInstance(), new Object[] { $1 });" +
+                        "}"
+                    );
+                }
+            }
+        });
+
         CtClass vanillaTweakerClass = ClassPool.getDefault().get("net.minecraft.launchwrapper.VanillaTweaker");
         CtMethod m = vanillaTweakerClass.getDeclaredMethod("injectIntoClassLoader");
-        m.setBody("" +
-            "{" +
-            "   Class clClass = Thread.currentThread().getContextClassLoader().loadClass(\"net.minecraft.launchwrapper.LaunchClassLoader\");" +
-            "   Class tweakerClass = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.tweaker.LFTweaker\");" +
-            "   Object tweaker = tweakerClass.newInstance();" +
-            "   tweakerClass.getMethod(\"injectIntoClassLoader\", new Class[] { clClass }).invoke(tweaker, new Object[] { $1 });" +
-            "}"
-        );
+        m.setBody("{}");
 
         inst.redefineClasses(new ClassDefinition(Class.forName(vanillaTweakerClass.getName()), vanillaTweakerClass.toBytecode()));
     }

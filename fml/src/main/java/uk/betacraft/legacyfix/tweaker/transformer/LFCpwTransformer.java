@@ -10,6 +10,10 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class LFCpwTransformer implements IClassTransformer {
+    public byte[] transform(String name, String transformedName, byte[] bytes) {
+        return transform(name, bytes);
+    }
+
     @Override
     public byte[] transform(String name, byte[] bytes) {
         if (bytes == null) {
