@@ -19,6 +19,7 @@ if (releaseVersion) {
     version "nightly-${runId}"
 } else {
     version "dev-${new Date().format('yyyyMMdd')}"
+    ext.devBuild = true
 }
 
 subprojects {
@@ -41,6 +42,9 @@ evaluationDependsOn(':common')
 
 shadowJar {
     archiveClassifier.set('')
+    if (project.findProperty('devBuild')) {
+        archiveVersion.set('dev')
+    }
     configurations = [project(':common').configurations.runtimeClasspath]
     from project(':common').jar
     from project(':fabric').jar
