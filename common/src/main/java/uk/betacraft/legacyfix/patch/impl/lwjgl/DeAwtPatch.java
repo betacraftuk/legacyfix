@@ -199,11 +199,16 @@ public class DeAwtPatch extends Patch {
             throw new PatchException("No update method found");
         }
 
-        if (isFinallyBlockEmpty(updateMethod)) {
+        boolean hookUpdate = isFinallyBlockEmpty(updateMethod);
+        boolean exitAfterRun = updateMethod != runMethod || !hookUpdate;
+
+        runMethod.addCatch("{ $e.printStackTrace(); System.exit(1); throw $e; }", pool.getRawClass("java.lang.Throwable"));
+
+        if (hookUpdate) {
             updateMethod.insertAfter(SHUTDOWN_HOOK, true);
         }
 
-        if (updateMethod != runMethod || !isFinallyBlockEmpty(updateMethod)) {
+        if (exitAfterRun) {
             runMethod.insertAfter("System.exit(0);", true);
         }
 
