@@ -24,6 +24,7 @@ public class Patcher implements PatchPool {
         new CommonsLangVersionPatch(),
         new AsmClassVersionPatch(),
         new InterfaceMethodRefPatch(),
+        new FmlTweakSortPatch(),
         new GameDirPatch()
     };
 
