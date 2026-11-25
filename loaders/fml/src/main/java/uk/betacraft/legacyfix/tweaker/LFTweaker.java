@@ -4,15 +4,19 @@ import javassist.ClassPool;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import uk.betacraft.legacyfix.Agent;
+import uk.betacraft.legacyfix.Logger;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.impl.thirdparty.FmlModContainerPatch;
 import uk.betacraft.legacyfix.proxy.GameArgs;
+import uk.betacraft.legacyfix.tweaker.transformer.LFTransformer;
 
 import java.io.File;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.security.ProtectionDomain;
 import java.util.List;
 
 @SuppressWarnings({"unused", "rawtypes"})
@@ -47,7 +51,38 @@ public class LFTweaker implements ITweaker {
 
         patcher.apply();
 
-        classLoader.registerTransformer("uk.betacraft.legacyfix.tweaker.transformer.LFTransformer");
+        classLoader.registerTransformer(LFTransformer.class.getName());
+        if (Agent.appliesJvmPatches()) {
+            patchDelegatedLwjgl(classLoader);
+        }
+    }
+
+    private void patchDelegatedLwjgl(final LaunchClassLoader classLoader) {
+        final LFTransformer transformer = new LFTransformer();
+        ClassFileTransformer delegated = new ClassFileTransformer() {
+            @Override
+            public byte[] transform(ClassLoader loader, String name, Class<?> type, ProtectionDomain domain, byte[] bytes) {
+                if (loader == null || loader == classLoader || name == null || !name.startsWith("org/lwjgl/")) {
+                    return null;
+                }
+
+                String className = name.replace('/', '.');
+                try {
+                    byte[] patched = transformer.transform(className, className, bytes);
+                    return patched == bytes ? null : patched;
+                } catch (RuntimeException e) {
+                    Logger.error("Failed to patch delegated LWJGL class " + className, e);
+                    return null;
+                }
+            }
+        };
+
+        try {
+            Class<?> systemAgent = ClassLoader.getSystemClassLoader().loadClass(Agent.class.getName());
+            systemAgent.getMethod("addLaunchWrapperTransformer", ClassFileTransformer.class).invoke(null, delegated);
+        } catch (Exception e) {
+            Logger.error("Failed to register delegated LWJGL transformer", e);
+        }
     }
 
     private void patchLogger() {

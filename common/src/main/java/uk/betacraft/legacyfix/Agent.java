@@ -30,6 +30,7 @@ public class Agent {
     public static boolean loaded = false;
     public static boolean active = false;
     private static final String JVM_PATCHES_PROP = "lf.agent.jvmPatches";
+    private static Instrumentation lwInst;
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         loaded = true;
@@ -46,6 +47,7 @@ public class Agent {
 
         if (LaunchWrapperInjector.inject(inst)) {
             Logger.info("Injected LaunchWrapper transformer");
+            lwInst = inst;
             System.setProperty(JVM_PATCHES_PROP, "true");
             install(inst, new Patcher(ClassPool.getDefault(), Patcher.JVM_PATCHES));
             return;
@@ -137,6 +139,12 @@ public class Agent {
                 return currentBuffer == classfileBuffer ? null : currentBuffer;
             }
         });
+    }
+
+    public static void addLaunchWrapperTransformer(ClassFileTransformer transformer) {
+        if (lwInst != null) {
+            lwInst.addTransformer(transformer);
+        }
     }
 
     public static boolean appliesJvmPatches() {
