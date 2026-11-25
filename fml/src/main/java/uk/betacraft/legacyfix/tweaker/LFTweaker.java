@@ -24,6 +24,14 @@ public class LFTweaker implements ITweaker {
         String[] rawArgs = new String[args.size()];
         rawArgs = args.toArray(rawArgs);
         GameArgs.setArgsRaw(rawArgs);
+
+        if (gameDir != null && Agent.getSetting("lf.gameDir") == null) {
+            Agent.setSetting("lf.gameDir", gameDir.getAbsolutePath());
+        }
+
+        if (assetsDir != null && Agent.getSetting("lf.assetsDir") == null) {
+            Agent.setSetting("lf.assetsDir", assetsDir.getAbsolutePath());
+        }
     }
 
     @Override
@@ -36,6 +44,7 @@ public class LFTweaker implements ITweaker {
         if (!Agent.loaded) {
             patcher.patches.add(new FmlModContainerPatch());
         }
+
         patcher.apply();
 
         classLoader.registerTransformer("uk.betacraft.legacyfix.tweaker.transformer.LFTransformer");

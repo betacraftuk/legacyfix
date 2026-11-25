@@ -23,7 +23,8 @@ public class Patcher implements PatchPool {
         new Pack200Patch(),
         new CommonsLangVersionPatch(),
         new AsmClassVersionPatch(),
-        new InterfaceMethodRefPatch()
+        new InterfaceMethodRefPatch(),
+        new GameDirPatch()
     };
 
     public static final Patch[] GAME_PATCHES = new Patch[]{
@@ -44,7 +45,6 @@ public class Patcher implements PatchPool {
         new DeAwtPatch(),
         new MousePatch(),
         new VSyncPatch(),
-        new GameDirPatch(),
         new IndevSoundPatch(),
         new IntelGraphicsPatch(),
         new ScreenshotPatch(),

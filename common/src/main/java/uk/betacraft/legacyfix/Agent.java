@@ -28,7 +28,7 @@ public class Agent {
 
     public static boolean loaded = false;
     public static boolean active = false;
-    private static final String JVM_PATCHES_PROPERTY = "legacyfix.agent.jvmPatches";
+    private static final String JVM_PATCHES_PROP = "lf.agent.jvmPatches";
 
     public static void premain(String agentArgs, final Instrumentation inst) {
         loaded = true;
@@ -36,7 +36,7 @@ public class Agent {
 
         if (LaunchWrapperInjector.inject(inst)) {
             Logger.info("Injected LaunchWrapper transformer");
-            System.setProperty(JVM_PATCHES_PROPERTY, "true");
+            System.setProperty(JVM_PATCHES_PROP, "true");
             install(inst, new Patcher(ClassPool.getDefault(), Patcher.JVM_PATCHES));
             return;
         }
@@ -130,7 +130,7 @@ public class Agent {
     }
 
     public static boolean appliesJvmPatches() {
-        return System.getProperty(JVM_PATCHES_PROPERTY) != null;
+        return System.getProperty(JVM_PATCHES_PROP) != null;
     }
 
     private static ImageIcon icon;
