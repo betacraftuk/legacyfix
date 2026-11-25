@@ -51,7 +51,7 @@ public class Agent {
             return;
         }
 
-        if (FmlInjector.inject()) {
+        if (FmlInjector.inject(inst)) {
             Logger.info("Injected legacy FML transformer");
             return;
         }
