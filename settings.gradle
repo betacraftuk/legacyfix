@@ -1,2 +1,8 @@
 rootProject.name = 'legacyfix'
-include 'common', 'fabric', 'fml', 'risugami'
+include 'common'
+
+file('loaders').eachDir { dir ->
+    if (new File(dir, 'build.gradle').exists()) {
+        include "loaders:${dir.name}"
+    }
+}

@@ -22,7 +22,7 @@ if (releaseVersion) {
     ext.devBuild = true
 }
 
-subprojects {
+configure(subprojects - project(':loaders')) {
     apply plugin: 'java'
 
     processResources {
@@ -47,9 +47,7 @@ shadowJar {
     }
     configurations = [project(':common').configurations.runtimeClasspath]
     from project(':common').jar
-    from project(':fabric').jar
-    from project(':fml').jar
-    from project(':risugami').jar
+    project(':loaders').subprojects.each { from it.jar }
 
     exclude 'javassist/tools/**'
     exclude 'javassist/scopedpool/**'
