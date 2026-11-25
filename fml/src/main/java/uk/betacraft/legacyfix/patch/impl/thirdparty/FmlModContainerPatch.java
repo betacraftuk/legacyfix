@@ -2,10 +2,12 @@ package uk.betacraft.legacyfix.patch.impl.thirdparty;
 
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.NotFoundException;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.patch.api.Patch;
 import uk.betacraft.legacyfix.patch.api.PatchException;
 import uk.betacraft.legacyfix.patch.api.PatchPool;
+import uk.betacraft.legacyfix.patch.api.PatchUnapplicableException;
 
 public class FmlModContainerPatch extends Patch {
     public FmlModContainerPatch() {
@@ -24,6 +26,14 @@ public class FmlModContainerPatch extends Patch {
             modContainerClassName += "FmlModContainer";
         } else {
             throw new PatchException("Could not find Loader class!");
+        }
+
+        CtClass loaderClass = patchPool.getRawClass(loaderClassName);
+        try {
+            loaderClass.getDeclaredMethod("identifyMods");
+            loaderClass.getDeclaredField("injectedContainers");
+        } catch (NotFoundException e) {
+            throw new PatchUnapplicableException("Loader doesn't support injected containers");
         }
 
         final String containerClassName = modContainerClassName;
