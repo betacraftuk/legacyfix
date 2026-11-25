@@ -4,6 +4,7 @@ import javassist.*;
 import uk.betacraft.legacyfix.agent.FabricInjector;
 import uk.betacraft.legacyfix.agent.FmlInjector;
 import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
+import uk.betacraft.legacyfix.jvm.AppletPolyfill;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
@@ -33,6 +34,15 @@ public class Agent {
     public static void premain(String agentArgs, final Instrumentation inst) {
         loaded = true;
         Logger.info("Loading agent (" + VERSION + ")");
+
+        if (JvmUtils.getJvmVersion() >= 26) {
+            try {
+                AppletPolyfill.install();
+                Logger.info("Installed applet polyfill");
+            } catch (Throwable t) {
+                Logger.error("Failed to install applet polyfill", t);
+            }
+        }
 
         if (LaunchWrapperInjector.inject(inst)) {
             Logger.info("Injected LaunchWrapper transformer");

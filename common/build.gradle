@@ -11,6 +11,15 @@ sourceSets {
             srcDir 'src/jvm/java'
         }
     }
+    polyfill {
+        java {
+            srcDir 'src/polyfill/java'
+        }
+    }
+}
+
+jar {
+    from sourceSets.polyfill.output
 }
 
 repositories {
