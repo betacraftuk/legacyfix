@@ -4,6 +4,7 @@
   "description": "A mod that fixes legacy Minecraft versions.",
   "version": "${version}",
   "url": "https://github.com/betacraftuk/legacyfix",
+  "updateUrl": "",
   "authors": [ "devcody", "Moresteck" ],
   "credits": "",
   "logoFile": "/assets/legacyfix/icon-64x.png",
