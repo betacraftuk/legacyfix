@@ -18,6 +18,7 @@ public class Patcher implements PatchPool {
         new URLClassLoaderPatch(),
         new ThreadTargetPatch(),
         new UnfinalFieldsPatch(),
+        new AnonymousClassPatch(),
         new SecurityManagerPatch(),
         new SunReflectPatch(),
         new Pack200Patch(),

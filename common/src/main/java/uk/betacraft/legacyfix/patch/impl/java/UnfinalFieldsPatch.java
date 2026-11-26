@@ -29,13 +29,11 @@ public class UnfinalFieldsPatch extends Patch {
     public void apply(PatchPool patchPool) {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                final boolean accessesModifiers =
-                    mentions(bytecode, "java/lang/reflect/Field")
-                    && mentions(bytecode, "modifiers");
-
-                if (!accessesModifiers && !mentions(bytecode, "getDeclaredFields")) {
+                if (!mentions(bytecode, "java/lang/reflect/Field")) {
                     return null;
                 }
+
+                final boolean accessesModifiers = mentions(bytecode, "modifiers");
 
                 byte[] result = instrument(name, bytecode, new ExprEditor() {
                     public void edit(MethodCall m) throws CannotCompileException {
@@ -53,6 +51,15 @@ public class UnfinalFieldsPatch extends Patch {
                         }
 
                         if (!accessesModifiers) {
+                            if (FIELD.equals(cls) && modifiersWrite(method) != null) {
+                                m.replace("" +
+                                    "if (" + isUnfinalStatic() + ") {" +
+                                    "    " + invokeStatic(REMOVER, "setStatic", new String[] {FIELD + ".class", "java.lang.Object.class"}, new String[] {"$0", "($w) $2"}) + ";" +
+                                    "} else {" +
+                                    "    $proceed($$);" +
+                                    "}"
+                                );
+                            }
                             return;
                         }
 
@@ -129,7 +136,8 @@ public class UnfinalFieldsPatch extends Patch {
     }
 
     private static String isUnfinalStatic() {
-        return "((java.lang.Boolean) " + invokeStatic(REMOVER, "isUnfinalStatic", new String[] {FIELD + ".class"}, new String[] {"$0"}) + ").booleanValue()";
+        int staticFinal = java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
+        return "($0 != null && ($0.getModifiers() & " + staticFinal + ") == " + staticFinal + " && ((java.lang.Boolean) " + invokeStatic(REMOVER, "isUnfinalStatic", new String[] {FIELD + ".class"}, new String[] {"$0"}) + ").booleanValue())";
     }
 
     private static String readExpression(String method) {
