@@ -42,7 +42,7 @@ public class GameDirPatch extends Patch {
                     "            $1 = (java.io.File) assetUtils.getMethod(\"getCacheDirectory\", null).invoke(null, null);" +
                     "        }" +
                     "    }" +
-                    "} catch (Throwable t) { t.printStackTrace(); }"
+                    "} catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }"
                 );
 
                 CtMethod existsMethod = ctClass.getDeclaredMethod("exists");
@@ -63,7 +63,7 @@ public class GameDirPatch extends Patch {
                     "                return newFile.exists();" +
                     "            }" +
                     "        }" +
-                    "    } catch (Throwable t) { t.printStackTrace(); }" +
+                    "    } catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }" +
                     "}"
                 );
 
@@ -78,7 +78,7 @@ public class GameDirPatch extends Patch {
                     "                return size.longValue();" +
                     "            }" +
                     "        }" +
-                    "    } catch (Throwable t) { t.printStackTrace(); }" +
+                    "    } catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }" +
                     "}"
                 );
 
@@ -91,7 +91,7 @@ public class GameDirPatch extends Patch {
                     "            return (java.io.File[]) assetUtils.getMethod(\"getAssetsAsFileArray\", null).invoke(null, null);" +
                     "        }" +
                     "    }" +
-                    "} catch (Throwable t) { t.printStackTrace(); }"
+                    "} catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }"
                 );
 
                 CtMethod listFiles2Method = ctClass.getDeclaredMethod("listFiles", new CtClass[]{fileFilterClass});
@@ -103,7 +103,7 @@ public class GameDirPatch extends Patch {
                     "            return (java.io.File[]) assetUtils.getMethod(\"getAssetsAsFileArray\", null).invoke(null, null);" +
                     "        }" +
                     "    }" +
-                    "} catch (Throwable t) { t.printStackTrace(); }"
+                    "} catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }"
                 );
 
                 CtMethod isDirectoryMethod = ctClass.getDeclaredMethod("isDirectory");
@@ -114,7 +114,7 @@ public class GameDirPatch extends Patch {
                     "            Class assetUtils = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.proxy.assets.AssetUtils\");" +
                     "            return ((Boolean) assetUtils.getMethod(\"isExpectedAssetsDir\", new Class[] {String.class}).invoke(null, new Object[] {$0.path})).booleanValue();" +
                     "        }" +
-                    "    } catch (Throwable t) { t.printStackTrace(); }" +
+                    "    } catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }" +
                     "}"
                 );
             }
@@ -132,7 +132,7 @@ public class GameDirPatch extends Patch {
                     "            $1 = new java.io.File(asset);" +
                     "        }" +
                     "    }" +
-                    "} catch (Throwable t) { t.printStackTrace(); }"
+                    "} catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }"
                 );
             }
         });
@@ -148,7 +148,7 @@ public class GameDirPatch extends Patch {
                         "    if (newFile != null) {" +
                         "        $1 = newFile;" +
                         "    }" +
-                        "} catch (Throwable t) { t.printStackTrace(); }" +
+                        "} catch (ClassNotFoundException e) {} catch (Throwable t) { t.printStackTrace(); }" +
                     "}"
                 );
             }
