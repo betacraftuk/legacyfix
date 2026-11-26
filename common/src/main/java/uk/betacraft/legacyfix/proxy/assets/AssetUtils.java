@@ -18,10 +18,27 @@ import java.io.*;
 import java.util.*;
 
 public class AssetUtils {
+    public static volatile List<AssetObject> assets = new LinkedList<AssetObject>();
+    private static final ThreadLocal<Boolean> LOADING = new ThreadLocal<Boolean>();
+
     private static File ASSETS_DIR = null;
     private static File RESOURCES_DIR = null;
 
-    public static List<AssetObject> assets = new LinkedList<AssetObject>();
+    private static boolean isLoading() {
+        return Boolean.TRUE.equals(LOADING.get());
+    }
+
+    private static void ensureAssetsLoaded(String caller) {
+        if (!assets.isEmpty() || isLoading()) {
+            return;
+        }
+
+        try {
+            initAssets(getAssetIndex());
+        } catch (FileNotFoundException e) {
+            Logger.error(caller, e);
+        }
+    }
 
     private static File getAssetsDir() {
         if (ASSETS_DIR == null) {
@@ -40,14 +57,22 @@ public class AssetUtils {
     }
 
     public static JSONObject getAssetIndex() throws FileNotFoundException {
-        String assetIndexPath = GameArgs.getAssetIndexPath();
-        if (assetIndexPath == null) {
-            return new JSONObject();
-        }
+        boolean outer = !isLoading();
+        LOADING.set(Boolean.TRUE);
+        try {
+            String assetIndexPath = GameArgs.getAssetIndexPath();
+            if (assetIndexPath == null) {
+                return new JSONObject();
+            }
 
-        return new JSONObject(
-            new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))
-        );
+            return new JSONObject(
+                new JSONTokener(new InputStreamReader(new FileInputStream(assetIndexPath)))
+            );
+        } finally {
+            if (outer) {
+                LOADING.remove();
+            }
+        }
     }
 
     public static String generateTxtIndex() {
@@ -131,9 +156,11 @@ public class AssetUtils {
     }
 
     public static void initAssets(JSONObject assetIndex) {
-        assets.clear();
-        removeResourcesAndAssets();
+        boolean outer = !isLoading();
+        LOADING.set(Boolean.TRUE);
+        List<AssetObject> assets = new LinkedList<AssetObject>();
         try {
+            removeResourcesAndAssets();
             List<File> localAssetsToSkip = new LinkedList<File>();
 
             JSONObject objects = assetIndex.getJSONObject("objects");
@@ -189,9 +216,14 @@ public class AssetUtils {
                 assets.add(new AssetObject(key, additionalAsset.length(), additionalAsset.getPath()));
             }
 
+            AssetUtils.assets = assets;
             System.setProperty("assets-loaded", "true");
         } catch (Throwable t) {
             Logger.error("initAssets", t);
+        } finally {
+            if (outer) {
+                LOADING.remove();
+            }
         }
     }
 
@@ -402,13 +434,7 @@ public class AssetUtils {
     // Used by GameDirPatch
     @SuppressWarnings("unused")
     public static File[] getAssetsAsFileArray() {
-        if (assets.isEmpty()) {
-            try {
-                initAssets(getAssetIndex());
-            } catch (FileNotFoundException e) {
-                Logger.error("getAssetsAsFileArray", e);
-            }
-        }
+        ensureAssetsLoaded("getAssetsAsFileArray");
 
         List<File> listFiles = new LinkedList<File>();
 
@@ -420,13 +446,11 @@ public class AssetUtils {
     }
 
     public static AssetObject getAssetFromExpectedPath(String path) {
-        if (assets.isEmpty()) {
-            try {
-                initAssets(getAssetIndex());
-            } catch (FileNotFoundException e) {
-                Logger.error("getAssetFromExpectedPath", e);
-            }
+        if (isLoading()) {
+            return null;
         }
+
+        ensureAssetsLoaded("getAssetFromExpectedPath");
 
         String winEscaped = path.replace("\\", "/");
 
