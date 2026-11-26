@@ -141,13 +141,15 @@ public class GameDirPatch extends Patch {
             public void transform(CtClass ctClass) throws Exception {
                 CtConstructor fileOutputStreamConstructor = ctClass.getDeclaredConstructor(new CtClass[]{fileClass});
                 fileOutputStreamConstructor.insertBefore(
-                    "try {" +
+                    "if ($1 != null && $1.getName().startsWith(\"mc_map_\")) {" +
+                        "try {" +
                         "    Class patchHelper = Thread.currentThread().getContextClassLoader().loadClass(\"uk.betacraft.legacyfix.patch.impl.misc.GameDirPatch\");" +
                         "    java.io.File newFile = (java.io.File) patchHelper.getMethod(\"getIndevMapRenderFromExpectedPath\", new Class[] {java.io.File.class}).invoke(null, new Object[] {$1});" +
                         "    if (newFile != null) {" +
                         "        $1 = newFile;" +
                         "    }" +
-                        "} catch (Throwable t) { t.printStackTrace(); }"
+                        "} catch (Throwable t) { t.printStackTrace(); }" +
+                    "}"
                 );
             }
         });

@@ -7,6 +7,8 @@ import uk.betacraft.legacyfix.agent.LaunchWrapperInjector;
 import uk.betacraft.legacyfix.jvm.AppletPolyfill;
 import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
+import uk.betacraft.legacyfix.patch.api.Patch;
+import uk.betacraft.legacyfix.patch.impl.misc.GameDirPatch;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
 import uk.betacraft.legacyfix.util.StreamUtils;
@@ -57,11 +59,13 @@ public class Agent {
 
         if (FmlInjector.inject(inst)) {
             Logger.info("Injected legacy FML transformer");
+            installGameDirPatch(inst);
             return;
         }
 
         if (FabricInjector.inject()) {
             Logger.info("Injected Fabric mod");
+            installGameDirPatch(inst);
             return;
         }
 
@@ -71,6 +75,10 @@ public class Agent {
 
         active = true;
         install(inst, new Patcher(ClassPool.getDefault()));
+    }
+
+    private static void installGameDirPatch(Instrumentation inst) {
+        install(inst, new Patcher(ClassPool.getDefault(), new Patch[]{new GameDirPatch()}));
     }
 
     private static void install(Instrumentation inst, final Patcher patcher) {
