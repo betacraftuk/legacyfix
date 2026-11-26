@@ -20,8 +20,22 @@ public class ThreadTargetStub {
         }
     }
 
+    public static Field[] withTarget(Object declaredFields) {
+        Field[] fields = (Field[]) declaredFields;
+        for (Field field : fields) {
+            if ("target".equals(field.getName())) {
+                return fields;
+            }
+        }
+
+        Field[] result = new Field[fields.length + 1];
+        System.arraycopy(fields, 0, result, 0, fields.length);
+        result[fields.length] = field();
+        return result;
+    }
+
     public static boolean isTargetField(Field field) {
-        return field.getDeclaringClass() == ThreadTargetStub.class;
+        return field != null && field.getDeclaringClass() == ThreadTargetStub.class;
     }
 
     public static Object read(Object thread) {

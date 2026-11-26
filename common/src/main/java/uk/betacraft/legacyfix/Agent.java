@@ -9,10 +9,12 @@ import uk.betacraft.legacyfix.patch.Patcher;
 import uk.betacraft.legacyfix.patch.api.CtTransformer;
 import uk.betacraft.legacyfix.util.BouncyCastleUtils;
 import uk.betacraft.legacyfix.util.JvmUtils;
+import uk.betacraft.legacyfix.util.StreamUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
@@ -77,10 +79,23 @@ public class Agent {
         Map<String, List<CtTransformer>> ctTransformersMap = patcher.getCtTransformers();
         List<ClassDefinition> definitions = new ArrayList<ClassDefinition>();
 
-        for (String className : ctTransformersMap.keySet()) {
-            try {
-                Class<?> loadedClass = Class.forName(className, false, ClassLoader.getSystemClassLoader());
+        final Set<String> redefinedClasses = new HashSet<String>();
+        Map<String, Class<?>> alreadyLoaded = new HashMap<String, Class<?>>();
+        ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+        for (Class<?> clazz : inst.getAllLoadedClasses()) {
+            ClassLoader loader = clazz.getClassLoader();
+            if ((loader == null || loader == systemLoader) && ctTransformersMap.containsKey(clazz.getName())) {
+                alreadyLoaded.put(clazz.getName(), clazz);
+            }
+        }
 
+        for (String className : ctTransformersMap.keySet()) {
+            Class<?> loadedClass = alreadyLoaded.get(className);
+            if (loadedClass == null) {
+                continue;
+            }
+
+            try {
                 ClassPool pool = ClassPool.getDefault();
                 CtClass ctClass = pool.get(className);
                 if (ctClass.isFrozen()) {
@@ -93,8 +108,8 @@ public class Agent {
 
                 byte[] redefined = patcher.applyTransformers(className, ctClass.toBytecode());
                 definitions.add(new ClassDefinition(loadedClass, redefined));
+                redefinedClasses.add(className);
                 ctClass.detach();
-            } catch (ClassNotFoundException ignored) {
             } catch (Exception e) {
                 Logger.error("Failed to prepare redefinition for " + className, e);
             }
@@ -108,6 +123,8 @@ public class Agent {
             }
         }
 
+        List<Class<?>> retransformTargets = findRetransformTargets(inst, patcher, redefinedClasses);
+
         inst.addTransformer(new ClassFileTransformer() {
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
                 if (className == null) {
@@ -115,6 +132,12 @@ public class Agent {
                 }
 
                 String dotName = className.replace('/', '.');
+
+                // retransforming a class redefined before hands already-patched bytes
+                if (classBeingRedefined != null && redefinedClasses.contains(dotName)) {
+                    return null;
+                }
+
                 byte[] currentBuffer = classfileBuffer;
 
                 List<CtTransformer> ctTransformers = patcher.getCtTransformers().get(dotName);
@@ -138,7 +161,71 @@ public class Agent {
                 currentBuffer = patcher.applyTransformers(dotName, currentBuffer);
                 return currentBuffer == classfileBuffer ? null : currentBuffer;
             }
-        });
+        }, true);
+
+        for (Class<?> clazz : retransformTargets) {
+            try {
+                inst.retransformClasses(clazz);
+                Logger.debug("Retransformed already loaded class " + clazz.getName());
+            } catch (Throwable t) {
+                Logger.error("Failed to retransform already loaded class " + clazz.getName(), t);
+            }
+        }
+    }
+
+    private static List<Class<?>> findRetransformTargets(Instrumentation inst, Patcher patcher, Set<String> redefinedClasses) {
+        List<Class<?>> targets = new ArrayList<Class<?>>();
+        if (!inst.isRetransformClassesSupported()) {
+            return targets;
+        }
+
+        Object ownSource = codeSource(Agent.class);
+        for (Class<?> clazz : inst.getAllLoadedClasses()) {
+            ClassLoader loader = clazz.getClassLoader();
+            String name = clazz.getName();
+            if (loader == null || clazz.isArray() || name.indexOf('/') != -1 // hidden/lambda classes
+                || redefinedClasses.contains(name) || !inst.isModifiableClass(clazz)
+            ) {
+                continue;
+            }
+
+            Object source = codeSource(clazz);
+            if (source != null && source.equals(ownSource)) {
+                continue;
+            }
+
+            InputStream in = null;
+            try {
+                in = loader.getResourceAsStream(name.replace('.', '/') + ".class");
+                if (in == null) {
+                    continue;
+                }
+
+                byte[] original = StreamUtils.readInputStream(in);
+                if (original != null && patcher.applyTransformers(name, original) != original) {
+                    targets.add(clazz);
+                }
+            } catch (Throwable ignored) {
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+
+        return targets;
+    }
+
+    private static Object codeSource(Class<?> clazz) {
+        try {
+            ProtectionDomain domain = clazz.getProtectionDomain();
+            return domain == null || domain.getCodeSource() == null ? null : domain.getCodeSource().getLocation();
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     public static void addLaunchWrapperTransformer(ClassFileTransformer transformer) {

@@ -29,7 +29,11 @@ public class UnfinalFieldsPatch extends Patch {
     public void apply(PatchPool patchPool) {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (!mentions(bytecode, "java/lang/reflect/Field") || !mentions(bytecode, "modifiers")) {
+                final boolean accessesModifiers =
+                    mentions(bytecode, "java/lang/reflect/Field")
+                    && mentions(bytecode, "modifiers");
+
+                if (!accessesModifiers && !mentions(bytecode, "getDeclaredFields")) {
                     return null;
                 }
 
@@ -37,6 +41,20 @@ public class UnfinalFieldsPatch extends Patch {
                     public void edit(MethodCall m) throws CannotCompileException {
                         String cls = m.getClassName();
                         String method = m.getMethodName();
+
+                        if ("java.lang.Class".equals(cls) && "getDeclaredFields".equals(method)) {
+                            m.replace("" +
+                                "$_ = $proceed($$);" +
+                                "if ($0 == " + FIELD + ".class) {" +
+                                "    $_ = (" + FIELD + "[]) " + invokeStatic(STUB, "withModifiers", new String[] {"java.lang.Object.class"}, new String[] {"$_"}) + ";" +
+                                "}"
+                            );
+                            return;
+                        }
+
+                        if (!accessesModifiers) {
+                            return;
+                        }
 
                         if ("java.lang.Class".equals(cls) && "getDeclaredField".equals(method)) {
                             m.replace("" +

@@ -17,8 +17,22 @@ public class ModifiersStub {
         }
     }
 
+    public static Field[] withModifiers(Object declaredFields) {
+        Field[] fields = (Field[]) declaredFields;
+        for (Field field : fields) {
+            if ("modifiers".equals(field.getName())) {
+                return fields;
+            }
+        }
+
+        Field[] result = new Field[fields.length + 1];
+        System.arraycopy(fields, 0, result, 0, fields.length);
+        result[fields.length] = field();
+        return result;
+    }
+
     public static boolean isModifiersField(Field field) {
-        return field.getDeclaringClass() == ModifiersStub.class
+        return field != null && field.getDeclaringClass() == ModifiersStub.class
             || (field.getDeclaringClass() == Field.class && "modifiers".equals(field.getName()));
     }
 

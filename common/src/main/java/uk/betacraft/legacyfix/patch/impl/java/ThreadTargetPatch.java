@@ -25,8 +25,12 @@ public class ThreadTargetPatch extends Patch {
     public void apply(PatchPool patchPool) {
         patchPool.addTransformer(new Transformer() {
             public byte[] transform(String name, byte[] bytecode) throws Exception {
-                if (!mentions(bytecode, "java/lang/reflect/Field") || !mentions(bytecode, "java/lang/Thread")
-                    || !mentions(bytecode, "target")) {
+                final boolean accessesTarget =
+                    mentions(bytecode, "java/lang/reflect/Field")
+                    && mentions(bytecode, "java/lang/Thread")
+                    && mentions(bytecode, "target");
+
+                if (!accessesTarget && !mentions(bytecode, "getDeclaredFields")) {
                     return null;
                 }
 
@@ -34,6 +38,20 @@ public class ThreadTargetPatch extends Patch {
                     public void edit(MethodCall m) throws CannotCompileException {
                         String cls = m.getClassName();
                         String method = m.getMethodName();
+
+                        if ("java.lang.Class".equals(cls) && "getDeclaredFields".equals(method)) {
+                            m.replace("" +
+                                "$_ = $proceed($$);" +
+                                "if ($0 == java.lang.Thread.class) {" +
+                                "    $_ = (" + FIELD + "[]) " + invokeStatic(STUB, "withTarget", new String[] {"java.lang.Object.class"}, new String[] {"$_"}) + ";" +
+                                "}"
+                            );
+                            return;
+                        }
+
+                        if (!accessesTarget) {
+                            return;
+                        }
 
                         if ("java.lang.Class".equals(cls) && "getDeclaredField".equals(method)) {
                             m.replace("" +
