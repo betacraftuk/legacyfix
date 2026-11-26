@@ -71,11 +71,11 @@ public class UnfinalFieldsPatch extends Patch {
                             return;
                         }
 
-                        String condition = valueCondition(method);
-                        if (condition != null) {
+                        String[] write = modifiersWrite(method);
+                        if (write != null) {
                             m.replace("" +
-                                "if (" + isModifiersField() + " && $1 instanceof " + FIELD + condition + ") {" +
-                                "    " + invokeStatic(REMOVER, "removeFinal", new String[] {FIELD + ".class"}, new String[] {"$1"}) + ";" +
+                                "if (" + isModifiersField() + " && $1 instanceof " + FIELD + write[0] + ") {" +
+                                "    " + invokeStatic(REMOVER, "setModifiers", new String[] {FIELD + ".class", "int.class"}, new String[] {"$1", "($w) " + write[1]}) + ";" +
                                 "} else if (" + isUnfinalStatic() + ") {" +
                                 "    " + invokeStatic(REMOVER, "setStatic", new String[] {FIELD + ".class", "java.lang.Object.class"}, new String[] {"$0", "($w) $2"}) + ";" +
                                 "} else {" +
@@ -106,18 +106,21 @@ public class UnfinalFieldsPatch extends Patch {
         });
     }
 
-    private static String valueCondition(String method) {
-        String dropsFinal = " && ((%s & " + java.lang.reflect.Modifier.FINAL + ") == 0)";
-
+    private static String[] modifiersWrite(String method) {
         if ("set".equals(method)) {
-            return " && $2 instanceof java.lang.Integer" + String.format(dropsFinal, "((java.lang.Integer) $2).intValue()");
+            return new String[] {" && $2 instanceof java.lang.Integer", "((java.lang.Integer) $2).intValue()"};
         }
-        if ("setInt".equals(method) || "setShort".equals(method) || "setByte".equals(method) || "setChar".equals(method)) {
-            return String.format(dropsFinal, "(int) $2");
+
+        if ("setInt".equals(method) || "setShort".equals(method) || "setByte".equals(method) || "setChar".equals(method)
+            || "setLong".equals(method) || "setFloat".equals(method) || "setDouble".equals(method)
+        ) {
+            return new String[] {"", "(int) $2"};
         }
-        if ("setLong".equals(method) || "setFloat".equals(method) || "setDouble".equals(method) || "setBoolean".equals(method)) {
-            return "";
+
+        if ("setBoolean".equals(method)) {
+            return new String[] {"", "0"};
         }
+
         return null;
     }
 

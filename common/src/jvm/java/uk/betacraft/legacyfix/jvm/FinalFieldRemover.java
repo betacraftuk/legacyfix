@@ -39,6 +39,12 @@ public class FinalFieldRemover {
         }
     }
 
+    public static void setModifiers(Field field, int value) {
+        if ((value & Modifier.FINAL) == 0) {
+            removeFinal(field);
+        }
+    }
+
     public static boolean isUnfinalStatic(Field field) {
         return UNFINAL_STATICS.contains(field);
     }
