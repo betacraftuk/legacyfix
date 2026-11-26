@@ -120,14 +120,18 @@ public class GameClasses {
             int pos = it.next();
             int op = it.byteAt(pos);
 
-            if (!seenUsername && op == Opcode.LDC) {
-                int idx = it.byteAt(pos + 1) & 0xFF;
+            if (!seenUsername && (op == Opcode.LDC || op == Opcode.LDC_W)) {
+                int idx = op == Opcode.LDC ? it.byteAt(pos + 1) : it.u16bitAt(pos + 1);
                 if (cp.getTag(idx) == ConstPool.CONST_String) {
                     String s = cp.getStringInfo(idx);
                     if ("username".equals(s)) {
                         seenUsername = true;
                     }
                 }
+                continue;
+            }
+
+            if (op != Opcode.NEW && op != Opcode.INVOKESTATIC && op != Opcode.INVOKESPECIAL) {
                 continue;
             }
 
