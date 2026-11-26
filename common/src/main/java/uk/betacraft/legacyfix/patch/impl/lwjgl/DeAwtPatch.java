@@ -194,6 +194,11 @@ public class DeAwtPatch extends Patch {
             Logger.debug("DeAwtPatch", "setServer() injected into Minecraft.run()");
         }
 
+        if (GameClasses.doesAppletModeGateRobot(pool)) {
+            runMethod.insertBefore("$0." + GameClasses.findAppletModeFieldName(pool) + " = false;");
+            Logger.debug("DeAwtPatch", "appletMode cleared via robot gate");
+        }
+
         CtMethod updateMethod = findUpdateMethod(gameClass, runMethod);
         if (updateMethod == null) {
             throw new PatchException("No update method found");

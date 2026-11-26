@@ -13,6 +13,7 @@ public class GameClasses {
     private static String minecraftClass = null;
 
     private static String appletModeFieldName = null;
+    private static boolean appletModeGatesRobot = false;
     private static String minecraftFieldName = null;
     private static String sessionClassName = null;
     private static String sessionFieldName = null;
@@ -219,6 +220,13 @@ public class GameClasses {
         if (minecraftClass != null) {
             CtClass mcClass = patchPool.getRawClass(minecraftClass);
 
+            appletModeFieldName = findRobotGateFieldName(mcClass);
+            if (appletModeFieldName != null) {
+                appletModeGatesRobot = true;
+                Logger.debug("Found appletMode field via robot gate: " + appletModeFieldName);
+                return appletModeFieldName;
+            }
+
             for (CtField field : mcClass.getDeclaredFields()) {
                 String className = field.getType().getName();
 
@@ -231,6 +239,57 @@ public class GameClasses {
         }
 
         return appletModeFieldName;
+    }
+
+    public static boolean doesAppletModeGateRobot(PatchPool patchPool) throws NotFoundException {
+        findAppletModeFieldName(patchPool);
+        return appletModeGatesRobot;
+    }
+
+    private static String findRobotGateFieldName(CtClass mcClass) {
+        CtMethod run;
+        try {
+            run = mcClass.getDeclaredMethod("run", new CtClass[0]);
+        } catch (NotFoundException e) {
+            return null;
+        }
+
+        CodeAttribute ca = run.getMethodInfo().getCodeAttribute();
+        if (ca == null) {
+            return null;
+        }
+
+        ConstPool cp = ca.getConstPool();
+        CodeIterator it = ca.iterator();
+        String lastBoolean = null;
+
+        try {
+            while (it.hasNext()) {
+                int pos = it.next();
+                int op = it.byteAt(pos);
+
+                if (op == Opcode.GETFIELD) {
+                    int index = it.u16bitAt(pos + 1);
+                    if ("Z".equals(cp.getFieldrefType(index))
+                        && mcClass.getName().equals(cp.getFieldrefClassName(index))
+                    ) {
+                        lastBoolean = cp.getFieldrefName(index);
+                    }
+                } else if (op == Opcode.INVOKEVIRTUAL && lastBoolean != null) {
+                    int index = it.u16bitAt(pos + 1);
+                    if ("getLocationOnScreen".equals(cp.getMethodrefName(index))
+                        && "()Ljava/awt/Point;".equals(cp.getMethodrefType(index))
+                    ) {
+                        CtField field = mcClass.getDeclaredField(lastBoolean);
+                        return Modifier.isStatic(field.getModifiers()) ? null : lastBoolean;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("GameClasses", e);
+        }
+
+        return null;
     }
 
     public static String findSessionClassName(PatchPool patchPool) throws NotFoundException, BadBytecode {
