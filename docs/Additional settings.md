@@ -58,9 +58,10 @@ Has the same effect as **Invert mouse: ON** in game options
 ```
 -Dlf.modloader
 ```
-## Java 9+ support for Forge (b1.7.3 - b1.8.1)
+## Disable Java 9+ fixes for Forge (b1.7.3 - b1.8.1)
+Applied automatically on Java 9+ when Beta Forge is installed.
 ```
--Dlf.beta-forge
+-Dlf.beta-forge.disable
 ```
 ## Disable skin handling
 You may want to do that if LegacyFix conflicts with some skin mods
