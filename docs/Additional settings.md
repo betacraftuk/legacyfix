@@ -63,6 +63,11 @@ Applied automatically on Java 9+ when Beta Forge is installed.
 ```
 -Dlf.beta-forge.disable
 ```
+## Disable loading skins of given usernames
+Separate different usernames with commas. Usernames are case-sensitive.
+```
+-Dlf.skin.ignoreUsernames=<username1,username2,...>
+```
 ## Disable skin handling
 You may want to do that if LegacyFix conflicts with some skin mods
 ```
