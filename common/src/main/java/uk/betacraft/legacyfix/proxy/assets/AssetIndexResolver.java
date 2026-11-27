@@ -105,8 +105,14 @@ public class AssetIndexResolver {
                 String value = separator == -1 ? "true" : setting.substring(separator + 1);
 
                 if (key.startsWith("lf.")) {
-                    if (!Agent.hasSetting(key)) {
+                    if (Agent.hasSetting(key)) {
+                        continue;
+                    }
+
+                    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
                         Agent.setSetting(key, Boolean.valueOf(value));
+                    } else {
+                        Agent.setSetting(key, value);
                     }
                 } else if (System.getProperty(key) == null) {
                     System.setProperty(key, value);

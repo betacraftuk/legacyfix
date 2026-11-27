@@ -25,6 +25,25 @@ public class SkinHandler extends HandlerBase {
     private boolean isCapeRequest = false;
     private Pattern patternUsed;
 
+    private static List<String> ignoredUsernames = null;
+
+    private static final List<String> getIgnoredUsernames() {
+        if (ignoredUsernames != null) {
+            return ignoredUsernames;
+        }
+
+        String rawSetting = Agent.getSetting("lf.skin.ignoreUsernames", null);
+        if (rawSetting == null) {
+            return ignoredUsernames = Collections.emptyList();
+        }
+
+        return ignoredUsernames = Arrays.asList(rawSetting.split(","));
+    }
+
+    private static boolean isUsernameIgnored(String username) {
+        return getIgnoredUsernames().contains(username);
+    }
+
     public SkinHandler(URL u, Pattern patternUsed) {
         super(u, patternUsed);
         this.patternUsed = patternUsed;
@@ -42,6 +61,9 @@ public class SkinHandler extends HandlerBase {
         }
 
         String username = matcher.group(5);
+        if (isUsernameIgnored(username)) {
+            return;
+        }
 
         byte[] data;
         MinecraftApi.SkinData skinData = null;

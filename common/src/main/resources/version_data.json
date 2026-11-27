@@ -213,6 +213,20 @@
         ]
     },
     {
+        "version": "^(Demo \\(PC Gamer\\)|b1\\.3-(?:.+)?demo)$",
+        "desc": "b1.3 PC Gamer Demo",
+        "assetIndex": "b1.2",
+        "settings": [
+            "lf.skin.ignoreUsernames=DemoUser",
+            "lf.proxy.serveAs64x32",
+            "lf.proxy.convertAlexToSteve",
+            "lf.proxy.rotateBottomTextures",
+            "lf.proxy.overlayOuterBodyToBase",
+            "java.util.Arrays.useLegacyMergeSort=true",
+            "lf.applet"
+        ]
+    },
+    {
         "version": "^b1\\.[2-3](?:.+)?$",
         "desc": "b1.2 to b1.3_01",
         "assetIndex": "b1.2",
